@@ -1,0 +1,49 @@
+@startuml
+
+title "GameRes MVP Use Cases"
+
+    actor User
+
+    rectangle {
+        'AUTH'
+        usecase Login
+        usecase Logout
+        'GAME LIST'
+        usecase (Show all games) as showAll
+        usecase (Filter games by platform) as filterPlatform
+        usecase (Filter games by genre) as filterGenre
+        usecase (Filter games by developer) as filterByDev
+            'TOP'
+        usecase (Show all time top 100 games) as showTop100
+        usecase (Show this year top 100 games) as showThisYearTop100
+            'NEW'
+        usecase (show New Games) as showNew
+        usecase (Show games released last 7 days) as showReleasedLast7Days
+        usecase (Show games released last 30 days) as showReleasedLast30Days
+        usecase (Show games released this year) as showReleasedThisYear
+            'UP COMMING'
+        usecase (Show next 7 days releases) as showNext7DaysReleases
+        usecase (Show next 30 days releases) as showNext30DaysReleases
+            'DEPENDS ON USER ACTIONS'
+        usecase (Show user's favorites games) as showFavorites
+        usecase (Show games recently viewed by the user) as showRecentlyViewed
+    }
+
+    User -- Login
+    User -- Logout
+    User -- showAll
+    showAll <.. filterPlatform : <<extends>>
+    showAll <.. filterGenre : <<extends>>
+    showAll <.. filterByDev : <<extends>>
+    User -- showTop100
+    User -- showThisYearTop100
+    User -- showNew
+    showNew <.. showReleasedLast7Days : <<extends>>
+    showNew <.. showReleasedLast30Days : <<extends>>
+    showNew <.. showReleasedThisYear : <<extends>>
+    User -- showNext7DaysReleases
+    User -- showNext30DaysReleases
+    User -- showFavorites
+    User -- showRecentlyViewed
+
+@enduml
