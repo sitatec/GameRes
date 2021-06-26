@@ -2,27 +2,33 @@ import { env } from "process";
 import bent from "bent";
 
 export class TokenManager {
-  private _token = "";
-  private _httpClient = bent("json")
 
-  
-  public async getToken () {
-    if(!this._token){
-      await this.generateToken();
-    }
+  private readonly ACCESS_TOKEN_VALIDATION_URL = "https://id.twitch.tv/oauth2/validate";
+  private readonly ACCESS_TOKEN_URL =
+    "https://id.twitch.tv/oauth2/token?client_id=" +
+    `${env.CLIENT_ID}&client_secret=${env.CLIENT_SECRET}&grant_type=client_credentials`;
+
+  constructor(private readonly _httpClient = bent("json"), private _token = "") { }
+
+  public get token() {
     return this._token;
   }
 
-  private generateToken() {
-    return this._httpClient(this.getApiTokenUrl()).then((response) =>{
+  public generateNewToken() {
+    return this._httpClient(this.ACCESS_TOKEN_URL).then((response) => {
       this._token = response.access_token;
-      // Reset the current token 10 second before it expires.
-      setTimeout(() => this._token = "", response.expires_in - 10);
     })
   }
 
-  private getApiTokenUrl(){
-    return `https://id.twitch.tv/oauth2/token?client_id=${env.CLIENT_ID}&client_secret=${env.CLIENT_SECRET}&grant_type=client_credentials`;
+  public async isCurrentTokenValid(): Promise<boolean> {
+    if (!this._token) return false;
+
+    const headers = new Headers();
+    headers.append("Authorization", `OAuth ${this._token}`);
+
+    return this._httpClient(this.ACCESS_TOKEN_VALIDATION_URL, headers)
+      .then(() => true)
+      .catch(() => false);
   }
-  
+
 }
