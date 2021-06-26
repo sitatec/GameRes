@@ -1,17 +1,15 @@
-import app, { request, response } from "express"
+import app from "express"
 import { env } from "process"
-import { TokenManager } from "./TokenManager";
+import { Controller } from "./Controller";
 
-const tokenManager = new TokenManager();
+const controller = new Controller();
 
-app().get("/apitoken/:secret", async (request, response) => {
+app().get("/apitoken/:secret", (request, response) => {
 
-  if(request.params.secret != env.CLIENT_ID as string + env.CLIENT_SECRET){
-    response.send(400) // BAD REQUEST
+  if (request.params.secret != env.CLIENT_ID as string + env.CLIENT_SECRET) {
+    return response.status(400).send("Invalid Secret")
   }
 
-  response.json({
-    token: tokenManager.getToken()
-  })
 
-}).listen(env.PORT || 8080, () => console.log("SERVER STARTED!!"));
+}).get("/apitoken/:secret/get", controller.getToken)
+  .listen(env.PORT || 8080, () => console.log("SERVER STARTED!!"));
