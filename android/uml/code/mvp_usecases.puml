@@ -6,8 +6,9 @@ title "GameRes MVP Use Cases"
 
     rectangle {
         'AUTH'
-        usecase Login
-        usecase Logout
+'        usecase Login
+'        usecase Logout
+
         'GAME LIST'
         usecase (Show all games) as showAll
         usecase (Filter games by platform) as filterPlatform
