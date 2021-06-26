@@ -5,13 +5,16 @@ export class Controller {
 
   constructor(private readonly _tokenManager = new TokenManager()){}
 
-  readonly getToken = async (_ :Request, response: Response) => {
-    if(! await this._tokenManager.isCurrentTokenValid()){
-      await this._tokenManager.generateNewToken();
+  readonly getToken = async (request :Request, response: Response) => {
+    console.log("\nGET TOKEN CALLD\n");
+    try{
+      if(! await this._tokenManager.isCurrentTokenValid()){
+        await this._tokenManager.generateNewToken();
+      }
+       response.json({ token: this._tokenManager.token})
+    } catch {
+      response.status(500).end();
     }
-    response.json({
-      token: this._tokenManager.token
-    })
   };
 
   // readonly refreshToken = async (_: Request, response: Response) => {

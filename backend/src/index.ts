@@ -6,6 +6,6 @@ import { validateRequest } from "./validators";
 const controller = new Controller();
 
 app()
-  .get("/apitoken/:secret", validateRequest)
+  .use("/apitoken/:secret", validateRequest)
   .get("/apitoken/:secret/get", controller.getToken)
   .listen(env.PORT || 8080, () => console.log("SERVER STARTED!!"));
