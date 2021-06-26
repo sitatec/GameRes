@@ -2,14 +2,15 @@
   "name": "gameres_backend",
   "version": "1.0.0",
   "description": "Game Resources",
-  "main": "src/index.ts",
+  "main": "build/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "gcp-build": "tsc -p .",
-    "deploy": "gcloud app deploy"
+    "deploy": "gcloud app deploy",
+    "dev": "ts-node src/index.ts"
   },
   "author": "berete.dev",
-  "license": "ISC",
+  "license": "Apache 2.0",
   "dependencies": {
     "bent": "^7.3.12",
     "express": "^4.17.1"

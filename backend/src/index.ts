@@ -14,4 +14,4 @@ app().get("/apitoken/:secret", async (request, response) => {
     token: tokenManager.getToken()
   })
 
-}).listen(env.PORT || 8080);
+}).listen(env.PORT || 8080, () => console.log("SERVER STARTED!!"));
