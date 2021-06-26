@@ -1,13 +1,13 @@
 {
   "name": "gameres_backend",
   "version": "1.0.0",
-  "description": "Game Resources",
-  "main": "build/index.js",
+  "description": "An access token provider for GameRes clients",
+  "main": "build/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node build/server.js",
     "gcp-build": "tsc -p .",
     "deploy": "gcloud app deploy",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/server.ts"
   },
   "author": "berete.dev",
   "license": "Apache 2.0",

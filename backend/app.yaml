@@ -1,0 +1,10 @@
+runtime: nodejs14
+
+env_variables:
+  CLIENT_SECRET: i3z0n2uxvk5vza3m4r8gwmtfwy27yd
+  CLIENT_ID: 2h010t608k8k5pbtx233o5luwlueop
+
+handlers:
+  - url: /apitoken/.*
+    secure: always
+    script: auto
