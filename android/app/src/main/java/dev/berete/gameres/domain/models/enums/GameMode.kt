@@ -12,6 +12,7 @@ enum class GameMode {
     MMO, //Massively Multiplayer Online
     SPLIT_SCREEN,
     COOPERATIVE,
+    OTHERS
     ;
 
     /**

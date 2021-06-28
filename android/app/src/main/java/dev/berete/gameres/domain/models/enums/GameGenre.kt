@@ -14,6 +14,7 @@ enum class GameGenre {
     SHOOTER,
     SIMULATOR,
     STRATEGY,
+    OTHERS
     ;
 
     /**

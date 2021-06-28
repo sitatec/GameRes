@@ -7,9 +7,10 @@ import java.util.Date
  * The class representing a video game.
  */
 data class Game(
+    val id: Long,
     val name: String,
     val genres: List<GameGenre>,
-    val platform: Platform,
+    val platform: List<Platform>,
     val firstReleaseDate: Date,
     val releaseDates: List<Date>,
     val summary: String,
@@ -18,8 +19,8 @@ data class Game(
     val artWorkUrls: List<String>,
     val screenshotUrls: List<String>,
     val videoUrls: List<String>,
-    val similarGameIds: List<String>,
-    val rating: Int,
+    val similarGameIds: List<Long>,
+    val rating: Double,
     val ratingCount: Int,
     val ageRatings: List<AgeRating>,
     val gameModes: List<GameMode>,

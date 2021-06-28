@@ -13,6 +13,7 @@ enum class PlayerPerspective {
     VIRTUAL_REALITY,
     AUDITORY,
     TEXT,
+    OTHERS,
     ;
 
     /**
