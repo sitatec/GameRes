@@ -3,6 +3,9 @@ package dev.berete.gameres.domain.models
 import dev.berete.gameres.domain.models.enums.*
 import java.util.Date
 
+/**
+ * The class representing a video game.
+ */
 data class Game(
     val name: String,
     val genres: List<GameGenre>,
