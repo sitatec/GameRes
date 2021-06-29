@@ -18,7 +18,7 @@ interface GameListProvider {
     ): List<Game>
 
     /**
-     * Returns the games that have been released after the givqen [timestamp].
+     * Returns the games that have been released after the given [timestamp].
      * Thi function can be useful for fetching new games.
      */
     suspend fun getGamesReleasedAfter(
@@ -27,10 +27,11 @@ interface GameListProvider {
     ): List<Game>
 
     /**
-     * Returns the games that will be released before the given [timestamp]
+     * Returns the games that will be released before the given [limitTimestamp] and after the current
+     * date plus one day.
      */
     suspend fun getUpcomingGames(
-        timestamp: Long,
+        limitTimestamp: Long,
         count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game>
 

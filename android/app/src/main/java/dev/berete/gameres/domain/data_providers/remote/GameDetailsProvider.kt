@@ -7,5 +7,5 @@ interface GameDetailsProvider {
     /**
      * Returns the details of the game that has the given [gameId].
      */
-    suspend fun getGameDetails(gameId: String): Game
+    suspend fun getGameDetails(gameId: Long): Game
 }
