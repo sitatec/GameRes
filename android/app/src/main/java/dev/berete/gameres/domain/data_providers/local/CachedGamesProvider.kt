@@ -17,4 +17,9 @@ interface CachedGamesProvider {
      * Returns the most recently games viewed by the current user.
      */
     suspend fun getRecentlyViewedGames() : List<Game>
+
+    /**
+     * Returns the game that have the given [id]
+     */
+    suspend fun getGameById(id: Long): Game
 }
