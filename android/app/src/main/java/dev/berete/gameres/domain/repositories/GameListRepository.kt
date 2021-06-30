@@ -4,10 +4,13 @@ import dev.berete.gameres.domain.data_providers.local.CachedGamesProvider
 import dev.berete.gameres.domain.data_providers.remote.GameListProvider
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.enums.GameGenre
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class GameListRepository(
+@Singleton
+class GameListRepository @Inject constructor(
     private val gameListProvider: GameListProvider,
-    private val cachedGamesProvider: CachedGamesProvider,
+//    private val cachedGamesProvider: CachedGamesProvider,
 ) {
     // TODO handle cache
 
