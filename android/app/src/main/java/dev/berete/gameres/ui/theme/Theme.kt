@@ -1,21 +1,30 @@
 package dev.berete.gameres.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import android.annotation.SuppressLint
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
+@SuppressLint("ConflictingOnColor")
 private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200
+    primary = LightGreen,
+    primaryVariant = LightGreen,
+    secondary = LightGreen,
+    onSecondary = Color.White,
+    secondaryVariant = LightGreen,
+    surface = DarkBlue,
+    onSurface = Color.White,
+    background = DarkBlue,
+    onBackground = Color.White,
+    error = Red800,
+    onError = Color.White
 )
 
-private val LightColorPalette = lightColors(
-    primary = Purple500,
-    primaryVariant = Purple700,
-    secondary = Teal200
+//private val LightColorPalette = lightColors(
+//    primary = Purple500,
+//    primaryVariant = Purple700,
+//    secondary = Teal200
 
     /* Other default colors to override
     background = Color.White,
@@ -25,18 +34,14 @@ private val LightColorPalette = lightColors(
     onBackground = Color.Black,
     onSurface = Color.Black,
     */
-)
+//)
 
 @Composable
-fun GameResTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable() () -> Unit) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
-    }
+fun GameResTheme(content: @Composable () -> Unit) {
+    // TODO setup LightColorPalette
 
     MaterialTheme(
-        colors = colors,
+        colors = DarkColorPalette,
         typography = Typography,
         shapes = Shapes,
         content = content
