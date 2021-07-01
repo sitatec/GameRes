@@ -22,7 +22,7 @@ import java.util.*
 fun GameDTO.toDomainGame() = Game(id = id,
     name = name,
     genres = genresList.map(Genre::toDomainGameGenre),
-    platform = platformsList.map(PlatformDTO::toDomainGamePlatform),
+    platformList = platformsList.map(PlatformDTO::toDomainGamePlatform),
     firstReleaseDate = Date(firstReleaseDate.seconds),
     releaseDates = releaseDatesList.map { Date(it.date.seconds) },
     summary = summary,
@@ -60,16 +60,14 @@ fun Genre.toDomainGameGenre(): GameGenre {
 fun PlatformDTO.toDomainGamePlatform(): Platform {
     val platformName = name.lowercase()
     return when {
-        // Playstation most be checked before Nintendo, otherwise "Nintendo PlayStation" will be
-        // assigned to the Nintendo platform. TODO implement better converter to avoid conflicts in the future.
         platformName.contains("playstation") -> Platform.PLAYSTATION
-        platformName.contains("nintendo") -> Platform.NINTENDO
         platformName.contains("xbox") -> Platform.XBOX
         platformName.contains("microsoft windows") -> Platform.WINDOWS
         platformName.contains("wii") -> Platform.WII
+        platformName == "nintendo switch" -> Platform.NINTENDO_SWITCH
+        platformName == "android" -> Platform.ANDROID
         platformName == "mac" || platformName == "ios" -> Platform.APPLE
         platformName == "linux" -> Platform.LINUX
-        platformName == "android" -> Platform.ANDROID
         else -> Platform.OTHERS.apply { this.platformName = this@toDomainGamePlatform.name }
     }
 }
