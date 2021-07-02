@@ -8,6 +8,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import dev.berete.gameres.ui.screens.home.HomeViewModel
 import dev.berete.gameres.ui.theme.GameResTheme
 
 class MainActivity : ComponentActivity() {

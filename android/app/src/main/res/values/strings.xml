@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">GameRes</string>
+    <string name="menu_button_content_description">Menu button</string>
+    <string name="search_btn_content_description">Search game</string>
 </resources>

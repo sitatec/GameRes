@@ -14,12 +14,14 @@ import dev.berete.gameres.data_sources.remote.IGDBAPIClient
 import dev.berete.gameres.data_sources.remote.access_token.AccessTokenProvider
 import dev.berete.gameres.data_sources.remote.access_token.BackendClient
 import retrofit2.Retrofit
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 class SingletonModule {
 
     @Provides
+    @Singleton
     suspend fun providesIGDBAPIClient(accessTokenProvider: AccessTokenProvider): IGDBAPIClient {
         val accessToken = accessTokenProvider.getAccessToken()
         val iGdbWrapper = IGDBWrapper.apply { setCredentials(BuildConfig.CLIENT_ID, accessToken) }

@@ -15,7 +15,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.coil.rememberCoilPainter
@@ -23,8 +26,22 @@ import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.enums.Platform
 import dev.berete.gameres.ui.theme.GameResTheme
+import dev.berete.gameres.ui.theme.Sportypo
 import dev.berete.gameres.ui.utils.FakeGame
 import dev.berete.gameres.ui.utils.logo
+
+@Composable
+fun GameResLogo() {
+    Text(
+        text = buildAnnotatedString {
+            append("Game")
+            withStyle(SpanStyle(MaterialTheme.colors.primary)) {
+                append("Res")
+            }
+        },
+        fontFamily = Sportypo,
+    )
+}
 
 @Composable
 fun PlatformLogos(
