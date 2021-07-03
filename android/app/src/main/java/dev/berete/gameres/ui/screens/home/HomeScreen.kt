@@ -1,9 +1,9 @@
 package dev.berete.gameres.ui.screens.home
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -11,64 +11,132 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.accompanist.coil.rememberCoilPainter
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.ui.screens.GameResLogo
 import dev.berete.gameres.ui.screens.PlatformLogos
-import dev.berete.gameres.ui.theme.GameResTheme
+import dev.berete.gameres.ui.theme.*
 import dev.berete.gameres.ui.utils.FakeGame
+import dev.berete.gameres.ui.utils.FakeGameList
 
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel) {
-    Scaffold(topBar = { GameResTopAppBar { GameResLogo() } }) { bodyPadding ->
-        val gameList by homeViewModel.gameList.observeAsState(listOf())
-        HomeScreenBody(gameList = gameList, Modifier.padding(bodyPadding))
+fun HomeScreen(viewModel: HomeViewModel) {
+    Scaffold(topBar = { GameResTopAppBar({ GameResLogo() }) }) {
+        Spacer(modifier = Modifier.height(8.dp))
+        HomeScreenBody(viewModel)
     }
 }
 
 @Composable
-fun GameResTopAppBar(title: @Composable () -> Unit) {
+fun GameResTopAppBar(title: @Composable () -> Unit, modifier: Modifier = Modifier) {
     TopAppBar(
         title = title,
         navigationIcon = {
-            Icon(Icons.Default.Menu, stringResource(R.string.menu_button_content_description))
+            Icon(
+                imageVector = Icons.Default.Menu,
+                contentDescription = stringResource(R.string.menu_button_content_description),
+                modifier = modifier.padding(start = 8.dp),
+            )
         },
         actions = {
-            Icon(Icons.Default.Search, stringResource(R.string.search_btn_content_description))
-        }
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = stringResource(R.string.search_btn_content_description),
+                modifier = modifier.padding(end = 8.dp),
+            )
+        },
+        modifier = modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .height(50.dp)
+            .clip(MaterialTheme.shapes.medium)
     )
 }
 
 @Composable
-fun HomeScreenBody(gameList: List<Game>, modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
+fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
+    val trendingGameList by viewModel.trendingGameList.observeAsState(initial = emptyList())
+    val mostPopularGames by viewModel.mostPopularGames.observeAsState(initial = emptyList())
+    val numberOfItemsByRow = LocalConfiguration.current.screenWidthDp / 150
 
+    LazyColumn(modifier = modifier) {
+        item {
+            MostPopularGamesSection(mostPopularGames = mostPopularGames,onGameSelected = {})
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = "Trending",
+                style = MaterialTheme.typography.h6,
+                modifier = Modifier.padding(start = 16.dp),
+            )
+            Spacer(Modifier.height(8.dp))
+        }
+
+        items(trendingGameList.chunked(numberOfItemsByRow)) { rowItems ->
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) {
+                for (game in rowItems) {
+                    GameCard(game = game,
+                        onClick = { },
+                        modifier = Modifier.weight(1F))
+                }
+            }
+            Spacer(Modifier.height(14.dp))
+        }
     }
 }
 
+// ------------------------- MOST POPULAR GAMES SECTION -------------------------- //
 
 @Composable
-fun LargeGameCard(game: Game, onClick: (Game) -> Unit, modifier: Modifier = Modifier) {
+fun MostPopularGamesSection(
+    mostPopularGames: List<Game>,
+    onGameSelected: (Game) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier) {
+        Text(
+            text = "Most popular",
+            style = MaterialTheme.typography.h6,
+            modifier = Modifier.padding(start = 16.dp),
+        )
+        Spacer(Modifier.height(8.dp))
+        LazyRow {
+            items(items = mostPopularGames, key = { it.id }) { game ->
+                Spacer(Modifier.width(14.dp))
+                LargeGameCard(game = game, onClick = { onGameSelected(game) })
+            }
+        }
+    }
+}
+
+@Composable
+fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier
-            .clickable { onClick(game) }
-            .size(300.dp, 180.dp)
+        Modifier
+            .clickable { onClick() }
+            .size(250.dp, 150.dp)
             .then(modifier),
+        shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
     ) {
         Image(
             painter = rememberCoilPainter(
-                request = game.artWorkUrls.first(),
+                request = if(game.artWorkUrls.isEmpty()) "" else game.artWorkUrls.first(),
                 fadeIn = true,
                 previewPlaceholder = R.drawable.apex_legends_artwork,
             ),
@@ -78,7 +146,8 @@ fun LargeGameCard(game: Game, onClick: (Game) -> Unit, modifier: Modifier = Modi
         Row(
             verticalAlignment = Alignment.Bottom,
             modifier = Modifier
-                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black)))
+                .background(Brush.verticalGradient(listOf(Color.Transparent,
+                    MaterialTheme.colors.surface)))
                 .padding(bottom = 8.dp),
         ) {
             Image(
@@ -98,29 +167,118 @@ fun LargeGameCard(game: Game, onClick: (Game) -> Unit, modifier: Modifier = Modi
                     text = game.name,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.h6,
                 )
-                Spacer(Modifier.height(5.dp))
+                Spacer(Modifier.height(8.dp))
                 PlatformLogos(game.platformList)
             }
         }
     }
 }
 
+@Composable
+fun GameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Card(modifier.clickable { onClick() }) {
+        Column {
+            Image(
+                painter = rememberCoilPainter(
+                    request = if (game.artWorkUrls.isEmpty()) game.coverUrl else game.artWorkUrls.first(),
+                    fadeIn = true,
+                    previewPlaceholder = R.drawable.apex_legends_cover,
+                ),
+                contentDescription = game.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(130.dp),
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.TopCenter
+            )
+            Text(
+                text = game.name,
+                modifier = Modifier.padding(start = 8.dp, top = 4.dp, bottom = 0.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .padding(bottom = 8.dp, top = 4.dp)
+                    .fillMaxWidth(),
+            ) {
+                PlatformLogos(
+                    platformList = game.platformList,
+                )
+                GameScore(score = game.rating.toInt())
+            }
+        }
+    }
+}
+
+@Composable
+fun GameScore(
+    score: Int,
+    modifier: Modifier = Modifier,
+    style: TextStyle = TextStyle.Default.copy(fontSize = 11.sp),
+) {
+    val scoreColor = remember {
+        when {
+            score > 70 -> HighScoreColor
+            score > 50 -> MediumScoreColor
+            score > 30 -> BadScoreColor
+            else -> WorseScoreColor
+        }
+    }
+    Text(
+        text = score.toString(),
+        style = style,
+        color = scoreColor,
+        modifier = Modifier
+            .border(width = (1.5).dp, color = scoreColor, shape = MaterialTheme.shapes.small)
+            .padding(horizontal = 3.dp, vertical = 2.dp)
+            .then(modifier),
+    )
+}
+
+// ------------------------- PREVIEWS -------------------------- //
+
+@ExperimentalFoundationApi
 @Preview
 @Composable
 fun HomeScreenPreview() {
     GameResTheme {
-        Scaffold(topBar = { GameResTopAppBar { GameResLogo() } }) { bodyPadding ->
-            HomeScreenBody(
-                gameList = listOf(
-                    FakeGame,
-                    FakeGame.copy(id = 1),
-                    FakeGame.copy(id = 2),
-                    FakeGame.copy(id = 3),
-                ),
-                modifier = Modifier.padding(bodyPadding),
-            )
+        Scaffold(topBar = { GameResTopAppBar({ GameResLogo() }) }) {
+            val mostPopularGames = FakeGameList
+            val trendingGameList = FakeGameList
+            val numberOfItemsByRow = LocalConfiguration.current.screenWidthDp / 150
+
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyColumn {
+                item {
+                    MostPopularGamesSection(mostPopularGames = mostPopularGames, onGameSelected = {})
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = "Trending",
+                        style = MaterialTheme.typography.h6,
+                        modifier = Modifier.padding(start = 16.dp),
+                    )
+                    Spacer(Modifier.height(8.dp))
+                }
+
+                items(trendingGameList.chunked(numberOfItemsByRow)) { rowItems ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    ) {
+                        for (game in rowItems) {
+                            GameCard(game = game,
+                                onClick = { },
+                                modifier = Modifier.weight(1F))
+                        }
+                    }
+                    Spacer(Modifier.height(14.dp))
+                }
+            }
         }
     }
 }

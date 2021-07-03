@@ -13,7 +13,11 @@ import dev.berete.gameres.BuildConfig
 import dev.berete.gameres.data_sources.remote.IGDBAPIClient
 import dev.berete.gameres.data_sources.remote.access_token.AccessTokenProvider
 import dev.berete.gameres.data_sources.remote.access_token.BackendClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
@@ -21,24 +25,41 @@ import javax.inject.Singleton
 class SingletonModule {
 
     @Provides
-    @Singleton
-    suspend fun providesIGDBAPIClient(accessTokenProvider: AccessTokenProvider): IGDBAPIClient {
-        val accessToken = accessTokenProvider.getAccessToken()
-        val iGdbWrapper = IGDBWrapper.apply { setCredentials(BuildConfig.CLIENT_ID, accessToken) }
-        return IGDBAPIClient(iGdbWrapper, APICalypse())
+    fun providesIGDBAPIClient(accessTokenProvider: AccessTokenProvider): IGDBAPIClient {
+        lateinit var iGDBAPIClient: IGDBAPIClient
+        val threadLock = Object()
+        CoroutineScope(IO).launch {
+            val accessToken = accessTokenProvider.getAccessToken()
+            val iGdbWrapper = IGDBWrapper.apply {
+                setCredentials(BuildConfig.CLIENT_ID, accessToken)
+            }
+
+            iGDBAPIClient = IGDBAPIClient(iGdbWrapper, APICalypse())
+            synchronized(threadLock) {
+                threadLock.notify()
+            }
+        }
+        synchronized(threadLock) {
+            threadLock.wait(3000)
+        }
+        return iGDBAPIClient
     }
 
     @Provides
-    fun providesAccessTokenProvider(@ApplicationContext context: Context, backendClient: BackendClient): AccessTokenProvider {
-        val sharedPreferences = context.getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)
+    fun providesAccessTokenProvider(
+        @ApplicationContext context: Context,
+        backendClient: BackendClient,
+    ): AccessTokenProvider {
+        val sharedPreferences =
+            context.getSharedPreferences(BuildConfig.APPLICATION_ID, MODE_PRIVATE)
         return AccessTokenProvider(backendClient, sharedPreferences)
     }
 
     @Provides
     fun providesBackendClient(): BackendClient {
-        val baseUrl = "${BackendClient.BACKEND_BASE_URL}/${BuildConfig.BACKEND_ACCESS_KEY}"
         return Retrofit.Builder()
-            .baseUrl(baseUrl)
+            .baseUrl(BackendClient.BACKEND_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(BackendClient::class.java)
     }

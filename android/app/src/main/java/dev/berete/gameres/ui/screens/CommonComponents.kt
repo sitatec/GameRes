@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
@@ -31,7 +32,7 @@ import dev.berete.gameres.ui.utils.FakeGame
 import dev.berete.gameres.ui.utils.logo
 
 @Composable
-fun GameResLogo() {
+fun GameResLogo(style: TextStyle = MaterialTheme.typography.body1) {
     Text(
         text = buildAnnotatedString {
             append("Game")
@@ -40,6 +41,7 @@ fun GameResLogo() {
             }
         },
         fontFamily = Sportypo,
+        style = style,
     )
 }
 
@@ -49,7 +51,7 @@ fun PlatformLogos(
     modifier: Modifier = Modifier,
     singleLogoModifier: Modifier = Modifier
         .height(12.dp)
-        .padding(end = 5.dp),
+        .padding(end = 8.dp),
 ) {
     Row(modifier = modifier) {
         for (platform in platformList) {

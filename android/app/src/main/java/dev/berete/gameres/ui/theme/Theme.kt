@@ -18,7 +18,7 @@ private val DarkColorPalette = darkColors(
     background = DarkBlue,
     onBackground = Color.White,
     error = Red800,
-    onError = Color.White
+    onError = Color.White,
 )
 
 //private val LightColorPalette = lightColors(
