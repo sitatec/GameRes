@@ -22,7 +22,7 @@ import java.util.*
 fun GameDTO.toDomainGame() = Game(id = id,
     name = name,
     genres = genresList.map(Genre::toDomainGameGenre),
-    platformList = platformsList.map(PlatformDTO::toDomainGamePlatform),
+    platformList = platformsList.map(PlatformDTO::toDomainGamePlatform).toSet().toList(), // toSet() removes double elements
     firstReleaseDate = Date(firstReleaseDate.seconds),
     releaseDates = releaseDatesList.map { Date(it.date.seconds) },
     summary = summary,
@@ -119,6 +119,7 @@ fun GameCompanyDTO.toDomainGameCompany(): GameCompany {
 
 
 // ------------- Domain Models to Data Transfer Object Converters --------------- //
+
 
 //fun GameGenre.toDTOName(): String {
 //    return when(this){
