@@ -49,16 +49,16 @@ fun GameResLogo(style: TextStyle = MaterialTheme.typography.body1) {
 fun PlatformLogos(
     platformList: List<Platform>,
     modifier: Modifier = Modifier,
-    singleLogoModifier: Modifier = Modifier
-        .height(12.dp)
-        .padding(end = 8.dp),
+    singleLogoModifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
         for (platform in platformList) {
             Image(
                 painter = painterResource(platform.logo),
                 contentDescription = null,
-                modifier = singleLogoModifier,
+                modifier = singleLogoModifier
+                    .height(12.dp)
+                    .padding(end = 8.dp),
             )
         }
     }

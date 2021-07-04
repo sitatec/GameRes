@@ -118,11 +118,10 @@ class IGDBAPIClient(
     }
 
     private fun getGameGenreQuery(genre: GameGenre): String {
-        if (genre != GameGenre.OTHERS) return "genres.name == ${genre.iGDBCompatibleName()}"
+        if(genre == GameGenre.ACTION) return "themes.name = \"Action\""
+        if (genre != GameGenre.OTHERS) return "genres.name = \"${genre.iGDBCompatibleName()}\""
 
-        val allGenreNames = GameGenre.values()
-            .filter { it != GameGenre.OTHERS }
-            .map(GameGenre::iGDBCompatibleName)
+        val allGenreNames = GameGenre.genreValues.map(GameGenre::iGDBCompatibleName)
         return "genres.name != (${allGenreNames.joinToString()}})"
     }
 
