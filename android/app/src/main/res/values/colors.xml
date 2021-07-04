@@ -8,4 +8,5 @@
     <color name="dark_bleu">#FF0D111B</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="ic_launcher_background">@color/dark_bleu</color>
 </resources>

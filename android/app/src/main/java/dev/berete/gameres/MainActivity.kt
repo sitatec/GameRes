@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.google.android.material.internal.TextDrawableHelper
 import dagger.hilt.android.AndroidEntryPoint
 import dev.berete.gameres.ui.screens.home.HomeScreen
 import dev.berete.gameres.ui.screens.home.HomeViewModel

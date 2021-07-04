@@ -102,7 +102,7 @@ fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
                             viewModel.onGameGenreSelected(genreName)
                         }
                     },
-                    text = { Text(genreName) },
+                    text = { Text(text = genreName, fontSize = 13.sp) },
                 )
             }
         }
