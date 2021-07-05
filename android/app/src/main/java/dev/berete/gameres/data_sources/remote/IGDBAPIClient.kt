@@ -23,8 +23,8 @@ class IGDBAPIClient(
     private val iGDBAPIWrapper: IGDBWrapper,
     private val apiCalypse: APICalypse,
 ) : GameListProvider, GameDetailsProvider {
-    //TODO REFACTORING: delegate the common code between the get* methods to another function.
 
+    //TODO REFACTORING: delegate the common code between the get* methods to another function.
 
     private val gameSummaryFields =
         "name, cover.image_id, total_rating, platforms.name, status, artworks.image_id, total_rating_count"
@@ -42,7 +42,7 @@ class IGDBAPIClient(
         val numberOfGamesToFetch = regularizeGameCount(count)
         val queryBuilder = apiCalypse.newBuilder()
             .fields(gameSummaryFields)
-            .where("first_release_date > $startTimeStamp & first_release_date < $endTimestamp & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
+            .where("first_release_date > ${startTimeStamp.toFixed10Digits()} & first_release_date < ${endTimestamp.toFixed10Digits()} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
             .sort("total_rating_count", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
 
@@ -55,7 +55,7 @@ class IGDBAPIClient(
         val numberOfGamesToFetch = regularizeGameCount(count)
         val queryBuilder = apiCalypse.newBuilder()
             .fields(gameSummaryFields)
-            .where("first_release_date > $timestamp & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
+            .where("first_release_date > ${timestamp.toFixed10Digits()} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
             .sort("total_rating_count", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
 
@@ -70,7 +70,7 @@ class IGDBAPIClient(
             Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.timeInMillis
         val queryBuilder = apiCalypse.newBuilder()
             .fields(gameSummaryFields)
-            .where("first_release_date > $tomorrowTimeStamp & first_release_date < $limitTimestamp & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
+            .where("first_release_date > ${tomorrowTimeStamp.toFixed10Digits()} & first_release_date < ${limitTimestamp.toFixed10Digits()} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
             .sort("total_rating_count", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
 
@@ -88,7 +88,7 @@ class IGDBAPIClient(
         val numberOfGamesToFetch = regularizeGameCount(count)
         val queryBuilder = apiCalypse.newBuilder()
             .fields(gameSummaryFields)
-            .where("first_release_date > $startTimeStamp & first_release_date < $endTimestamp & ${
+            .where("first_release_date > ${startTimeStamp.toFixed10Digits()} & first_release_date < ${endTimestamp.toFixed10Digits()} & ${
                 getGameGenreQuery(genre)
             } & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
             .sort("total_rating_count", Sort.DESCENDING)
@@ -159,3 +159,11 @@ fun APICalypse.newBuilder() = APICalypse()
  */
 fun GameGenre.iGDBCompatibleName() =
     if (this == GameGenre.RPG) "Role-playing (RPG)" else name.toLowercaseExceptFirstChar()
+
+fun Long.toFixed10Digits() : String {
+    val thisNumberAsString = this.toString()
+    if(thisNumberAsString.length > 10){
+         thisNumberAsString.substring(0..9)
+    }
+    return thisNumberAsString
+}
