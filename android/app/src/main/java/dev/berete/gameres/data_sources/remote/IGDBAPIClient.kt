@@ -132,7 +132,7 @@ class IGDBAPIClient(
         val nintendoSwitchId = "130"
         val android = "34"
         val appleIds = "14, 39" // MacOS, IOS
-        val linuxId = "39"
+        val linuxId = "3"
         val wiiIds = "5, 41" // WII, WII U
         return "$playstationIds, $xboxIds, $windowsId, $nintendoSwitchId, $android, $appleIds, $linuxId, $wiiIds"
     }
@@ -163,7 +163,7 @@ fun GameGenre.iGDBCompatibleName() =
 fun Long.toFixed10Digits() : String {
     val thisNumberAsString = this.toString()
     if(thisNumberAsString.length > 10){
-         thisNumberAsString.substring(0..9)
+        return thisNumberAsString.substring(0..9)
     }
     return thisNumberAsString
 }
