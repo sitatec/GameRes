@@ -1,5 +1,4 @@
 # GameRes
-
 An app built with jetpack compose that provides various information about video games :
  - image
  - videos (gameplay, traler,...)
@@ -10,3 +9,4 @@ An app built with jetpack compose that provides various information about video 
  - Upcoming games
  ...
 
+<img src="https://github.com/sitatec/GameRes/blob/home/assets/compose_grid_demo.gif?raw=true" height="700">
