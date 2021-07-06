@@ -2,7 +2,12 @@ package dev.berete.gameres.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple200 = Color(0xFFBB86FC)
-val Purple500 = Color(0xFF6200EE)
-val Purple700 = Color(0xFF3700B3)
-val Teal200 = Color(0xFF03DAC5)
+val LightGreen = Color(0xFF2BBF7F)
+val DarkBlue = Color(0xFF0D111B)
+val Red800 = Color(0xffd00036)
+
+// GAME SCORE COLORS
+val HighScoreColor = Color(0xFF2BBF7F)
+val MediumScoreColor = Color(0xFF91B11F)
+val BadScoreColor = Color(0xFFD5971A)
+val WorseScoreColor = Color(0xEEEB4C1B)

@@ -21,4 +21,17 @@ enum class GameGenre {
      * Returns a capitalized form of the current entry
      */
     override fun toString() = name.toLowercaseExceptFirstChar()
+
+    companion object{
+
+        /**
+         * All values except [OTHERS]
+         */
+        val genreValues = values().filter { it != OTHERS }
+
+        /**
+         * All value names except for [OTHERS]
+         */
+        val genreNames = genreValues.map { it.name }
+    }
 }

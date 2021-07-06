@@ -9,7 +9,7 @@ enum class Platform {
     PLAYSTATION,
     XBOX,
     WINDOWS,
-    NINTENDO,
+    NINTENDO_SWITCH,
     ANDROID,
     APPLE, // MACOS && IOS
     LINUX,
