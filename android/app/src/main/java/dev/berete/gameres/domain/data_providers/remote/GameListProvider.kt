@@ -2,6 +2,7 @@ package dev.berete.gameres.domain.data_providers.remote
 
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.enums.GameGenre
+import dev.berete.gameres.domain.models.enums.GameMode
 
 /**
  * Game date provider
@@ -44,6 +45,19 @@ interface GameListProvider {
         startTimeStamp: Long,
         endTimestamp: Long,
         genre: GameGenre,
+        count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
+    ): List<Game>
+
+
+    /**
+     * Returns the popular games (from [startTimeStamp] to [endTimestamp]) of the given [gameMode].
+     *
+     * e.g: Battle Royale games that were popular in the interval of 23/04/2017 to 18/11/2019
+     */
+    suspend fun getPopularGamesByMode(
+        startTimeStamp: Long,
+        endTimestamp: Long,
+        gameMode: GameMode,
         count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game>
 

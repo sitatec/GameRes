@@ -5,19 +5,16 @@ import com.api.igdb.apicalypse.Sort
 import com.api.igdb.request.IGDBWrapper
 import com.api.igdb.request.games
 import proto.Game as GameDTO
-import dev.berete.gameres.data_sources.remote.access_token.AccessTokenProvider
 import dev.berete.gameres.domain.data_providers.remote.GameDetailsProvider
 import dev.berete.gameres.domain.data_providers.remote.GameListProvider
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.enums.GameGenre
+import dev.berete.gameres.domain.models.enums.GameMode
 import dev.berete.gameres.domain.utils.toLowercaseExceptFirstChar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.IllegalArgumentException
 import java.util.*
+import kotlin.IllegalArgumentException
 
 class IGDBAPIClient(
     private val iGDBAPIWrapper: IGDBWrapper,
@@ -99,6 +96,26 @@ class IGDBAPIClient(
         }
     }
 
+    override suspend fun getPopularGamesByMode(
+        startTimeStamp: Long,
+        endTimestamp: Long,
+        gameMode: GameMode,
+        count: Int,
+    ): List<Game> {
+        val numberOfGamesToFetch = regularizeGameCount(count)
+        val queryBuilder = apiCalypse.newBuilder()
+            .fields(gameSummaryFields)
+            .where("first_release_date > ${startTimeStamp.toFixed10Digits()} & first_release_date < ${endTimestamp.toFixed10Digits()} & ${
+                getGameModeQuery(gameMode)
+            } & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
+            .sort("total_rating_count", Sort.DESCENDING)
+            .limit(numberOfGamesToFetch)
+
+        return withContext(IO) {
+            iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
+        }
+    }
+
     override suspend fun getGameDetails(gameId: Long): Game {
         val queryBuilder = apiCalypse.newBuilder().fields(completeGameFields).where("id = $gameId")
 
@@ -118,11 +135,28 @@ class IGDBAPIClient(
     }
 
     private fun getGameGenreQuery(genre: GameGenre): String {
-        if(genre == GameGenre.ACTION) return "themes.name = \"Action\""
-        if (genre != GameGenre.OTHERS) return "genres.name = \"${genre.iGDBCompatibleName()}\""
+        if (genre == GameGenre.ACTION) return "themes.name = \"Action\""
 
-        val allGenreNames = GameGenre.genreValues.map(GameGenre::iGDBCompatibleName)
-        return "genres.name != (${allGenreNames.joinToString()}})"
+        return if (genre != GameGenre.OTHERS) {
+            "genres.name = \"${genre.iGDBCompatibleName()}\""
+        } else {
+            val allGenreNames = GameGenre.genreValues.map(GameGenre::iGDBCompatibleName)
+            "genres.name != (${allGenreNames.joinToString()}})"
+        }
+
+    }
+
+    private fun getGameModeQuery(gameMode: GameMode): String {
+        val modeName = when(gameMode){
+            GameMode.BATTLE_ROYALE -> "Battle Royale"
+            GameMode.MULTIPLAYER -> "Multiplayer"
+            GameMode.SINGLE_PLAYER -> "Single player"
+            GameMode.MMO -> "Massively Multiplayer Online (MMO)"
+            GameMode.SPLIT_SCREEN -> "Split screen"
+            GameMode.COOPERATIVE -> "Co-operative"
+            GameMode.OTHERS -> throw IllegalArgumentException("The value `GameMode.OTHERS` is not supported yet")
+        }
+        return "game_modes.name = \"$modeName\""
     }
 
     private fun getIGDBPlatformIDs(): String {
@@ -160,9 +194,9 @@ fun APICalypse.newBuilder() = APICalypse()
 fun GameGenre.iGDBCompatibleName() =
     if (this == GameGenre.RPG) "Role-playing (RPG)" else name.toLowercaseExceptFirstChar()
 
-fun Long.toFixed10Digits() : String {
+fun Long.toFixed10Digits(): String {
     val thisNumberAsString = this.toString()
-    if(thisNumberAsString.length > 10){
+    if (thisNumberAsString.length > 10) {
         return thisNumberAsString.substring(0..9)
     }
     return thisNumberAsString

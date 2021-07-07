@@ -54,7 +54,7 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
             gameList.subList(10, gameList.size).sortedByDescending { it.rating }
     }
 
-    fun onGameGenreSelected(genreName: String) {
+    fun onGameTypeSelected(genreName: String) {
         when (genreName) {
             "Multiplayer" -> filterByGameMode(GameMode.MULTIPLAYER)
             "Battle Royale" -> filterByGameMode(GameMode.BATTLE_ROYALE)
@@ -62,12 +62,21 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
         }
     }
 
-
     private fun filterByGameMode(gameMode: GameMode) {
-
+        // TODO filter the current game list first and check if it content enough game and return the
+        //  the filtered list before making api call.
+        viewModelScope.launch {
+            setGames(gameListRepository.getPopularGamesByMode(
+                startTimeStamp = getYearTimestamp(2019),
+                endTimestamp = getYearTimestamp(),
+                gameMode = gameMode,
+            ))
+        }
     }
 
     private fun filterByGameGenre(gameGenre: GameGenre) {
+        // TODO filter the current game list first and check if it content enough game and return the
+        //  the filtered list before making api call.
         viewModelScope.launch {
             setGames(gameListRepository.getPopularGamesByGenre(
                 startTimeStamp = getYearTimestamp(2019),

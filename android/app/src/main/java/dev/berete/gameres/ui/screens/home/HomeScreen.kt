@@ -3,7 +3,6 @@ package dev.berete.gameres.ui.screens.home
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
@@ -30,8 +29,6 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.coil.rememberCoilPainter
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
-import dev.berete.gameres.domain.models.enums.GameGenre
-import dev.berete.gameres.domain.models.enums.GameMode
 import dev.berete.gameres.ui.screens.GameResLogo
 import dev.berete.gameres.ui.screens.PlatformLogos
 import dev.berete.gameres.ui.theme.*
@@ -99,7 +96,7 @@ fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
                     onClick = {
                         if(selectedTabIndex != index) {
                             selectedTabIndex = index
-                            viewModel.onGameGenreSelected(genreName)
+                            viewModel.onGameTypeSelected(genreName)
                         }
                     },
                     text = { Text(text = genreName, fontSize = 13.sp) },
