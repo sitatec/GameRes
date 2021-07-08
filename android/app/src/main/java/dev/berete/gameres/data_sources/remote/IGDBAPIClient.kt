@@ -4,6 +4,7 @@ import com.api.igdb.apicalypse.APICalypse
 import com.api.igdb.apicalypse.Sort
 import com.api.igdb.request.IGDBWrapper
 import com.api.igdb.request.games
+import com.api.igdb.request.releaseDates
 import proto.Game as GameDTO
 import dev.berete.gameres.domain.data_providers.remote.GameDetailsProvider
 import dev.berete.gameres.domain.data_providers.remote.GameListProvider
@@ -25,6 +26,9 @@ class IGDBAPIClient(
 
     private val gameSummaryFields =
         "name, cover.image_id, total_rating, platforms.name, status, artworks.image_id, total_rating_count"
+
+    private val gameSummaryFieldsWithGamePrefix =
+        "game.name, game.cover.image_id, game.total_rating, game.platforms.name, game.status, game.artworks.image_id, game.total_rating_count"
 
     private val completeGameFields =
         "$gameSummaryFields, genres, game_modes, age_ratings, first_release_date, themes," +
@@ -55,7 +59,7 @@ class IGDBAPIClient(
         val queryBuilder = apiCalypse.newBuilder()
             .fields(gameSummaryFields)
             .where("first_release_date > ${timestamp.toFixed10Digits()} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
-            .sort("total_rating_count", Sort.DESCENDING)
+            .sort("first_release_date", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
             .offset(page * count)
 
@@ -68,19 +72,21 @@ class IGDBAPIClient(
         val numberOfGamesToFetch = regularizeGameCount(count)
         val tomorrowTimeStamp =
             Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.timeInMillis
+
         var maxReleaseDateQuery = ""
-        if(limitTimestamp > 1){
+        if (limitTimestamp > 0) {
             maxReleaseDateQuery = "& first_release_date < ${limitTimestamp.toFixed10Digits()}"
         }
+
         val queryBuilder = apiCalypse.newBuilder()
-            .fields(gameSummaryFields)
-            .where("first_release_date > ${tomorrowTimeStamp.toFixed10Digits()} $maxReleaseDateQuery & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
-            .sort("total_rating_count", Sort.DESCENDING)
+            .fields(gameSummaryFieldsWithGamePrefix)
+            .where("date > ${tomorrowTimeStamp.toFixed10Digits()} $maxReleaseDateQuery & game.platforms = (${getIGDBPlatformIDs()})")
+            .sort("date", Sort.ASCENDING)
             .limit(numberOfGamesToFetch)
             .offset(page * count)
 
         return withContext(IO) {
-            iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
+            iGDBAPIWrapper.releaseDates(queryBuilder).map { it.game.toDomainGame() }
         }
     }
 
@@ -159,7 +165,7 @@ class IGDBAPIClient(
     }
 
     private fun getGameModeQuery(gameMode: GameMode): String {
-        val modeName = when(gameMode){
+        val modeName = when (gameMode) {
             GameMode.BATTLE_ROYALE -> "Battle Royale"
             GameMode.MULTIPLAYER -> "Multiplayer"
             GameMode.SINGLE_PLAYER -> "Single player"
