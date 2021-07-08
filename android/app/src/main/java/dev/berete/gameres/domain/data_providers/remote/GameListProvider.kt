@@ -34,7 +34,7 @@ interface GameListProvider {
      * date plus one day.
      */
     suspend fun getUpcomingGames(
-        limitTimestamp: Long,
+        limitTimestamp: Long = 0,
         page: Int = 0,
         count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game>

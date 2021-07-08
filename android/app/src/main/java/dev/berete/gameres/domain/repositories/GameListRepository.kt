@@ -43,11 +43,11 @@ class GameListRepository @Inject constructor(
 
     /**
      * Returns the games that will be released before the given [limitTimestamp] and after the current
-     * date plus one day.
+     * date plus one day, if no [limitTimestamp] is passed, there will not be a limit date.
      * The result may be retrieved from the local database if an internet connection is not available
      */
     suspend fun getUpcomingGames(
-        limitTimestamp: Long,
+        limitTimestamp: Long = 0,
         page: Int = 0,
         count: Int = GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game> {

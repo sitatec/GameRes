@@ -68,9 +68,13 @@ class IGDBAPIClient(
         val numberOfGamesToFetch = regularizeGameCount(count)
         val tomorrowTimeStamp =
             Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.timeInMillis
+        var maxReleaseDateQuery = ""
+        if(limitTimestamp > 1){
+            maxReleaseDateQuery = "& first_release_date < ${limitTimestamp.toFixed10Digits()}"
+        }
         val queryBuilder = apiCalypse.newBuilder()
             .fields(gameSummaryFields)
-            .where("first_release_date > ${tomorrowTimeStamp.toFixed10Digits()} & first_release_date < ${limitTimestamp.toFixed10Digits()} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
+            .where("first_release_date > ${tomorrowTimeStamp.toFixed10Digits()} $maxReleaseDateQuery & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
             .sort("total_rating_count", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
             .offset(page * count)
