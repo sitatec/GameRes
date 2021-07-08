@@ -83,7 +83,9 @@ fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
             indicator = { tabPositions ->
                 TabRowDefaults.Indicator(
                     height = 2.dp,
-                    modifier = Modifier.tabIndicatorOffset((tabPositions[selectedTabIndex])).width(3.dp),
+                    modifier = Modifier
+                        .tabIndicatorOffset((tabPositions[selectedTabIndex]))
+                        .width(3.dp),
                     color = MaterialTheme.colors.primary,
                 )
             },
@@ -94,7 +96,7 @@ fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
                     selectedContentColor = MaterialTheme.colors.primary,
                     unselectedContentColor = MaterialTheme.colors.onSurface.copy(0.87F),
                     onClick = {
-                        if(selectedTabIndex != index) {
+                        if (selectedTabIndex != index) {
                             selectedTabIndex = index
                             viewModel.onGameTypeSelected(genreName)
                         }
@@ -208,7 +210,11 @@ fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier
 
 @Composable
 fun GameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Card(modifier.clickable { onClick() }) {
+    Surface(
+        modifier = modifier.clickable { onClick() },
+        color = Color.Gray.copy(0.05F),
+        shape = MaterialTheme.shapes.small,
+    ) {
         Column {
             Image(
                 painter = rememberCoilPainter(
