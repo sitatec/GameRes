@@ -19,17 +19,19 @@ import java.util.*
 /**
  * Converts this Game DTO (Data Transfer Object) instance to the domain's [Game] model
  */
-fun GameDTO.toDomainGame() = Game(id = id,
+fun GameDTO.toDomainGame(largeImageSize: ImageSize = ImageSize.SCREENSHOT_MEDIUM) = Game(
+    id = id,
     name = name,
     genres = genresList.map(Genre::toDomainGameGenre),
-    platformList = platformsList.map(PlatformDTO::toDomainGamePlatform).toSet().toList(), // toSet() removes double elements
+    platformList = platformsList.map(PlatformDTO::toDomainGamePlatform).toSet()
+        .toList(), // toSet() removes double elements
     firstReleaseDate = Date(firstReleaseDate.seconds),
     releaseDates = releaseDatesList.map { Date(it.date.seconds) },
     summary = summary,
     storyline = storyline,
     coverUrl = imageBuilder(cover.imageId, ImageSize.COVER_BIG),
-    artWorkUrls = artworksList.map { imageBuilder(it.imageId, ImageSize.HD) },
-    screenshotUrls = screenshotsList.map { imageBuilder(it.imageId, ImageSize.HD) },
+    artWorkUrls = artworksList.map { imageBuilder(it.imageId, largeImageSize) },
+    screenshotUrls = screenshotsList.map { imageBuilder(it.imageId, largeImageSize) },
     videoUrls = videosList.map { "https://www.youtube.com/watch?v=${it.videoId}" },
     similarGameIds = similarGamesList.map { it.id },
     rating = totalRating,
@@ -40,7 +42,7 @@ fun GameDTO.toDomainGame() = Game(id = id,
     developers = involvedCompaniesList.filter { it.developer }
         .map(GameCompanyDTO::toDomainGameCompany),
     publishers = involvedCompaniesList.filter { it.publisher }
-        .map(GameCompanyDTO::toDomainGameCompany)
+        .map(GameCompanyDTO::toDomainGameCompany),
 )
 
 /**

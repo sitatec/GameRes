@@ -5,6 +5,7 @@ import com.api.igdb.apicalypse.Sort
 import com.api.igdb.request.IGDBWrapper
 import com.api.igdb.request.games
 import com.api.igdb.request.releaseDates
+import com.api.igdb.utils.ImageSize
 import proto.Game as GameDTO
 import dev.berete.gameres.domain.data_providers.remote.GameDetailsProvider
 import dev.berete.gameres.domain.data_providers.remote.GameListProvider
@@ -138,7 +139,7 @@ class IGDBAPIClient(
         val queryBuilder = apiCalypse.newBuilder().fields(completeGameFields).where("id = $gameId")
 
         return withContext(IO) {
-            iGDBAPIWrapper.games(queryBuilder).first().toDomainGame()
+            iGDBAPIWrapper.games(queryBuilder).first().toDomainGame(ImageSize.HD)
         }
     }
 

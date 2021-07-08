@@ -201,7 +201,7 @@ fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier
                 previewPlaceholder = R.drawable.apex_legends_artwork,
             ),
             contentDescription = game.name,
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.Crop,
         )
         Row(
             verticalAlignment = Alignment.Bottom,
