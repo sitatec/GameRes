@@ -73,8 +73,11 @@ fun GameResTopAppBar(title: @Composable () -> Unit, modifier: Modifier = Modifie
 
 @Composable
 fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
-    val trendingGameList by viewModel.gameList.observeAsState(initial = emptyList())
+    val gameList by viewModel.gameList.observeAsState(initial = emptyList())
     val mostPopularGames by viewModel.mostPopularGames.observeAsState(initial = emptyList())
+    val newGames by viewModel.newGames.observeAsState(initial = emptyList())
+    val upcomingGames by viewModel.upComingGames.observeAsState(initial = emptyList())
+
     var selectedTabIndex by remember { mutableStateOf(0) }
     val numberOfItemsByRow = LocalConfiguration.current.screenWidthDp / 200
 
@@ -114,8 +117,23 @@ fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
             LazyColumn(modifier = modifier) {
                 item {
                     Spacer(Modifier.height(16.dp))
-                    MostPopularGamesSection(mostPopularGames = mostPopularGames,
-                        onGameSelected = {})
+                    GamesSection(
+                        title = "Popular",
+                        mostPopularGames = mostPopularGames,
+                        onGameSelected = {},
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    GamesSection(
+                        title = "New",
+                        mostPopularGames = newGames,
+                        onGameSelected = {},
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    GamesSection(
+                        title = "Upcoming",
+                        mostPopularGames = upcomingGames,
+                        onGameSelected = {},
+                    )
                     Spacer(Modifier.height(16.dp))
                     Text(
                         text = "Highly Rated",
@@ -125,7 +143,7 @@ fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
                     Spacer(Modifier.height(10.dp))
                 }
 
-                items(items = trendingGameList.chunked(numberOfItemsByRow)) { rowItems ->
+                items(items = gameList.chunked(numberOfItemsByRow)) { rowItems ->
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(14.dp),
                         modifier = Modifier.padding(horizontal = 16.dp),
@@ -144,20 +162,21 @@ fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
 // ------------------------- MOST POPULAR GAMES SECTION -------------------------- //
 
 @Composable
-fun MostPopularGamesSection(
+fun GamesSection(
     mostPopularGames: List<Game>,
+    title: String,
     onGameSelected: (Game) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
         Text(
-            text = "Popular Games",
+            text = title,
             style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
             modifier = Modifier.padding(start = 16.dp),
         )
         Spacer(Modifier.height(10.dp))
         LazyRow {
-            items(items = mostPopularGames, key = { it.id }) { game ->
+            items(items = mostPopularGames) { game ->
                 Spacer(Modifier.width(14.dp))
                 LargeGameCard(game = game, onClick = { onGameSelected(game) })
             }
@@ -298,8 +317,8 @@ fun HomeScreenPreview() {
             Spacer(modifier = Modifier.height(8.dp))
             LazyColumn {
                 item {
-                    MostPopularGamesSection(mostPopularGames = mostPopularGames,
-                        onGameSelected = {})
+                    GamesSection(mostPopularGames = mostPopularGames,
+                        onGameSelected = {}, title = "Popular Games")
                     Spacer(Modifier.height(16.dp))
                     Text(
                         text = "Trending",

@@ -20,19 +20,36 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(private val gameListRepository: GameListRepository) :
     ViewModel() {
 
+    /**
+     * A random timestamp from 2000 to the last year, so each time the user launches the app,
+     * he/she will see different games on the home page.
+     *
+     * TODO implement a smartest algo.
+     */
+    private val minReleaseDate: Long
+        get() {
+            val numberOfYearsSince2000 = Calendar.getInstance().get(Calendar.YEAR) - 2000
+            val randomYearFrom2000toLastYear = Random().nextInt(numberOfYearsSince2000 - 1) + 2000
+            return getYearTimestamp(randomYearFrom2000toLastYear)
+        }
+
     private val _gameList: MutableLiveData<List<Game>> = MutableLiveData(emptyList())
-    val gameList: LiveData<List<Game>>
-        get() = _gameList
+    val gameList: LiveData<List<Game>> = _gameList
 
     private val _mostPopularGames: MutableLiveData<List<Game>> = MutableLiveData(emptyList())
-    val mostPopularGames: LiveData<List<Game>>
-        get() = _mostPopularGames
+    val mostPopularGames: LiveData<List<Game>> = _mostPopularGames
+
+    private val _newGames: MutableLiveData<List<Game>> = MutableLiveData(emptyList())
+    val newGames: LiveData<List<Game>> = _newGames
+
+    private val _upComingGames: MutableLiveData<List<Game>> = MutableLiveData(emptyList())
+    val upComingGames: LiveData<List<Game>> = _upComingGames
 
     private var currentPage = 0
 
     private var _loadNextPage = suspend {
         val loadedGames = gameListRepository.getPopularGames(
-            startTimeStamp = getYearTimestamp(2017),
+            startTimeStamp = minReleaseDate,
             endTimestamp = getYearTimestamp(),
             page = ++currentPage,
         ).sortedByDescending { it.rating }
@@ -50,15 +67,33 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
         listOf(*GameGenre.genreNames.toTypedArray(), "Battle Royale", "Multiplayer").sorted()
 
     init {
-        fetchGames()
+        fetchNewGames()
+        fetchGameList()
+        fetchUpComingGames()
     }
 
-    private fun fetchGames() {
+    private fun fetchNewGames() {
+        viewModelScope.launch {
+            val lastYear = Calendar.getInstance().get(Calendar.YEAR) - 1
+            _newGames.value = gameListRepository.getGamesReleasedAfter(
+                timestamp = getYearTimestamp(lastYear),
+                count = 10,
+            ).sortedByDescending { it.rating }
+        }
+    }
+
+    private fun fetchGameList() {
         viewModelScope.launch {
             setPopularAndHighlyRatedGames(gameListRepository.getPopularGames(
-                startTimeStamp = getYearTimestamp(2017),
+                startTimeStamp = minReleaseDate,
                 endTimestamp = getYearTimestamp(), // NOW
             ))
+        }
+    }
+
+    private fun fetchUpComingGames(){
+        viewModelScope.launch {
+            _upComingGames.value = gameListRepository.getUpcomingGames(count = 10)
         }
     }
 
@@ -82,16 +117,16 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
         currentPage = 0
         viewModelScope.launch {
             setPopularAndHighlyRatedGames(gameListRepository.getPopularGamesByMode(
-                startTimeStamp = getYearTimestamp(2017),
+                startTimeStamp = minReleaseDate,
                 endTimestamp = getYearTimestamp(),
                 gameMode = gameMode,
             ))
         }
         _loadNextPage = {
             val loadedGames = gameListRepository.getPopularGamesByMode(
-                startTimeStamp = getYearTimestamp(2017),
+                startTimeStamp = minReleaseDate,
                 endTimestamp = getYearTimestamp(),
-                page = ++currentPage,
+                page = currentPage++,
                 gameMode = gameMode,
             ).sortedByDescending { it.rating }
 
@@ -105,16 +140,16 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
         currentPage = 0
         viewModelScope.launch {
             setPopularAndHighlyRatedGames(gameListRepository.getPopularGamesByGenre(
-                startTimeStamp = getYearTimestamp(2019),
+                startTimeStamp = minReleaseDate,
                 endTimestamp = getYearTimestamp(),
                 genre = gameGenre,
             ))
         }
         _loadNextPage = {
             val loadedGames = gameListRepository.getPopularGamesByGenre(
-                startTimeStamp = getYearTimestamp(2019),
+                startTimeStamp = minReleaseDate,
                 endTimestamp = getYearTimestamp(),
-                page = ++currentPage,
+                page = currentPage++,
                 genre = gameGenre,
             ).sortedByDescending { it.rating }
 
