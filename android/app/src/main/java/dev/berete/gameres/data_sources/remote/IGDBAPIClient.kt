@@ -34,6 +34,7 @@ class IGDBAPIClient(
     override suspend fun getPopularGames(
         startTimeStamp: Long,
         endTimestamp: Long,
+        page: Int,
         count: Int,
     ): List<Game> {
         val numberOfGamesToFetch = regularizeGameCount(count)
@@ -42,26 +43,28 @@ class IGDBAPIClient(
             .where("first_release_date > ${startTimeStamp.toFixed10Digits()} & first_release_date < ${endTimestamp.toFixed10Digits()} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
             .sort("total_rating_count", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
+            .offset(page * count)
 
         return withContext(IO) {
             iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
         }
     }
 
-    override suspend fun getGamesReleasedAfter(timestamp: Long, count: Int): List<Game> {
+    override suspend fun getGamesReleasedAfter(timestamp: Long, page: Int, count: Int): List<Game> {
         val numberOfGamesToFetch = regularizeGameCount(count)
         val queryBuilder = apiCalypse.newBuilder()
             .fields(gameSummaryFields)
             .where("first_release_date > ${timestamp.toFixed10Digits()} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
             .sort("total_rating_count", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
+            .offset(page * count)
 
         return withContext(IO) {
             iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
         }
     }
 
-    override suspend fun getUpcomingGames(limitTimestamp: Long, count: Int): List<Game> {
+    override suspend fun getUpcomingGames(limitTimestamp: Long, page: Int, count: Int): List<Game> {
         val numberOfGamesToFetch = regularizeGameCount(count)
         val tomorrowTimeStamp =
             Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.timeInMillis
@@ -70,6 +73,7 @@ class IGDBAPIClient(
             .where("first_release_date > ${tomorrowTimeStamp.toFixed10Digits()} & first_release_date < ${limitTimestamp.toFixed10Digits()} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
             .sort("total_rating_count", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
+            .offset(page * count)
 
         return withContext(IO) {
             iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
@@ -80,6 +84,7 @@ class IGDBAPIClient(
         startTimeStamp: Long,
         endTimestamp: Long,
         genre: GameGenre,
+        page: Int,
         count: Int,
     ): List<Game> {
         val numberOfGamesToFetch = regularizeGameCount(count)
@@ -90,6 +95,7 @@ class IGDBAPIClient(
             } & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
             .sort("total_rating_count", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
+            .offset(page * count)
 
         return withContext(IO) {
             iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
@@ -100,6 +106,7 @@ class IGDBAPIClient(
         startTimeStamp: Long,
         endTimestamp: Long,
         gameMode: GameMode,
+        page: Int,
         count: Int,
     ): List<Game> {
         val numberOfGamesToFetch = regularizeGameCount(count)
@@ -110,6 +117,7 @@ class IGDBAPIClient(
             } & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
             .sort("total_rating_count", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
+            .offset(page * count)
 
         return withContext(IO) {
             iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)

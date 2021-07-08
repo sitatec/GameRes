@@ -15,6 +15,7 @@ interface GameListProvider {
     suspend fun getPopularGames(
         startTimeStamp: Long,
         endTimestamp: Long,
+        page: Int = 0,
         count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game>
 
@@ -24,6 +25,7 @@ interface GameListProvider {
      */
     suspend fun getGamesReleasedAfter(
         timestamp: Long,
+        page: Int = 0,
         count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game>
 
@@ -33,6 +35,7 @@ interface GameListProvider {
      */
     suspend fun getUpcomingGames(
         limitTimestamp: Long,
+        page: Int = 0,
         count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game>
 
@@ -45,6 +48,7 @@ interface GameListProvider {
         startTimeStamp: Long,
         endTimestamp: Long,
         genre: GameGenre,
+        page: Int = 0,
         count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game>
 
@@ -58,6 +62,7 @@ interface GameListProvider {
         startTimeStamp: Long,
         endTimestamp: Long,
         gameMode: GameMode,
+        page: Int = 0,
         count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game>
 

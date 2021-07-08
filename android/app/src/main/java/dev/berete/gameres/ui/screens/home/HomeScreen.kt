@@ -27,6 +27,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.coil.rememberCoilPainter
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.ui.screens.GameResLogo
@@ -71,7 +73,7 @@ fun GameResTopAppBar(title: @Composable () -> Unit, modifier: Modifier = Modifie
 
 @Composable
 fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
-    val trendingGameList by viewModel.trendingGameList.observeAsState(initial = emptyList())
+    val trendingGameList by viewModel.gameList.observeAsState(initial = emptyList())
     val mostPopularGames by viewModel.mostPopularGames.observeAsState(initial = emptyList())
     var selectedTabIndex by remember { mutableStateOf(0) }
     val numberOfItemsByRow = LocalConfiguration.current.screenWidthDp / 200
@@ -105,29 +107,35 @@ fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
                 )
             }
         }
-        LazyColumn(modifier = modifier) {
-            item {
-                Spacer(Modifier.height(16.dp))
-                MostPopularGamesSection(mostPopularGames = mostPopularGames, onGameSelected = {})
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = "Highly Rated",
-                    style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
-                    modifier = Modifier.padding(start = 16.dp),
-                )
-                Spacer(Modifier.height(10.dp))
-            }
-
-            items(items = trendingGameList.chunked(numberOfItemsByRow)) { rowItems ->
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                ) {
-                    for (game in rowItems) {
-                        GameCard(game = game, onClick = { }, modifier = Modifier.weight(1F))
-                    }
+        SwipeRefresh(
+            onRefresh = { viewModel.loadNextPage() },
+            bottomRefreshIndicatorState = rememberSwipeRefreshState(isRefreshing = viewModel.isNextPageLoading),
+        ) {
+            LazyColumn(modifier = modifier) {
+                item {
+                    Spacer(Modifier.height(16.dp))
+                    MostPopularGamesSection(mostPopularGames = mostPopularGames,
+                        onGameSelected = {})
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = "Highly Rated",
+                        style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
+                        modifier = Modifier.padding(start = 16.dp),
+                    )
+                    Spacer(Modifier.height(10.dp))
                 }
-                Spacer(Modifier.height(14.dp))
+
+                items(items = trendingGameList.chunked(numberOfItemsByRow)) { rowItems ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                    ) {
+                        for (game in rowItems) {
+                            GameCard(game = game, onClick = { }, modifier = Modifier.weight(1F))
+                        }
+                    }
+                    Spacer(Modifier.height(14.dp))
+                }
             }
         }
     }

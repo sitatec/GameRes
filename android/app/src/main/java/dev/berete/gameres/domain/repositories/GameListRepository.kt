@@ -22,9 +22,10 @@ class GameListRepository @Inject constructor(
     suspend fun getPopularGames(
         startTimeStamp: Long,
         endTimestamp: Long,
+        page: Int = 0,
         count: Int = GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game> {
-        return gameListProvider.getPopularGames(startTimeStamp, endTimestamp, count)
+        return gameListProvider.getPopularGames(startTimeStamp, endTimestamp, page,count)
     }
 
     /**
@@ -34,9 +35,10 @@ class GameListRepository @Inject constructor(
      */
     suspend fun getGamesReleasedAfter(
         timestamp: Long,
+        page: Int = 0,
         count: Int = GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game> {
-        return gameListProvider.getGamesReleasedAfter(timestamp, count)
+        return gameListProvider.getGamesReleasedAfter(timestamp, page, count)
     }
 
     /**
@@ -46,9 +48,10 @@ class GameListRepository @Inject constructor(
      */
     suspend fun getUpcomingGames(
         limitTimestamp: Long,
+        page: Int = 0,
         count: Int = GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game> {
-        return gameListProvider.getUpcomingGames(limitTimestamp, count)
+        return gameListProvider.getUpcomingGames(limitTimestamp, page, count)
     }
 
     /**
@@ -61,12 +64,14 @@ class GameListRepository @Inject constructor(
         startTimeStamp: Long,
         endTimestamp: Long,
         genre: GameGenre,
+        page: Int = 0,
         count: Int = GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game> {
         return gameListProvider.getPopularGamesByGenre(
             startTimeStamp,
             endTimestamp,
             genre,
+            page,
             count,
         )
     }
@@ -81,12 +86,14 @@ class GameListRepository @Inject constructor(
         startTimeStamp: Long,
         endTimestamp: Long,
         gameMode: GameMode,
+        page: Int = 0,
         count: Int = GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game> {
         return gameListProvider.getPopularGamesByMode(
             startTimeStamp,
             endTimestamp,
             gameMode,
+            page,
             count,
         )
     }

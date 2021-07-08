@@ -1,6 +1,8 @@
 package dev.berete.gameres.ui.screens.home
 
-import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,8 +13,6 @@ import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.domain.models.enums.GameMode
 import dev.berete.gameres.domain.repositories.GameListRepository
 import kotlinx.coroutines.launch
-import proto.GameCategoryEnum
-import java.time.LocalDate
 import java.util.*
 import javax.inject.Inject
 
@@ -20,13 +20,28 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(private val gameListRepository: GameListRepository) :
     ViewModel() {
 
-    private val _trendingGameList: MutableLiveData<List<Game>> = MutableLiveData(emptyList())
-    val trendingGameList: LiveData<List<Game>>
-        get() = _trendingGameList
+    private val _gameList: MutableLiveData<List<Game>> = MutableLiveData(emptyList())
+    val gameList: LiveData<List<Game>>
+        get() = _gameList
 
     private val _mostPopularGames: MutableLiveData<List<Game>> = MutableLiveData(emptyList())
     val mostPopularGames: LiveData<List<Game>>
         get() = _mostPopularGames
+
+    private var currentPage = 0
+
+    private var _loadNextPage = suspend {
+        val loadedGames = gameListRepository.getPopularGames(
+            startTimeStamp = getYearTimestamp(2017),
+            endTimestamp = getYearTimestamp(),
+            page = ++currentPage,
+        ).sortedByDescending { it.rating }
+
+        _gameList.value = _gameList.value!!.plus(loadedGames)
+    }
+
+    var isNextPageLoading by mutableStateOf(false)
+        private set
 
     /**
      * Game genre names to show in the tabs
@@ -40,17 +55,16 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
 
     private fun fetchGames() {
         viewModelScope.launch {
-            setGames(gameListRepository.getPopularGames(
-                startTimeStamp = getYearTimestamp(2019),
+            setPopularAndHighlyRatedGames(gameListRepository.getPopularGames(
+                startTimeStamp = getYearTimestamp(2017),
                 endTimestamp = getYearTimestamp(), // NOW
             ))
         }
     }
 
-    private fun setGames(gameList: List<Game>) {
-        Log.d("HOME_VIEW_MODEL", "setGames")
+    private fun setPopularAndHighlyRatedGames(gameList: List<Game>) {
         _mostPopularGames.value = gameList.subList(0, 10)
-        _trendingGameList.value =
+        _gameList.value =
             gameList.subList(10, gameList.size).sortedByDescending { it.rating }
     }
 
@@ -65,24 +79,54 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
     private fun filterByGameMode(gameMode: GameMode) {
         // TODO filter the current game list first and check if it content enough game and return the
         //  the filtered list before making api call.
+        currentPage = 0
         viewModelScope.launch {
-            setGames(gameListRepository.getPopularGamesByMode(
-                startTimeStamp = getYearTimestamp(2019),
+            setPopularAndHighlyRatedGames(gameListRepository.getPopularGamesByMode(
+                startTimeStamp = getYearTimestamp(2017),
                 endTimestamp = getYearTimestamp(),
                 gameMode = gameMode,
             ))
+        }
+        _loadNextPage = {
+            val loadedGames = gameListRepository.getPopularGamesByMode(
+                startTimeStamp = getYearTimestamp(2017),
+                endTimestamp = getYearTimestamp(),
+                page = ++currentPage,
+                gameMode = gameMode,
+            ).sortedByDescending { it.rating }
+
+            _gameList.value = _gameList.value!!.plus(loadedGames)
         }
     }
 
     private fun filterByGameGenre(gameGenre: GameGenre) {
         // TODO filter the current game list first and check if it content enough game and return the
         //  the filtered list before making api call.
+        currentPage = 0
         viewModelScope.launch {
-            setGames(gameListRepository.getPopularGamesByGenre(
+            setPopularAndHighlyRatedGames(gameListRepository.getPopularGamesByGenre(
                 startTimeStamp = getYearTimestamp(2019),
                 endTimestamp = getYearTimestamp(),
                 genre = gameGenre,
             ))
+        }
+        _loadNextPage = {
+            val loadedGames = gameListRepository.getPopularGamesByGenre(
+                startTimeStamp = getYearTimestamp(2019),
+                endTimestamp = getYearTimestamp(),
+                page = ++currentPage,
+                genre = gameGenre,
+            ).sortedByDescending { it.rating }
+
+            _gameList.value = _gameList.value!!.plus(loadedGames)
+        }
+    }
+
+    fun loadNextPage() {
+        viewModelScope.launch {
+            isNextPageLoading = true
+            _loadNextPage()
+            isNextPageLoading = false
         }
     }
 
