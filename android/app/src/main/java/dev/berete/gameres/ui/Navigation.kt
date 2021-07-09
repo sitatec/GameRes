@@ -15,6 +15,8 @@ object Routes {
     const val Home = "home"
     const val GameDetails = "game_details/{gameId}"
     const val Search = "search"
+
+    fun gameDetails(gameId: Long) = "game_details/$gameId"
 }
 
 @Composable

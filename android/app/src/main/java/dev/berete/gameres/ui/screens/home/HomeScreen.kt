@@ -31,8 +31,8 @@ import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.berete.gameres.R
-import dev.berete.gameres.Routes
 import dev.berete.gameres.domain.models.Game
+import dev.berete.gameres.ui.Routes
 import dev.berete.gameres.ui.screens.GameResLogo
 import dev.berete.gameres.ui.screens.PlatformLogos
 import dev.berete.gameres.ui.theme.*
@@ -124,29 +124,29 @@ fun HomeScreenBody(
                 item {
                     Spacer(Modifier.height(16.dp))
                     GamesSection(
-                        title = "Popular",
+                        title = stringResource(R.string.popular_txt),
                         mostPopularGames = mostPopularGames,
                         onGameSelected = {
-                            navController.navigate("${Routes.GameDetails}/${it.id}")
+                            navController.navigate(Routes.gameDetails(it.id))
                         },
                     )
                     Spacer(Modifier.height(16.dp))
                     GamesSection(
-                        title = "New",
+                        title = stringResource(R.string.new_txt),
                         mostPopularGames = newGames,
                         onGameSelected = {
-                            navController.navigate("${Routes.GameDetails}/${it.id}")
+                            navController.navigate(Routes.gameDetails(it.id))
                         },
                     )
                     Spacer(Modifier.height(16.dp))
                     GamesSection(
-                        title = "Upcoming",
+                        title = stringResource(R.string.upcoming_txt),
                         mostPopularGames = upcomingGames,
                         onGameSelected = {},
                     )
                     Spacer(Modifier.height(16.dp))
                     Text(
-                        text = "Highly Rated",
+                        text = stringResource(R.string.highly_rated_txt),
                         style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
                         modifier = Modifier.padding(start = 16.dp),
                     )
