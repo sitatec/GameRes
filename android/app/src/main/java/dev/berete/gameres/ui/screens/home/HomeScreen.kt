@@ -26,10 +26,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.berete.gameres.R
+import dev.berete.gameres.Routes
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.ui.screens.GameResLogo
 import dev.berete.gameres.ui.screens.PlatformLogos
@@ -38,10 +40,10 @@ import dev.berete.gameres.ui.utils.FakeGame
 import dev.berete.gameres.ui.utils.FakeGameList
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel) {
+fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
     Scaffold(topBar = { GameResTopAppBar({ GameResLogo() }) }) {
         Spacer(modifier = Modifier.height(8.dp))
-        HomeScreenBody(viewModel)
+        HomeScreenBody(viewModel, navController)
     }
 }
 
@@ -72,7 +74,11 @@ fun GameResTopAppBar(title: @Composable () -> Unit, modifier: Modifier = Modifie
 }
 
 @Composable
-fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
+fun HomeScreenBody(
+    viewModel: HomeViewModel,
+    navController: NavController,
+    modifier: Modifier = Modifier,
+) {
     val gameList by viewModel.gameList.observeAsState(initial = emptyList())
     val mostPopularGames by viewModel.mostPopularGames.observeAsState(initial = emptyList())
     val newGames by viewModel.newGames.observeAsState(initial = emptyList())
@@ -120,13 +126,17 @@ fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
                     GamesSection(
                         title = "Popular",
                         mostPopularGames = mostPopularGames,
-                        onGameSelected = {},
+                        onGameSelected = {
+                            navController.navigate("${Routes.GameDetails}/${it.id}")
+                        },
                     )
                     Spacer(Modifier.height(16.dp))
                     GamesSection(
                         title = "New",
                         mostPopularGames = newGames,
-                        onGameSelected = {},
+                        onGameSelected = {
+                            navController.navigate("${Routes.GameDetails}/${it.id}")
+                        },
                     )
                     Spacer(Modifier.height(16.dp))
                     GamesSection(
@@ -149,7 +159,13 @@ fun HomeScreenBody(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
                         modifier = Modifier.padding(horizontal = 16.dp),
                     ) {
                         for (game in rowItems) {
-                            GameCard(game = game, onClick = { }, modifier = Modifier.weight(1F))
+                            GameCard(
+                                game = game,
+                                onClick = {
+                                    navController.navigate("${Routes.GameDetails}/${game.id}")
+                                },
+                                modifier = Modifier.weight(1F),
+                            )
                         }
                     }
                     Spacer(Modifier.height(14.dp))

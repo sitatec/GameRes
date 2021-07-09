@@ -20,13 +20,11 @@ import dev.berete.gameres.ui.theme.GameResTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel by viewModels<HomeViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             GameResTheme {
-                HomeScreen(viewModel = viewModel)
-
+                Navigation()
                 val systemUiController = rememberSystemUiController()
                 SideEffect {
                     systemUiController.setSystemBarsColor(color = DarkBlue, darkIcons = false)
@@ -35,3 +33,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
