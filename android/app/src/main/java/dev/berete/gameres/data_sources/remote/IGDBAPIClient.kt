@@ -26,15 +26,16 @@ class IGDBAPIClient(
     //TODO REFACTORING: delegate the common code between the get* methods to another function.
 
     private val gameSummaryFields =
-        "name, cover.image_id, total_rating, platforms.name, status, artworks.image_id, total_rating_count"
+        "name, cover.image_id, total_rating, platforms.name, screenshots.image_id, status, artworks.image_id, total_rating_count"
 
     private val gameSummaryFieldsWithGamePrefix =
         "game.name, game.cover.image_id, game.total_rating, game.platforms.name, game.status, game.artworks.image_id, game.total_rating_count"
 
     private val completeGameFields =
-        "$gameSummaryFields, genres, game_modes, age_ratings, first_release_date, themes," +
-                "player_perspectives, release_dates, screenshots, similar_games, storyline, summary, videos," +
-                "total_rating_count"
+        "$gameSummaryFields, genres.name, game_modes.name, age_ratings.rating, first_release_date, themes.name," +
+                "player_perspectives.name, release_dates.date, similar_games, storyline, summary, videos.video_id," +
+                "total_rating_count, involved_companies.developer, involved_companies.publisher, involved_companies.company.name," +
+                "involved_companies.company.description, involved_companies.company.country, involved_companies.company.logo.image_id"
 
     override suspend fun getPopularGames(
         startTimeStamp: Long,

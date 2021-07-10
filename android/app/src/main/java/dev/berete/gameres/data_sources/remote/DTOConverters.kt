@@ -1,10 +1,12 @@
 package dev.berete.gameres.data_sources.remote
 
+import android.util.Log
 import com.api.igdb.utils.ImageSize
 import com.api.igdb.utils.imageBuilder
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.GameCompany
 import dev.berete.gameres.domain.models.enums.*
+import proto.AgeRatingRatingEnum
 import proto.GameMode as GameModeDTO
 import proto.Game as GameDTO
 import proto.Genre
@@ -19,7 +21,10 @@ import java.util.*
 /**
  * Converts this Game DTO (Data Transfer Object) instance to the domain's [Game] model
  */
-fun GameDTO.toDomainGame(largeImageSize: ImageSize = ImageSize.SCREENSHOT_MEDIUM) = Game(
+fun GameDTO.toDomainGame(
+    largeImageSize: ImageSize = ImageSize.SCREENSHOT_MEDIUM,
+    coverSize: ImageSize = ImageSize.COVER_BIG,
+) = Game(
     id = id,
     name = name,
     genres = genresList.map(Genre::toDomainGameGenre),
@@ -29,14 +34,20 @@ fun GameDTO.toDomainGame(largeImageSize: ImageSize = ImageSize.SCREENSHOT_MEDIUM
     releaseDates = releaseDatesList.map { Date(it.date.seconds) },
     summary = summary,
     storyline = storyline,
-    coverUrl = imageBuilder(cover.imageId, ImageSize.COVER_BIG),
+    coverUrl = imageBuilder(cover.imageId, coverSize),
     artWorkUrls = artworksList.map { imageBuilder(it.imageId, largeImageSize) },
     screenshotUrls = screenshotsList.map { imageBuilder(it.imageId, largeImageSize) },
     videoUrls = videosList.map { "https://www.youtube.com/watch?v=${it.videoId}" },
     similarGameIds = similarGamesList.map { it.id },
     rating = totalRating,
     ratingCount = totalRatingCount,
-    ageRatings = ageRatingsList.map { AgeRating.valueOf(it.rating.name) },
+    ageRatings = ageRatingsList.map {
+        if (it.rating == AgeRatingRatingEnum.AGERATING_RATING_NULL) {
+            AgeRating.UNRECOGNIZED
+        } else {
+            AgeRating.valueOf(it.rating.name)
+        }
+    },
     gameModes = gameModesList.map(GameModeDTO::toDomainGameMode),
     playerPerspectives = playerPerspectivesList.map(PlayerPerspectiveDTO::toDomainPlayerPerspective),
     developers = involvedCompaniesList.filter { it.developer }
@@ -70,8 +81,8 @@ fun PlatformDTO.toDomainGamePlatform(): Platform {
         platformName == "android" -> Platform.ANDROID
         platformName == "mac" || platformName == "ios" -> Platform.APPLE
         platformName == "linux" -> Platform.LINUX
-        else -> Platform.OTHERS.apply { this.platformName = this@toDomainGamePlatform.name }
-    }
+        else -> Platform.OTHERS
+    }.apply { this.platformName = this@toDomainGamePlatform.name }
 }
 
 /**
