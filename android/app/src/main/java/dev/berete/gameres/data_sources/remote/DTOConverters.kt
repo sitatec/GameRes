@@ -1,12 +1,13 @@
 package dev.berete.gameres.data_sources.remote
 
-import android.util.Log
 import com.api.igdb.utils.ImageSize
 import com.api.igdb.utils.imageBuilder
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.GameCompany
+import dev.berete.gameres.domain.models.Video
 import dev.berete.gameres.domain.models.enums.*
 import proto.AgeRatingRatingEnum
+import proto.GameVideo
 import proto.GameMode as GameModeDTO
 import proto.Game as GameDTO
 import proto.Genre
@@ -37,7 +38,7 @@ fun GameDTO.toDomainGame(
     coverUrl = imageBuilder(cover.imageId, coverSize),
     artWorkUrls = artworksList.map { imageBuilder(it.imageId, largeImageSize) },
     screenshotUrls = screenshotsList.map { imageBuilder(it.imageId, largeImageSize) },
-    videoUrls = videosList.map { "https://www.youtube.com/watch?v=${it.videoId}" },
+    videoList = videosList.map(GameVideo::toDomainVideo),
     similarGameIds = similarGamesList.map { it.id },
     rating = totalRating,
     ratingCount = totalRatingCount,
@@ -129,6 +130,15 @@ fun GameCompanyDTO.toDomainGameCompany(): GameCompany {
         else ""
     )
 }
+
+/**
+ * Converts this Video DTO to domain video
+ */
+fun GameVideo.toDomainVideo() = Video(
+    url = "https://www.youtube.com/watch?v=${videoId}",
+    title = name,
+    thumbnailUrl = "https://img.youtube.com/vi/$videoId/0.jpg",
+)
 
 
 // ------------- Domain Models to Data Transfer Object Converters --------------- //

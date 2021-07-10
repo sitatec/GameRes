@@ -20,7 +20,7 @@ data class Game(
     val summary: String = "",
     val storyline: String = "",
     val screenshotUrls: List<String> = emptyList(),
-    val videoUrls: List<String> = emptyList(),
+    val videoList: List<Video> = emptyList(),
     val similarGameIds: List<Long> = emptyList(),
     val ageRatings: List<AgeRating> = emptyList(),
     val gameModes: List<GameMode> = emptyList(),
