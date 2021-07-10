@@ -24,9 +24,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.Navigator
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -38,6 +40,7 @@ import dev.berete.gameres.ui.screens.PlatformLogos
 import dev.berete.gameres.ui.theme.*
 import dev.berete.gameres.ui.utils.FakeGame
 import dev.berete.gameres.ui.utils.FakeGameList
+import dev.berete.gameres.ui.utils.bannerUrl
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
@@ -162,7 +165,7 @@ fun HomeScreenBody(
                             GameCard(
                                 game = game,
                                 onClick = {
-                                    navController.navigate("${Routes.GameDetails}/${game.id}")
+                                    navController.navigate(Routes.gameDetails(game.id))
                                 },
                                 modifier = Modifier.weight(1F),
                             )
@@ -212,8 +215,7 @@ fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier
     ) {
         Image(
             painter = rememberCoilPainter(
-                request = if (game.artWorkUrls.isEmpty()) "" else game.artWorkUrls.first(),
-                fadeIn = true,
+                request = game.bannerUrl,
                 previewPlaceholder = R.drawable.apex_legends_artwork,
             ),
             contentDescription = game.name,
@@ -229,7 +231,6 @@ fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier
             Image(
                 painter = rememberCoilPainter(
                     request = game.coverUrl,
-                    fadeIn = true,
                     previewPlaceholder = R.drawable.apex_legends_cover,
                 ),
                 contentDescription = null,
@@ -261,8 +262,7 @@ fun GameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier) {
         Column {
             Image(
                 painter = rememberCoilPainter(
-                    request = if (game.artWorkUrls.isEmpty()) game.coverUrl else game.artWorkUrls.first(),
-                    fadeIn = true,
+                    request = game.bannerUrl,
                     previewPlaceholder = R.drawable.apex_legends_cover,
                 ),
                 contentDescription = game.name,
@@ -298,6 +298,7 @@ fun GameScore(
     score: Int,
     modifier: Modifier = Modifier,
     style: TextStyle = TextStyle.Default.copy(fontSize = 11.sp),
+    borderWidth: Dp = (1.5).dp,
 ) {
     val scoreColor = remember {
         when {
@@ -311,10 +312,9 @@ fun GameScore(
         text = score.toString(),
         style = style,
         color = scoreColor,
-        modifier = Modifier
-            .border(width = (1.5).dp, color = scoreColor, shape = MaterialTheme.shapes.small)
-            .padding(horizontal = 3.dp, vertical = 2.dp)
-            .then(modifier),
+        modifier = modifier
+            .border(width = borderWidth, color = scoreColor, shape = MaterialTheme.shapes.small)
+            .padding(horizontal = (3.5).dp, vertical = 2.dp)
     )
 }
 
@@ -363,9 +363,9 @@ fun HomeScreenPreview() {
 }
 
 //@Preview
-@Composable
-fun LargeGameCardPreview() {
-    GameResTheme {
-        LargeGameCard(game = FakeGame, onClick = {})
-    }
-}
+//@Composable
+//fun LargeGameCardPreview() {
+//    GameResTheme {
+//        LargeGameCard(game = FakeGame, onClick = {})
+//    }
+//}

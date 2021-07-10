@@ -2,4 +2,8 @@
     <string name="app_name">GameRes</string>
     <string name="menu_button_content_description">Menu button</string>
     <string name="search_btn_content_description">Search game</string>
+    <string name="popular_txt">Popular</string>
+    <string name="new_txt">New</string>
+    <string name="upcoming_txt">Upcoming</string>
+    <string name="highly_rated_txt">Highly Rated</string>
 </resources>
