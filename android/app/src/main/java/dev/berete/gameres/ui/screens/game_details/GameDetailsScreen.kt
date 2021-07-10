@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -23,16 +24,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.lerp
 import androidx.navigation.NavController
 import com.google.accompanist.coil.rememberCoilPainter
+import com.google.accompanist.pager.*
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.ui.screens.PlatformLogos
 import dev.berete.gameres.ui.screens.home.GameScore
-import dev.berete.gameres.ui.theme.DarkBlue
+import dev.berete.gameres.ui.utils.allImageUrls
 import dev.berete.gameres.ui.utils.bannerUrl
+import kotlin.math.absoluteValue
 
 @Composable
+@ExperimentalPagerApi
 fun GameDetailsScreen(viewModel: GameDetailsViewModel, navController: NavController) {
     val game by viewModel.game.observeAsState()
 
@@ -44,6 +49,7 @@ fun GameDetailsScreen(viewModel: GameDetailsViewModel, navController: NavControl
 }
 
 @Composable
+@ExperimentalPagerApi
 fun GameDetailsScreenBody(game: Game, navController: NavController) {
     Column(Modifier.verticalScroll(rememberScrollState())) {
         Box(contentAlignment = Alignment.BottomStart) {
@@ -122,7 +128,7 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
                     withStyle(SpanStyle(color = MaterialTheme.colors.primary, fontSize = 14.sp)) {
                         append(game.gameModes.joinToString { it.toString() })
                     }
-                    Spacer(modifier = Modifier.height(7.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     // Player Perspective
                     withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, fontSize = 15.sp)) {
                         append("\nPlayer Perspective: ")
@@ -139,7 +145,7 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
                 modifier = Modifier.padding(horizontal = 16.dp),
                 color = MaterialTheme.colors.onSurface.copy(0.8f))
 
-            if(game.videoList.isNotEmpty()){
+            if (game.videoList.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Videos",
@@ -151,12 +157,7 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
                 Row(Modifier.horizontalScroll(rememberScrollState())) {
                     for (video in game.videoList) {
                         Spacer(Modifier.width(16.dp))
-                        Card(
-                            Modifier
-                                .size(280.dp, 160.dp),
-                            elevation = 8.dp,
-                            shape = RoundedCornerShape(8.dp),
-                        ) {
+                        Card(Modifier.size(280.dp, 160.dp)) {
                             Image(
                                 painter = rememberCoilPainter(request = video.thumbnailUrl),
                                 contentDescription = video.title,
@@ -195,6 +196,62 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
             }
         }
 
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Images",
+            style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+            modifier = Modifier.padding(start = 16.dp),
+        )
+        Spacer(Modifier.height(10.dp))
+
+        val pagerState =
+            rememberPagerState(pageCount = game.allImageUrls.size, initialOffscreenLimit = 2)
+        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { pageIndex ->
+            Card(
+                modifier = Modifier
+                    .graphicsLayer {
+                        // Calculate the absolute offset for the current page from the
+                        // scroll position. We use the absolute value which allows us to mirror
+                        // any effects for both directions
+                        val pageOffset = calculateCurrentOffsetForPage(pageIndex).absoluteValue
+
+                        // We animate the scaleX + scaleY, between 85% and 100%
+                        lerp(
+                            start = 0.85f,
+                            stop = 1f,
+                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                        ).also { scale ->
+                            scaleX = scale
+                            scaleY = scale
+                        }
+
+                        // We animate the alpha, between 50% and 100%
+                        alpha = lerp(
+                            start = 0.5f,
+                            stop = 1f,
+                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                        )
+                    }
+                    .fillMaxWidth(0.8f)
+                    .aspectRatio(1.5f),
+            ) {
+                Image(
+                    painter = rememberCoilPainter(request = game.allImageUrls[pageIndex]),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    alignment = Alignment.TopCenter,
+                    contentScale = ContentScale.Crop,
+                )
+            }
+        }
+
+        HorizontalPagerIndicator(
+            pagerState = pagerState,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(16.dp),
+        )
 
     }
 }

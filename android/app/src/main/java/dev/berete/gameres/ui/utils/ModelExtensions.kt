@@ -24,3 +24,6 @@ val Game.bannerUrl: String
         screenshotUrls.isNotEmpty() -> screenshotUrls.first()
         else -> "" // TODO create a placeholder
     }
+
+val Game.allImageUrls: List<String>
+    get() = artWorkUrls + screenshotUrls

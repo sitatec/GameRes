@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.pager.ExperimentalPagerApi
 import dev.berete.gameres.ui.screens.game_details.GameDetailsScreen
 import dev.berete.gameres.ui.screens.game_details.GameDetailsViewModel
 import dev.berete.gameres.ui.screens.home.HomeScreen
@@ -21,6 +22,7 @@ object Routes {
     fun gameDetails(gameId: Long) = "game_details/$gameId"
 }
 
+@ExperimentalPagerApi
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
