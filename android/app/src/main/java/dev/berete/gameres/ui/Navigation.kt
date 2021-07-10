@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
 import dev.berete.gameres.ui.screens.game_details.GameDetailsScreen
+import dev.berete.gameres.ui.screens.game_details.GameDetailsViewModel
 import dev.berete.gameres.ui.screens.home.HomeScreen
 import dev.berete.gameres.ui.screens.home.HomeViewModel
 
@@ -33,9 +34,9 @@ fun Navigation() {
         }
 
         composable(Routes.GameDetails) { backStackEntry ->
+            val gameId = backStackEntry.arguments!!.getString("gameId")!!.toLong()
             GameDetailsScreen(
-                gameId = backStackEntry.arguments!!.getString("gameId")!!.toLong(),
-                viewModel = hiltViewModel(),
+                viewModel = hiltViewModel<GameDetailsViewModel>().apply { initialize(gameId) },
                 navController = navController,
             )
         }
