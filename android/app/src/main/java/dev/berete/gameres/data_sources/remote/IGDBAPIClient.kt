@@ -32,7 +32,7 @@ class IGDBAPIClient(
         "game.name, game.cover.image_id, game.total_rating, game.platforms.name, game.status, game.artworks.image_id, game.total_rating_count"
 
     private val completeGameFields =
-        "$gameSummaryFields, genres.name, game_modes.name, age_ratings.rating, first_release_date, themes.name," +
+        "$gameSummaryFields, genres.name, game_modes.name, age_ratings.rating, first_release_date, themes.name, websites.category, websites.url," +
                 "player_perspectives.name, release_dates.date, similar_games, storyline, summary, videos.video_id, videos.name," +
                 "total_rating_count, involved_companies.developer, involved_companies.publisher, involved_companies.company.name," +
                 "involved_companies.company.description, involved_companies.company.country, involved_companies.company.logo.image_id"

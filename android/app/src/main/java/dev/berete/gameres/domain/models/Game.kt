@@ -27,4 +27,5 @@ data class Game(
     val playerPerspectives: List<PlayerPerspective> = emptyList(),
     val developers: List<GameCompany> = emptyList(),
     val publishers: List<GameCompany> = emptyList(),
-) {}
+    val websiteList: List<Website> = emptyList(),
+)

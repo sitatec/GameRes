@@ -21,12 +21,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.navigation.NavController
 import com.google.accompanist.coil.rememberCoilPainter
+import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.pager.*
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.enums.GameGenre
@@ -187,6 +189,7 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
                     style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
                     modifier = Modifier.padding(start = 16.dp),
                 )
+
                 Spacer(Modifier.height(5.dp))
                 Text(
                     text = game.storyline,
@@ -233,7 +236,7 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
                             fraction = 1f - pageOffset.coerceIn(0f, 1f)
                         )
                     }
-                    .fillMaxWidth(0.8f)
+                    .fillMaxWidth(0.85f)
                     .aspectRatio(1.5f),
             ) {
                 Image(
@@ -253,6 +256,124 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
                 .padding(16.dp),
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Websites",
+            style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+            modifier = Modifier.padding(start = 16.dp),
+        )
+        Spacer(Modifier.height(10.dp))
+
+        FlowRow(
+            mainAxisSpacing = 20.dp,
+            crossAxisSpacing = 10.dp,
+            modifier = Modifier.padding(horizontal = 16.dp),
+        ) {
+            for (website in game.websiteList) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Card(Modifier.size(24.dp)) {
+                        Image(
+                            painter = rememberCoilPainter(website.logoUrl),
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                    Spacer(Modifier.width(5.dp))
+                    Text(text = website.name)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Age rating",
+            style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+            modifier = Modifier.padding(start = 16.dp),
+        )
+        Spacer(Modifier.height(10.dp))
+
+        Row(Modifier.horizontalScroll(rememberScrollState())) {
+            for (ageRating in game.ageRatings) {
+                Spacer(Modifier.width(16.dp))
+                Image(painter = rememberCoilPainter(ageRating.labelUrl), contentDescription = null)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Developer",
+            style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+            modifier = Modifier.padding(start = 16.dp),
+        )
+        Spacer(Modifier.height(10.dp))
+
+        Column(Modifier.padding(horizontal = 16.dp)) {
+            for (developer in game.developers) {
+                Card(elevation = 1.dp) {
+                    Row(Modifier.padding(5.dp)) {
+                        Image(
+                            rememberCoilPainter(developer.logoUrl),
+                            contentDescription = null,
+                            Modifier.fillMaxHeight(),
+                        )
+                        Column(
+                            verticalArrangement = Arrangement.SpaceEvenly,
+                            modifier = Modifier.padding(8.dp),
+                        ) {
+                            Text(text = developer.name)
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(text = developer.country, color = Color.White.copy(0.6f))
+                                Text("Learn more", color = MaterialTheme.colors.primary)
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Publisher",
+            style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+            modifier = Modifier.padding(start = 16.dp),
+        )
+        Spacer(Modifier.height(10.dp))
+
+        Column(Modifier.padding(horizontal = 16.dp)) {
+            for (publisher in game.publishers) {
+                Card(elevation = 1.dp) {
+                    Row(Modifier.padding(5.dp)) {
+                        Image(
+                            rememberCoilPainter(publisher.logoUrl),
+                            contentDescription = null,
+                            alignment = Alignment.Center,
+                            modifier = Modifier.fillMaxHeight(),
+                        )
+                        Column(
+                            verticalArrangement = Arrangement.SpaceEvenly,
+                            modifier = Modifier.padding(8.dp),
+                        ) {
+                            Text(text = publisher.name)
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(text = publisher.country, color = Color.White.copy(0.6f))
+                                Text("Learn more", color = MaterialTheme.colors.primary)
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+        }
     }
 }
 
