@@ -1,6 +1,5 @@
 package dev.berete.gameres.ui.screens.game_details
 
-import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,7 +21,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,9 +30,10 @@ import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.pager.*
 import dev.berete.gameres.domain.models.Game
+import dev.berete.gameres.domain.models.GameCompany
 import dev.berete.gameres.domain.models.enums.GameGenre
+import dev.berete.gameres.ui.screens.GameScore
 import dev.berete.gameres.ui.screens.PlatformLogos
-import dev.berete.gameres.ui.screens.home.GameScore
 import dev.berete.gameres.ui.utils.allImageUrls
 import dev.berete.gameres.ui.utils.bannerUrl
 import kotlin.math.absoluteValue
@@ -149,13 +148,7 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
                 color = MaterialTheme.colors.onSurface.copy(0.8f))
 
             if (game.videoList.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Videos",
-                    style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-                    modifier = Modifier.padding(start = 16.dp),
-                )
-                Spacer(Modifier.height(10.dp))
+                SectionTitle("Videos")
 
                 Row(Modifier.horizontalScroll(rememberScrollState())) {
                     for (video in game.videoList) {
@@ -184,14 +177,7 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
             }
 
             if (game.storyline.isNotBlank()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Storyline",
-                    style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-                    modifier = Modifier.padding(start = 16.dp),
-                )
-
-                Spacer(Modifier.height(5.dp))
+                SectionTitle("Storyline")
                 Text(
                     text = game.storyline,
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -201,13 +187,7 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
         }
 
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Images",
-            style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-            modifier = Modifier.padding(start = 16.dp),
-        )
-        Spacer(Modifier.height(10.dp))
+        SectionTitle("Images")
 
         val pagerState =
             rememberPagerState(pageCount = game.allImageUrls.size, initialOffscreenLimit = 2)
@@ -257,18 +237,15 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
                 .padding(16.dp),
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Websites",
-            style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-            modifier = Modifier.padding(start = 16.dp),
-        )
-        Spacer(Modifier.height(10.dp))
+
+        SectionTitle("Medias")
 
         FlowRow(
             mainAxisSpacing = 20.dp,
             crossAxisSpacing = 10.dp,
-            modifier = Modifier.padding(horizontal = 16.dp).alpha(0.9f),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .alpha(0.9f),
         ) {
             for (website in game.websiteList) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -286,92 +263,33 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Age rating",
-            style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-            modifier = Modifier.padding(start = 16.dp),
-        )
-        Spacer(Modifier.height(10.dp))
 
-        Row(Modifier.horizontalScroll(rememberScrollState()).alpha(0.9f)) {
+        SectionTitle("Age Rating")
+
+        Row(Modifier
+            .horizontalScroll(rememberScrollState())
+            .alpha(0.9f)) {
             for (ageRating in game.ageRatings) {
                 Spacer(Modifier.width(16.dp))
                 Image(painter = rememberCoilPainter(ageRating.labelUrl), contentDescription = null)
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Developer",
-            style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-            modifier = Modifier.padding(start = 16.dp),
-        )
-        Spacer(Modifier.height(10.dp))
+
+        SectionTitle("Developer")
 
         Column(Modifier.padding(horizontal = 16.dp)) {
             for (developer in game.developers) {
-                Card(elevation = 1.dp) {
-                    Row(Modifier.padding(5.dp)) {
-                        Image(
-                            rememberCoilPainter(developer.logoUrl),
-                            contentDescription = null,
-                            Modifier.fillMaxHeight(),
-                        )
-                        Column(
-                            verticalArrangement = Arrangement.SpaceEvenly,
-                            modifier = Modifier.padding(8.dp),
-                        ) {
-                            Text(text = developer.name)
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(text = developer.country, color = Color.White.copy(0.6f))
-                                Text("Learn more", color = MaterialTheme.colors.primary)
-                            }
-                        }
-                    }
-                }
+                CompanyCard(company = developer)
                 Spacer(modifier = Modifier.height(10.dp))
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Publisher",
-            style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-            modifier = Modifier.padding(start = 16.dp),
-        )
-        Spacer(Modifier.height(10.dp))
+        SectionTitle("Publisher")
 
         Column(Modifier.padding(horizontal = 16.dp)) {
             for (publisher in game.publishers) {
-                Card(elevation = 1.dp) {
-                    Row(Modifier.padding(5.dp)) {
-                        Image(
-                            rememberCoilPainter(publisher.logoUrl),
-                            contentDescription = null,
-                            alignment = Alignment.Center,
-                            modifier = Modifier.fillMaxHeight(),
-                        )
-                        Column(
-                            verticalArrangement = Arrangement.SpaceEvenly,
-                            modifier = Modifier.padding(8.dp),
-                        ) {
-                            Text(text = publisher.name)
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(text = publisher.country, color = Color.White.copy(0.6f))
-                                Text("Learn more", color = MaterialTheme.colors.primary)
-                            }
-                        }
-                    }
-                }
+                CompanyCard(company = publisher)
                 Spacer(modifier = Modifier.height(10.dp))
             }
         }
@@ -381,6 +299,44 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
 @Composable
 fun GameDetailsScreenPlaceHolder() {
 
+}
+
+@Composable
+fun SectionTitle(title: String, modifier: Modifier = Modifier){
+    Spacer(modifier = Modifier.height(16.dp))
+    Text(
+        text = title,
+        style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+        modifier = modifier.padding(start = 16.dp),
+    )
+    Spacer(Modifier.height(10.dp))
+}
+
+@Composable
+fun CompanyCard(company: GameCompany, modifier: Modifier = Modifier) {
+    Card(elevation = 1.dp, modifier =  modifier) {
+        Row(Modifier.padding(5.dp)) {
+            Image(
+                rememberCoilPainter(company.logoUrl),
+                contentDescription = null,
+                Modifier.fillMaxHeight(),
+            )
+            Column(
+                verticalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.padding(8.dp),
+            ) {
+                Text(text = company.name)
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(text = company.country, color = Color.White.copy(0.6f))
+                    Text("Learn more", color = MaterialTheme.colors.primary)
+                }
+            }
+        }
+    }
 }
 
 //@Preview

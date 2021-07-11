@@ -28,17 +28,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.Navigator
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.ui.Routes
+import dev.berete.gameres.ui.screens.GameCard
 import dev.berete.gameres.ui.screens.GameResLogo
+import dev.berete.gameres.ui.screens.GameScore
 import dev.berete.gameres.ui.screens.PlatformLogos
 import dev.berete.gameres.ui.theme.*
-import dev.berete.gameres.ui.utils.FakeGame
 import dev.berete.gameres.ui.utils.FakeGameList
 import dev.berete.gameres.ui.utils.bannerUrl
 
@@ -128,7 +128,7 @@ fun HomeScreenBody(
                     Spacer(Modifier.height(16.dp))
                     GamesSection(
                         title = stringResource(R.string.popular_txt),
-                        mostPopularGames = mostPopularGames,
+                        GamesList = mostPopularGames,
                         onGameSelected = {
                             navController.navigate(Routes.gameDetails(it.id))
                         },
@@ -136,7 +136,7 @@ fun HomeScreenBody(
                     Spacer(Modifier.height(16.dp))
                     GamesSection(
                         title = stringResource(R.string.new_txt),
-                        mostPopularGames = newGames,
+                        GamesList = newGames,
                         onGameSelected = {
                             navController.navigate(Routes.gameDetails(it.id))
                         },
@@ -144,7 +144,7 @@ fun HomeScreenBody(
                     Spacer(Modifier.height(16.dp))
                     GamesSection(
                         title = stringResource(R.string.upcoming_txt),
-                        mostPopularGames = upcomingGames,
+                        GamesList = upcomingGames,
                         onGameSelected = {},
                     )
                     Spacer(Modifier.height(16.dp))
@@ -178,11 +178,10 @@ fun HomeScreenBody(
     }
 }
 
-// ------------------------- MOST POPULAR GAMES SECTION -------------------------- //
 
 @Composable
 fun GamesSection(
-    mostPopularGames: List<Game>,
+    GamesList: List<Game>,
     title: String,
     onGameSelected: (Game) -> Unit,
     modifier: Modifier = Modifier,
@@ -195,7 +194,7 @@ fun GamesSection(
         )
         Spacer(Modifier.height(10.dp))
         LazyRow {
-            items(items = mostPopularGames) { game ->
+            items(items = GamesList) { game ->
                 Spacer(Modifier.width(14.dp))
                 LargeGameCard(game = game, onClick = { onGameSelected(game) })
             }
@@ -252,72 +251,6 @@ fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier
     }
 }
 
-@Composable
-fun GameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.clickable { onClick() },
-        color = Color.Gray.copy(0.05F),
-        shape = MaterialTheme.shapes.small,
-    ) {
-        Column {
-            Image(
-                painter = rememberCoilPainter(
-                    request = game.bannerUrl,
-                    previewPlaceholder = R.drawable.apex_legends_cover,
-                ),
-                contentDescription = game.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(130.dp),
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.TopCenter
-            )
-            Text(
-                text = game.name,
-                modifier = Modifier.padding(start = 8.dp, top = 4.dp, bottom = 0.dp),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .padding(bottom = 8.dp, top = 4.dp)
-                    .fillMaxWidth(),
-            ) {
-                PlatformLogos(platformList = game.platformList)
-                GameScore(score = game.rating.toInt())
-            }
-        }
-    }
-}
-
-@Composable
-fun GameScore(
-    score: Int,
-    modifier: Modifier = Modifier,
-    style: TextStyle = TextStyle.Default.copy(fontSize = 11.sp),
-    borderWidth: Dp = (1.5).dp,
-) {
-    val scoreColor = remember {
-        when {
-            score > 70 -> HighScoreColor
-            score > 50 -> MediumScoreColor
-            score > 30 -> BadScoreColor
-            else -> WorseScoreColor
-        }
-    }
-    Text(
-        text = score.toString(),
-        style = style,
-        color = scoreColor,
-        modifier = modifier
-            .border(width = borderWidth, color = scoreColor, shape = MaterialTheme.shapes.small)
-            .padding(horizontal = (3.5).dp, vertical = 2.dp)
-    )
-}
-
 // ------------------------- PREVIEWS -------------------------- //
 
 @ExperimentalFoundationApi
@@ -333,7 +266,7 @@ fun HomeScreenPreview() {
             Spacer(modifier = Modifier.height(8.dp))
             LazyColumn {
                 item {
-                    GamesSection(mostPopularGames = mostPopularGames,
+                    GamesSection(GamesList = mostPopularGames,
                         onGameSelected = {}, title = "Popular Games")
                     Spacer(Modifier.height(16.dp))
                     Text(
