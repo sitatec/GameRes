@@ -66,6 +66,11 @@ interface GameListProvider {
         count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
     ): List<Game>
 
+    /**
+     * Return the games that have their id in the [gameIds] list.
+     */
+    suspend fun getGamesByIds(gameIds: List<Long>): List<Game>
+
     companion object {
         const val MAX_GAME_COUNT_BY_REQUEST = 100
         const val DEFAULT_GAME_COUNT_BY_REQUEST = 30

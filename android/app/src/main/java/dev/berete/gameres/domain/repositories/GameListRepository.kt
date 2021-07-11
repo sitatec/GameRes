@@ -98,4 +98,12 @@ class GameListRepository @Inject constructor(
         )
     }
 
+
+    /**
+     * Return the games that have their id in the [gameIds].
+     */
+    suspend fun getGamesByIds(gameIds: List<Long>): List<Game> {
+        return gameListProvider.getGamesByIds(gameIds)
+    }
+
 }

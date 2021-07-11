@@ -32,6 +32,8 @@ import com.google.accompanist.pager.*
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.GameCompany
 import dev.berete.gameres.domain.models.enums.GameGenre
+import dev.berete.gameres.ui.Routes
+import dev.berete.gameres.ui.screens.GameCard
 import dev.berete.gameres.ui.screens.GameScore
 import dev.berete.gameres.ui.screens.PlatformLogos
 import dev.berete.gameres.ui.utils.allImageUrls
@@ -42,9 +44,10 @@ import kotlin.math.absoluteValue
 @ExperimentalPagerApi
 fun GameDetailsScreen(viewModel: GameDetailsViewModel, navController: NavController) {
     val game by viewModel.game.observeAsState()
+    val similarGames by viewModel.similarGames.observeAsState(emptyList())
 
     if (game != null) {
-        GameDetailsScreenBody(game = game!!, navController = navController)
+        GameDetailsScreenBody(game = game!!, similarGames, navController = navController)
     } else {
         GameDetailsScreenPlaceHolder()
     }
@@ -52,7 +55,7 @@ fun GameDetailsScreen(viewModel: GameDetailsViewModel, navController: NavControl
 
 @Composable
 @ExperimentalPagerApi
-fun GameDetailsScreenBody(game: Game, navController: NavController) {
+fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: NavController) {
     Column(Modifier.verticalScroll(rememberScrollState())) {
         Box(contentAlignment = Alignment.BottomStart) {
             Image(
@@ -142,7 +145,55 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            val pagerState = rememberPagerState(
+                    pageCount = game.allImageUrls.size,
+                    initialOffscreenLimit = 2,
+                    initialPage = 1, // Initial image is the second in the list because the first
+            // may be show in the header. And by starting at with the second image, it will be more
+            // intuitive for the user to know that he can swipe on the image without showing a indicator.
+                )
+
+            Spacer(Modifier.height(25.dp))
+            HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { pageIndex ->
+                Card(
+                    modifier = Modifier
+                        .graphicsLayer {
+                            // Calculate the absolute offset for the current page from the
+                            // scroll position. We use the absolute value which allows us to mirror
+                            // any effects for both directions
+                            val pageOffset = calculateCurrentOffsetForPage(pageIndex).absoluteValue
+
+                            // We animate the scaleX + scaleY, between 85% and 100%
+                            lerp(
+                                start = 0.85f,
+                                stop = 1f,
+                                fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                            ).also { scale ->
+                                scaleX = scale
+                                scaleY = scale
+                            }
+
+                            // We animate the alpha, between 50% and 100%
+                            alpha = lerp(
+                                start = 0.5f,
+                                stop = 1f,
+                                fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                            )
+                        }
+                        .fillMaxWidth(0.8f)
+                        .aspectRatio(1.5f),
+                ) {
+                    Image(
+                        painter = rememberCoilPainter(request = game.allImageUrls[pageIndex]),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        alignment = Alignment.TopCenter,
+                        contentScale = ContentScale.Crop,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
             Text(text = game.summary,
                 modifier = Modifier.padding(horizontal = 16.dp),
                 color = MaterialTheme.colors.onSurface.copy(0.8f))
@@ -186,58 +237,6 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
             }
         }
 
-
-        SectionTitle("Images")
-
-        val pagerState =
-            rememberPagerState(pageCount = game.allImageUrls.size, initialOffscreenLimit = 2)
-        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { pageIndex ->
-            Card(
-                modifier = Modifier
-                    .graphicsLayer {
-                        // Calculate the absolute offset for the current page from the
-                        // scroll position. We use the absolute value which allows us to mirror
-                        // any effects for both directions
-                        val pageOffset = calculateCurrentOffsetForPage(pageIndex).absoluteValue
-
-                        // We animate the scaleX + scaleY, between 85% and 100%
-                        lerp(
-                            start = 0.85f,
-                            stop = 1f,
-                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                        ).also { scale ->
-                            scaleX = scale
-                            scaleY = scale
-                        }
-
-                        // We animate the alpha, between 50% and 100%
-                        alpha = lerp(
-                            start = 0.5f,
-                            stop = 1f,
-                            fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                        )
-                    }
-                    .fillMaxWidth(0.8f)
-                    .aspectRatio(1.5f),
-            ) {
-                Image(
-                    painter = rememberCoilPainter(request = game.allImageUrls[pageIndex]),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    alignment = Alignment.TopCenter,
-                    contentScale = ContentScale.Crop,
-                )
-            }
-        }
-
-        HorizontalPagerIndicator(
-            pagerState = pagerState,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(16.dp),
-        )
-
-
         SectionTitle("Medias")
 
         FlowRow(
@@ -263,6 +262,17 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
             }
         }
 
+        SectionTitle("Recommended")
+
+        Row(Modifier.horizontalScroll(rememberScrollState())) {
+            for (similarGame in similarGames) {
+                Spacer(Modifier.width(16.dp))
+                GameCard(similarGame, modifier = Modifier.size(220.dp, 190.dp), onClick = {
+                    navController.navigate(Routes.gameDetails(similarGame.id))
+                })
+            }
+        }
+        Spacer(Modifier.height(16.dp))
 
         SectionTitle("Age Rating")
 
@@ -290,7 +300,7 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
         Column(Modifier.padding(horizontal = 16.dp)) {
             for (publisher in game.publishers) {
                 CompanyCard(company = publisher)
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -302,19 +312,19 @@ fun GameDetailsScreenPlaceHolder() {
 }
 
 @Composable
-fun SectionTitle(title: String, modifier: Modifier = Modifier){
-    Spacer(modifier = Modifier.height(16.dp))
+fun SectionTitle(title: String, modifier: Modifier = Modifier) {
+    Spacer(modifier = Modifier.height(24.dp))
     Text(
         text = title,
         style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
         modifier = modifier.padding(start = 16.dp),
     )
-    Spacer(Modifier.height(10.dp))
+    Spacer(Modifier.height(16.dp))
 }
 
 @Composable
 fun CompanyCard(company: GameCompany, modifier: Modifier = Modifier) {
-    Card(elevation = 1.dp, modifier =  modifier) {
+    Card(elevation = 1.dp, modifier = modifier) {
         Row(Modifier.padding(5.dp)) {
             Image(
                 rememberCoilPainter(company.logoUrl),

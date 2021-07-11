@@ -136,6 +136,14 @@ class IGDBAPIClient(
         }
     }
 
+    override suspend fun getGamesByIds(gameIds: List<Long>): List<Game> {
+        val queryBuilder = apiCalypse.newBuilder().fields(gameSummaryFields).where("id = (${gameIds.joinToString()})")
+
+        return withContext(IO) {
+            iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
+        }
+    }
+
     override suspend fun getGameDetails(gameId: Long): Game {
         val queryBuilder = apiCalypse.newBuilder().fields(completeGameFields).where("id = $gameId")
 
