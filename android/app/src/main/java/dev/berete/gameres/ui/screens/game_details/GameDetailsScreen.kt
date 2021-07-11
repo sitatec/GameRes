@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -236,7 +237,7 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
                             fraction = 1f - pageOffset.coerceIn(0f, 1f)
                         )
                     }
-                    .fillMaxWidth(0.85f)
+                    .fillMaxWidth(0.8f)
                     .aspectRatio(1.5f),
             ) {
                 Image(
@@ -267,7 +268,7 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
         FlowRow(
             mainAxisSpacing = 20.dp,
             crossAxisSpacing = 10.dp,
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier.padding(horizontal = 16.dp).alpha(0.9f),
         ) {
             for (website in game.websiteList) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -293,7 +294,7 @@ fun GameDetailsScreenBody(game: Game, navController: NavController) {
         )
         Spacer(Modifier.height(10.dp))
 
-        Row(Modifier.horizontalScroll(rememberScrollState())) {
+        Row(Modifier.horizontalScroll(rememberScrollState()).alpha(0.9f)) {
             for (ageRating in game.ageRatings) {
                 Spacer(Modifier.width(16.dp))
                 Image(painter = rememberCoilPainter(ageRating.labelUrl), contentDescription = null)

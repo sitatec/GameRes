@@ -2,6 +2,7 @@ package dev.berete.gameres.data_sources.remote
 
 import com.api.igdb.utils.ImageSize
 import com.api.igdb.utils.imageBuilder
+import com.neovisionaries.i18n.CountryCode
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.GameCompany
@@ -134,7 +135,7 @@ fun GameCompanyDTO.toDomainGameCompany(): GameCompany {
         id = company.id,
         name = company.name,
         description = company.description,
-        country = Locale(Locale.getDefault().isO3Language, company.country.toString()).country,
+        country = CountryCode.getByCode(company.country).getName(),
         logoUrl = if (company.hasLogo()) imageBuilder(company.logo.imageId, ImageSize.LOGO_MEDIUM)
         else ""
     )

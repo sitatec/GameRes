@@ -102,4 +102,6 @@ dependencies {
 
     implementation files('libs/swiperefresh.aar')
 
+    implementation 'com.neovisionaries:nv-i18n:1.28'
+
 }
