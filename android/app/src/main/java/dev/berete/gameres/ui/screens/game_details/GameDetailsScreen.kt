@@ -1,5 +1,7 @@
 package dev.berete.gameres.ui.screens.game_details
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -7,6 +9,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -15,6 +18,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -236,7 +240,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
             }
 
             if (game.storyline.isNotBlank()) {
-                SectionTitle("Storyline")
+                SectionTitle("Storyline", spaceAfter = 10.dp)
                 Text(
                     text = game.storyline,
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -245,7 +249,6 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
             }
         }
 
-//        SectionTitle("Medias")
 
 
         SectionTitle("Recommendations")
@@ -259,7 +262,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
             }
         }
 
-        Spacer(modifier = Modifier.height(35.dp))
+        SectionTitle("Medias", spaceBefore = 28.dp)
         FlowRow(
             mainAxisSpacing = 20.dp,
             crossAxisSpacing = 10.dp,
@@ -268,17 +271,26 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                 .alpha(0.95f),
         ) {
             for (website in game.websiteList) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Image(
-                        painter = rememberCoilPainter(website.logoUrl),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .size(23.dp)
-                            .clip(MaterialTheme.shapes.small),
-                    )
-                    Spacer(Modifier.width(5.dp))
-                    Text(text = website.name)
+                val urlIntent = remember {
+                    Intent().setAction(Intent.ACTION_VIEW).setData(Uri.parse(website.url))
+                }
+                val context = LocalContext.current
+                Card(Modifier.clickable { context.startActivity(urlIntent) }) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(8.dp),
+                    ) {
+                        Image(
+                            painter = rememberCoilPainter(website.logoUrl),
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .size(23.dp)
+                                .clip(MaterialTheme.shapes.small),
+                        )
+                        Spacer(Modifier.width(5.dp))
+                        Text(text = website.name)
+                    }
                 }
             }
         }
@@ -303,22 +315,20 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
         }
 
         SectionTitle("Releases")
-
         Column(Modifier.padding(horizontal = 16.dp)) {
             Row {
                 TableTitleCell("Date")
-                TableTitleCell("Platform", 1.2f)
+                TableTitleCell("Platform")
                 TableTitleCell("Region")
             }
-            ProvideTextStyle(value = TextStyle(fontSize = 14.sp)) {
-                for (release in game.releases) {
-                    Row(Modifier.border(1.dp, Color.DarkGray)) {
-                        TableCell(release.formattedDate)
-                        TableCell(release.platform.platformName, 1.2f)
-                        TableCell(release.region)
-                    }
+            for (release in game.releases) {
+                Row(Modifier.border(1.dp, Color.DarkGray)) {
+                    TableCell(release.formattedDate)
+                    TableCell(release.platform.platformName)
+                    TableCell(release.region)
                 }
             }
+
         }
 
         SectionTitle("Age Rating")

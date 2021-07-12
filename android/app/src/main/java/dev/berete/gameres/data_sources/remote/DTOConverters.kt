@@ -137,7 +137,7 @@ fun GameCompanyDTO.toDomainGameCompany(): GameCompany {
         id = company.id,
         name = company.name,
         description = company.description,
-        country = CountryCode.getByCode(company.country).getName(),
+        country = CountryCode.getByCode(company.country)?.getName() ?: "",
         logoUrl = if (company.hasLogo()) imageBuilder(company.logo.imageId, ImageSize.LOGO_MEDIUM)
         else ""
     )
