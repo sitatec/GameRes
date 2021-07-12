@@ -22,6 +22,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
@@ -38,6 +39,7 @@ import dev.berete.gameres.ui.screens.GameScore
 import dev.berete.gameres.ui.screens.PlatformLogos
 import dev.berete.gameres.ui.utils.allImageUrls
 import dev.berete.gameres.ui.utils.bannerUrl
+import dev.berete.gameres.ui.utils.formattedInitialReleaseDate
 import kotlin.math.absoluteValue
 
 @Composable
@@ -111,7 +113,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Column {
             Text(
@@ -121,11 +123,12 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                         append("Genre: ")
                     }
                     withStyle(SpanStyle(color = MaterialTheme.colors.primary, fontSize = 14.sp)) {
-                        append(game.genres
-                            .filter { it != GameGenre.OTHERS }
-                            .joinToString { it.toString() })
+                        append(
+                            game.genres
+                                .filter { it != GameGenre.OTHERS }
+                                .joinToString { it.toString() },
+                        )
                     }
-                    Spacer(modifier = Modifier.height(5.dp))
                     // Mode
                     withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, fontSize = 15.sp)) {
                         append("\nMode: ")
@@ -133,7 +136,6 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                     withStyle(SpanStyle(color = MaterialTheme.colors.primary, fontSize = 14.sp)) {
                         append(game.gameModes.joinToString { it.toString() })
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
                     // Player Perspective
                     withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, fontSize = 15.sp)) {
                         append("\nPlayer Perspective: ")
@@ -141,17 +143,25 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                     withStyle(SpanStyle(color = MaterialTheme.colors.primary, fontSize = 14.sp)) {
                         append(game.playerPerspectives.joinToString { it.toString() })
                     }
+                    // First Release date
+                    withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, fontSize = 15.sp)) {
+                        append("\nInitial Release: ")
+                    }
+                    withStyle(SpanStyle(color = MaterialTheme.colors.primary, fontSize = 14.sp)) {
+                        append(game.formattedInitialReleaseDate)
+                    }
                 },
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
+                lineHeight = 21.sp,
             )
 
             val pagerState = rememberPagerState(
-                    pageCount = game.allImageUrls.size,
-                    initialOffscreenLimit = 2,
-                    initialPage = 1, // Initial image is the second in the list because the first
-            // may be show in the header. And by starting at with the second image, it will be more
-            // intuitive for the user to know that he can swipe on the image without showing a indicator.
-                )
+                pageCount = game.allImageUrls.size,
+                initialOffscreenLimit = 2,
+                initialPage = 1, // Initial image is the second in the list because the first
+                // may be show in the header. And by starting at with the second image, it will be more
+                // intuitive for the user to know that he can swipe on the image without showing a indicator.
+            )
 
             Spacer(Modifier.height(25.dp))
             HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { pageIndex ->
@@ -237,32 +247,10 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
             }
         }
 
-        SectionTitle("Medias")
+//        SectionTitle("Medias")
 
-        FlowRow(
-            mainAxisSpacing = 20.dp,
-            crossAxisSpacing = 10.dp,
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .alpha(0.9f),
-        ) {
-            for (website in game.websiteList) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Card(Modifier.size(24.dp)) {
-                        Image(
-                            painter = rememberCoilPainter(website.logoUrl),
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize(),
-                        )
-                    }
-                    Spacer(Modifier.width(5.dp))
-                    Text(text = website.name)
-                }
-            }
-        }
 
-        SectionTitle("Recommended")
+        SectionTitle("Recommendations")
 
         Row(Modifier.horizontalScroll(rememberScrollState())) {
             for (similarGame in similarGames) {
@@ -272,7 +260,66 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                 })
             }
         }
-        Spacer(Modifier.height(16.dp))
+
+        Spacer(modifier = Modifier.height(35.dp))
+        FlowRow(
+            mainAxisSpacing = 20.dp,
+            crossAxisSpacing = 10.dp,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .alpha(0.95f),
+        ) {
+            for (website in game.websiteList) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = rememberCoilPainter(website.logoUrl),
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .size(23.dp)
+                            .clip(MaterialTheme.shapes.small),
+                    )
+                    Spacer(Modifier.width(5.dp))
+                    Text(text = website.name)
+                }
+            }
+        }
+
+        SectionTitle("Platforms", spaceAfter = 8.dp, spaceBefore = 30.dp)
+
+        FlowRow(
+            mainAxisSpacing = 8.dp,
+            crossAxisSpacing = 3.dp,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .alpha(0.9f),
+        ) {
+            for ((index, platform) in game.platformList.withIndex()) {
+                Row {
+                    Text(platform.platformName, color = MaterialTheme.colors.primary)
+                    if (index < game.platformList.lastIndex) {
+                        Text(",")
+                    }
+                }
+            }
+        }
+
+        SectionTitle("Releases")
+        
+        Column{
+            Row {
+                TableTitleCell("Date")
+                TableTitleCell("Platform", 1.2f)
+                TableTitleCell("Region")
+            }
+            for(release in game.releases){
+                Row(Modifier.border(1.dp, Color.DarkGray)) {
+                    TableCell(release.formattedDate)
+                    TableCell(release.platform.platformName, 1.2f)
+                    TableCell(release.region)
+                }
+            }
+        }
 
         SectionTitle("Age Rating")
 
@@ -312,14 +359,19 @@ fun GameDetailsScreenPlaceHolder() {
 }
 
 @Composable
-fun SectionTitle(title: String, modifier: Modifier = Modifier) {
-    Spacer(modifier = Modifier.height(24.dp))
+fun SectionTitle(
+    title: String,
+    modifier: Modifier = Modifier,
+    spaceBefore: Dp = 24.dp,
+    spaceAfter: Dp = 16.dp,
+) {
+    Spacer(modifier = Modifier.height(spaceBefore))
     Text(
         text = title,
         style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
         modifier = modifier.padding(start = 16.dp),
     )
-    Spacer(Modifier.height(16.dp))
+    Spacer(Modifier.height(spaceAfter))
 }
 
 @Composable
@@ -347,6 +399,25 @@ fun CompanyCard(company: GameCompany, modifier: Modifier = Modifier) {
             }
         }
     }
+}
+
+@Composable
+fun RowScope.TableTitleCell(
+    text: String,
+    weight: Float = 1f
+) {
+    Text(
+        text = text,
+        Modifier
+            .border(1.dp, Color.DarkGray)
+            .weight(weight)
+            .padding(8.dp)
+    )
+}
+
+@Composable
+fun RowScope.TableCell(text: String, weight: Float = 1f) {
+    Text(text = text, Modifier.weight(weight).padding(8.dp))
 }
 
 //@Preview
