@@ -16,7 +16,7 @@ data class Game(
     val artWorkUrls: List<String> = emptyList(),
     val genres: List<GameGenre> = emptyList(),
     val firstReleaseDate: Date? = null,
-    val releaseDates: List<Date> = emptyList(),
+    val releases: List<Release> = emptyList(),
     val summary: String = "",
     val storyline: String = "",
     val screenshotUrls: List<String> = emptyList(),

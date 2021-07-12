@@ -3,18 +3,14 @@ package dev.berete.gameres.data_sources.remote
 import com.api.igdb.utils.ImageSize
 import com.api.igdb.utils.imageBuilder
 import com.neovisionaries.i18n.CountryCode
-import dev.berete.gameres.R
-import dev.berete.gameres.domain.models.Game
-import dev.berete.gameres.domain.models.GameCompany
-import dev.berete.gameres.domain.models.Video
-import dev.berete.gameres.domain.models.Website
+import dev.berete.gameres.domain.models.*
 import dev.berete.gameres.domain.models.enums.*
-import proto.AgeRatingRatingEnum
-import proto.GameVideo
+import dev.berete.gameres.domain.models.enums.AgeRating
+import dev.berete.gameres.domain.utils.toLowercaseExceptFirstChar
+import proto.*
+import proto.ReleaseDate as ReleaseDateDTO
 import proto.GameMode as GameModeDTO
 import proto.Game as GameDTO
-import proto.Genre
-import proto.WebsiteCategoryEnum
 import proto.Website as WebsiteDTO
 import proto.InvolvedCompany as GameCompanyDTO
 import proto.PlayerPerspective as PlayerPerspectiveDTO
@@ -36,8 +32,8 @@ fun GameDTO.toDomainGame(
     genres = genresList.map(Genre::toDomainGameGenre),
     platformList = platformsList.map(PlatformDTO::toDomainGamePlatform).toSet()
         .toList(), // toSet() removes double elements
-    firstReleaseDate = Date(firstReleaseDate.seconds),
-    releaseDates = releaseDatesList.map { Date(it.date.seconds) },
+    firstReleaseDate = Date(firstReleaseDate.seconds * 1000),
+    releases = releaseDatesList.map(ReleaseDateDTO::toDomainRelease),
     summary = summary,
     storyline = storyline,
     coverUrl = imageBuilder(cover.imageId, coverSize),
@@ -92,8 +88,14 @@ fun PlatformDTO.toDomainGamePlatform(): Platform {
         platformName == "android" -> Platform.ANDROID
         platformName == "mac" || platformName == "ios" -> Platform.APPLE
         platformName == "linux" -> Platform.LINUX
-        else -> Platform.OTHERS
-    }.apply { this.platformName = this@toDomainGamePlatform.name }
+        else -> Platform.OTHER
+    }.apply {
+        if(this == Platform.WINDOWS){
+            this.platformName = "PC (Windows)"
+        }else{
+            this.platformName = this@toDomainGamePlatform.name
+        }
+    }
 }
 
 /**
@@ -151,27 +153,96 @@ fun GameVideo.toDomainVideo() = Video(
 )
 
 fun WebsiteDTO.toDomainWebsite() = when (category!!) {
-        WebsiteCategoryEnum.WEBSITE_OFFICIAL -> Website(url,"Official", "file:///android_asset/official_website_icon.png")
-        WebsiteCategoryEnum.WEBSITE_WIKIA -> Website(url, "Fandom (Wikia)", "file:///android_asset/wikia_logo.png")
-        WebsiteCategoryEnum.WEBSITE_WIKIPEDIA -> Website(url, "Wikipedia", "file:///android_asset/wikipedia_logo.png")
-        WebsiteCategoryEnum.WEBSITE_FACEBOOK -> Website(url, "Facebook", "file:///android_asset/facebook_logo.png")
-        WebsiteCategoryEnum.WEBSITE_TWITTER -> Website(url,"Twitter", "file:///android_asset/twitter_logo.png")
-        WebsiteCategoryEnum.WEBSITE_TWITCH -> Website(url, "Twitch", "file:///android_asset/twitch_logo.png")
-        WebsiteCategoryEnum.WEBSITE_INSTAGRAM -> Website(url,"Instagram", "file:///android_asset/instagram_logo.png")
-        WebsiteCategoryEnum.WEBSITE_YOUTUBE -> Website(url,"Youtube", "file:///android_asset/youtube_logo.png")
-        WebsiteCategoryEnum.WEBSITE_IPHONE -> Website(url,"App Store (Iphone)", "file:///android_asset/appstore_icon.png")
-        WebsiteCategoryEnum.WEBSITE_IPAD -> Website(url,"App store (Ipad)", "file:///android_asset/appstore_icon.png")
-        WebsiteCategoryEnum.WEBSITE_ANDROID -> Website(url,"Google Play Store", "file:///android_asset/play_store_icon.png")
-        WebsiteCategoryEnum.WEBSITE_STEAM -> Website(url,"Steam", "file:///android_asset/steam_logo.png")
-        WebsiteCategoryEnum.WEBSITE_REDDIT -> Website(url,"Reddit", "file:///android_asset/reddit_logo.png")
-        WebsiteCategoryEnum.WEBSITE_ITCH ->Website(url,"Itch", "file:///android_asset/itch_logo.png")
-        WebsiteCategoryEnum.WEBSITE_EPICGAMES -> Website(url,"Epic Games", "file:///android_asset/epic_games_logo.png")
-        WebsiteCategoryEnum.WEBSITE_GOG -> Website(url,"Gog", "file:///android_asset/gog_logo.png")
-        WebsiteCategoryEnum.WEBSITE_DISCORD -> Website(url,"Discord", "file:///android_asset/discord_logo.png")
-        WebsiteCategoryEnum.UNRECOGNIZED -> throw IllegalStateException()
-        WebsiteCategoryEnum.WEBSITE_CATEGORY_NULL -> throw IllegalStateException()
+    WebsiteCategoryEnum.WEBSITE_OFFICIAL -> Website(
+        url,
+        "Official Website",
+        "file:///android_asset/official_website_icon.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_WIKIA -> Website(
+        url,
+        "Fandom (Wikia)",
+        "file:///android_asset/wikia_logo.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_WIKIPEDIA -> Website(
+        url,
+        "Wikipedia",
+        "file:///android_asset/wikipedia_logo.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_FACEBOOK -> Website(
+        url,
+        "Facebook",
+        "file:///android_asset/facebook_logo.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_TWITTER -> Website(
+        url,
+        "Twitter",
+        "file:///android_asset/twitter_logo.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_TWITCH -> Website(
+        url,
+        "Twitch",
+        "file:///android_asset/twitch_logo.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_INSTAGRAM -> Website(
+        url,
+        "Instagram",
+        "file:///android_asset/instagram_logo.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_YOUTUBE -> Website(
+        url,
+        "Youtube",
+        "file:///android_asset/youtube_logo.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_IPHONE -> Website(
+        url,
+        "App Store (Iphone)",
+        "file:///android_asset/appstore_icon.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_IPAD -> Website(
+        url,
+        "App store (Ipad)",
+        "file:///android_asset/appstore_icon.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_ANDROID -> Website(
+        url,
+        "Google Play Store",
+        "file:///android_asset/play_store_icon.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_STEAM -> Website(
+        url,
+        "Steam",
+        "file:///android_asset/steam_logo.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_REDDIT -> Website(
+        url,
+        "Reddit",
+        "file:///android_asset/reddit_logo.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_ITCH -> Website(
+        url,
+        "Itch",
+        "file:///android_asset/itch_logo.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_EPICGAMES -> Website(
+        url,
+        "Epic Games",
+        "file:///android_asset/epic_games_logo.png",
+    )
+    WebsiteCategoryEnum.WEBSITE_GOG -> Website(url, "Gog", "file:///android_asset/gog_logo.png")
+    WebsiteCategoryEnum.WEBSITE_DISCORD -> Website(
+        url,
+        "Discord",
+        "file:///android_asset/discord_logo.png",
+    )
+    WebsiteCategoryEnum.UNRECOGNIZED -> throw IllegalStateException()
+    WebsiteCategoryEnum.WEBSITE_CATEGORY_NULL -> throw IllegalStateException()
 }
 
+fun ReleaseDateDTO.toDomainRelease() = Release(
+    Date(date.seconds * 1000),
+    platform.toDomainGamePlatform(),
+    region.name.toLowercaseExceptFirstChar().replace("_", " "),
+)
 
 // ------------- Domain Models to Data Transfer Object Converters --------------- //
 

@@ -14,14 +14,14 @@ enum class Platform {
     APPLE, // MACOS && IOS
     LINUX,
     WII,
-    OTHERS,
+    OTHER,
     ;
 
     // Use full for platforms that are not listed above (OTHERS).
     var platformName: String = name
 
     override fun toString(): String {
-        return if (this == OTHERS) platformName
+        return if (this == OTHER) platformName
         else name.toLowercaseExceptFirstChar()
     }
 }

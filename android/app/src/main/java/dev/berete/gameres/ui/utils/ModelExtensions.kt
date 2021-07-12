@@ -4,6 +4,7 @@ import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.enums.Platform
 import dev.berete.gameres.domain.models.enums.Platform.*
+import java.text.SimpleDateFormat
 
 val Platform.logo: Int
     get() = when (this) {
@@ -15,7 +16,7 @@ val Platform.logo: Int
         APPLE -> R.drawable.ic_apple_logo
         LINUX -> R.drawable.ic_linux_logo
         WII -> R.drawable.ic_wii_logo
-        OTHERS -> R.drawable.ic_other
+        OTHER -> R.drawable.ic_other
     }
 
 val Game.bannerUrl: String
@@ -27,3 +28,8 @@ val Game.bannerUrl: String
 
 val Game.allImageUrls: List<String>
     get() = artWorkUrls + screenshotUrls
+
+val Game.formattedInitialReleaseDate : String
+    get() {
+       return SimpleDateFormat.getDateInstance().format(firstReleaseDate!!)
+    }
