@@ -30,8 +30,7 @@ fun GameDTO.toDomainGame(
     id = id,
     name = name,
     genres = genresList.map(Genre::toDomainGameGenre),
-    platformList = platformsList.map(PlatformDTO::toDomainGamePlatform).toSet()
-        .toList(), // toSet() removes double elements
+    platformList = platformsList.map(PlatformDTO::toDomainGamePlatform).toList(),
     firstReleaseDate = Date(firstReleaseDate.seconds * 1000),
     releases = releaseDatesList.map(ReleaseDateDTO::toDomainRelease),
     summary = summary,
@@ -78,16 +77,16 @@ fun Genre.toDomainGameGenre(): GameGenre {
  * Converts this Game Platform DTO (Data Transfer Object) instance to the domain's [Platform]
  */
 fun PlatformDTO.toDomainGamePlatform(): Platform {
-    val platformName = name.lowercase()
+    val name = name.lowercase()
     return when {
-        platformName.contains("playstation") -> Platform.PLAYSTATION
-        platformName.contains("xbox") -> Platform.XBOX
-        platformName.contains("microsoft windows") -> Platform.WINDOWS
-        platformName.contains("wii") -> Platform.WII
-        platformName == "nintendo switch" -> Platform.NINTENDO_SWITCH
-        platformName == "android" -> Platform.ANDROID
-        platformName == "mac" || platformName == "ios" -> Platform.APPLE
-        platformName == "linux" -> Platform.LINUX
+        name.contains("playstation") -> Platform.PLAYSTATION
+        name.contains("xbox") -> Platform.XBOX
+        name.contains("microsoft windows") -> Platform.WINDOWS
+        name.contains("wii") -> Platform.WII
+        name == "nintendo switch" -> Platform.NINTENDO_SWITCH
+        name == "android" -> Platform.ANDROID
+        name == "mac" || name == "ios" -> Platform.APPLE
+        name == "linux" -> Platform.LINUX
         else -> Platform.OTHER
     }.apply {
         if(this == Platform.WINDOWS){

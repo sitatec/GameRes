@@ -1,15 +1,16 @@
 package dev.berete.gameres.ui.screens.game_details
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
+import android.view.ContextThemeWrapper
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -18,9 +19,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
@@ -28,10 +30,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.pager.*
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerCallback
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerFullScreenListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.GameCompany
 import dev.berete.gameres.domain.models.enums.GameGenre
@@ -53,7 +62,9 @@ fun GameDetailsScreen(viewModel: GameDetailsViewModel, navController: NavControl
     if (game != null) {
         GameDetailsScreenBody(game = game!!, similarGames, navController = navController)
     } else {
-        GameDetailsScreenPlaceHolder()
+        Surface {
+            GameDetailsScreenPlaceHolder()
+        }
     }
 }
 
@@ -216,23 +227,52 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                 Row(Modifier.horizontalScroll(rememberScrollState())) {
                     for (video in game.videoList) {
                         Spacer(Modifier.width(16.dp))
-                        Card(Modifier.size(280.dp, 160.dp)) {
-                            Image(
-                                painter = rememberCoilPainter(request = video.thumbnailUrl),
-                                contentDescription = video.title,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize(),
+
+                        val videoState = rememberSaveable {
+                            VideoState(
+                                videoId = video.url.substring(32)// extract from the youtube url
                             )
-                            Surface(
-                                modifier = Modifier.wrapContentSize(Alignment.TopCenter),
-                                shape = RoundedCornerShape(bottomStart = 5.dp, bottomEnd = 5.dp),
-                                color = Color.Black.copy(0.7f),
-                            ) {
-                                Text(
-                                    text = video.title,
-                                    modifier = Modifier
-                                        .padding(horizontal = 8.dp)
+                        }
+
+                        var shouldVideoDialogShow by rememberSaveable { mutableStateOf(false) }
+
+                        VideoDialog(shouldShow = shouldVideoDialogShow, videoState = videoState) {
+                            shouldVideoDialogShow = false
+                        }
+
+                        Card(Modifier
+                            .clickable { shouldVideoDialogShow = true }
+                            .size(280.dp, (280 / 1.8).dp)) {
+                                Image(
+                                    painter = rememberCoilPainter(request = video.thumbnailUrl),
+                                    contentDescription = video.title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize(),
                                 )
+                                Surface(
+                                    modifier = Modifier.wrapContentSize(Alignment.TopCenter),
+                                    shape = RoundedCornerShape(bottomStart = 5.dp,
+                                        bottomEnd = 5.dp),
+                                ) {
+                                    Text(
+                                        text = video.title,
+                                        modifier = Modifier.padding(horizontal = 8.dp)
+                                    )
+                                }
+                            Box(contentAlignment = Alignment.Center) {
+                                Card(
+                                    Modifier
+                                        .fillMaxSize(0.3f)
+                                        .padding(8.dp),
+                                    elevation = 15.dp,
+                                    backgroundColor = Color.Black.copy(0.5f),
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.ic_play_arrow_24),
+                                        contentDescription = null,
+                                        alignment = Alignment.Center,
+                                    )
+                                }
                             }
                         }
                     }
@@ -343,7 +383,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
         }
 
 
-        SectionTitle("Developer")
+        SectionTitle("Developer${if (game.developers.size > 1) "s" else ""}")// TODO Refactor
 
         Column(Modifier.padding(horizontal = 16.dp)) {
             for (developer in game.developers) {
@@ -352,7 +392,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
             }
         }
 
-        SectionTitle("Publisher")
+        SectionTitle("Publisher${if (game.publishers.size > 1) 's' else ""}")// TODO Refactor
 
         Column(Modifier.padding(horizontal = 16.dp)) {
             for (publisher in game.publishers) {
@@ -365,7 +405,6 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
 
 @Composable
 fun GameDetailsScreenPlaceHolder() {
-
 }
 
 @Composable
@@ -431,6 +470,73 @@ fun RowScope.TableCell(text: String, weight: Float = 1f) {
         Modifier
             .weight(weight)
             .padding(8.dp))
+}
+
+@Composable
+fun VideoDialog(shouldShow: Boolean, videoState: VideoState, onDismiss: () -> Unit) {
+    var isFullScreen by remember { mutableStateOf(false) }
+
+
+    val videoCardModifier = if (isFullScreen) {
+        Modifier.fillMaxSize()
+    } else {
+        val videoWidth = LocalConfiguration.current.screenWidthDp * 0.8
+        Modifier.size(videoWidth.dp, (videoWidth / 1.8).dp) /* 16:9 */
+    }
+
+    if (shouldShow) {
+        Dialog(onDismissRequest = onDismiss) {
+            Card(videoCardModifier) {
+                VideoPlayer(
+                    videoState = videoState,
+                    onFullscreenStateChange = { isFullScreen = it },
+                )
+            }
+        }
+    }
+
+}
+
+@Composable
+fun VideoPlayer(
+    videoState: VideoState,
+    onFullscreenStateChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    enableFullScreenInLandscape: Boolean = true,
+) {
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    AndroidView(
+        factory = { context ->
+            (context as ContextThemeWrapper).setTheme(R.style.VideoDialogTheme)
+            YouTubePlayerView(context).apply {
+//                (context as LifecycleOwner).lifecycle.addObserver(this)// TODO Refactor
+
+                getYouTubePlayerWhenReady(object : YouTubePlayerCallback {
+                    override fun onYouTubePlayer(youTubePlayer: YouTubePlayer) {
+                        if (isLandscape && enableFullScreenInLandscape) {
+                            enterFullScreen()
+                        }
+                        youTubePlayer.addListener(videoState)
+                        youTubePlayer.loadVideo(videoId = videoState.videoId,
+                            videoState.currentSecond)
+                    }
+                })
+                addFullScreenListener(object : YouTubePlayerFullScreenListener {
+                    override fun onYouTubePlayerEnterFullScreen() {
+                        onFullscreenStateChange(true)
+                    }
+
+                    override fun onYouTubePlayerExitFullScreen() {
+                        onFullscreenStateChange(false)
+                    }
+
+                })
+
+            }
+        },
+        modifier = modifier.fillMaxSize(),
+    )
 }
 
 //@Preview

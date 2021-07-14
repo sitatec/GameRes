@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'kotlin-parcelize'
 }
 
 android {
@@ -97,10 +98,8 @@ dependencies {
     implementation 'com.github.husnjak:IGDB-API-JVM:1.0.2'
     implementation 'com.google.protobuf:protobuf-java:3.15.3'
 
-    // EXO PLAYER
-    implementation 'com.google.android.exoplayer:exoplayer:2.14.1'
-
     implementation files('libs/swiperefresh.aar')
+    implementation files('libs/youtube_player.aar')
 
     implementation 'com.neovisionaries:nv-i18n:1.28'
 

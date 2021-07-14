@@ -1,6 +1,9 @@
 package dev.berete.gameres.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -27,7 +30,7 @@ object Routes {
 fun Navigation() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Routes.Home) {
+    NavHost(navController = navController, startDestination = Routes.Home, modifier = Modifier.background(MaterialTheme.colors.background)) {
         composable(
             Routes.Home,
             arguments = listOf(navArgument("gameId") { type = NavType.LongType }),
