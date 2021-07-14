@@ -24,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -412,6 +413,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
+
     }
 }
 
@@ -437,12 +439,15 @@ fun SectionTitle(
 
 @Composable
 fun CompanyCard(company: GameCompany, modifier: Modifier = Modifier) {
+    var shouldShowDialog by rememberSaveable { mutableStateOf(false) }
+
     Card(elevation = 1.dp, modifier = modifier) {
         Row(Modifier.padding(5.dp)) {
             Image(
                 rememberCoilPainter(company.logoUrl),
                 contentDescription = null,
-                Modifier.fillMaxHeight(),
+                alignment = Alignment.Center,
+                modifier = Modifier.fillMaxHeight(),
             )
             Column(
                 verticalArrangement = Arrangement.SpaceEvenly,
@@ -455,10 +460,23 @@ fun CompanyCard(company: GameCompany, modifier: Modifier = Modifier) {
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(text = company.country, color = Color.White.copy(0.6f))
-                    Text("Learn more", color = MaterialTheme.colors.primary, fontSize = 14.sp)
+                    Text(
+                        "Learn more",
+                        color = MaterialTheme.colors.primary,
+                        fontSize = 14.sp,
+                        modifier = Modifier.clickable { shouldShowDialog = true }.padding(8.dp),
+                    )
                 }
             }
         }
+    }
+
+    if (shouldShowDialog) {
+        GameCompanyDialog(
+            gameCompany = company,
+            onDismiss = { shouldShowDialog = false },
+            modifier = Modifier.fillMaxWidth(0.8f),
+        )
     }
 }
 
@@ -516,7 +534,6 @@ fun VideoPlayer(
     videoState: VideoState,
     modifier: Modifier = Modifier,
 ) {
-
     AndroidView(
         factory = { context ->
             (context as ContextThemeWrapper).setTheme(R.style.VideoDialogTheme)
@@ -530,7 +547,7 @@ fun VideoPlayer(
                             videoId = videoState.videoId,
                             videoState.currentSecond
                         )
-                        if(videoState.isFullScreen.value){
+                        if (videoState.isFullScreen.value) {
                             enterFullScreen()
                         }
                     }
@@ -549,6 +566,45 @@ fun VideoPlayer(
             }
         },
         modifier = modifier.fillMaxSize(),
+    )
+}
+
+@Composable
+fun GameCompanyDialog(
+    gameCompany: GameCompany,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        buttons = {
+            Box(contentAlignment = Alignment.CenterEnd, modifier = Modifier.fillMaxWidth()) {
+                TextButton(onClick = onDismiss) {
+                    Text(text = "OK")
+                }
+            }
+        },
+        title = {
+            Row(Modifier.padding(5.dp)) {
+                Image(
+                    rememberCoilPainter(gameCompany.logoUrl),
+                    contentDescription = null,
+                    alignment = Alignment.Center,
+                )
+                Column(
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.padding(8.dp),
+                ) {
+                    Text(text = gameCompany.name)
+                    Text(text = gameCompany.country, color = Color.White.copy(0.6f))
+                }
+            }
+        },
+        text = {
+                Text(gameCompany.description, fontSize = 15.sp)
+        },
+        modifier = modifier,
+        shape = MaterialTheme.shapes.small,
     )
 }
 
