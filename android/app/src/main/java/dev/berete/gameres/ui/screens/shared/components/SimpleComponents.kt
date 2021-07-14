@@ -1,11 +1,9 @@
 package dev.berete.gameres.ui.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -13,8 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -23,16 +19,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.coil.rememberCoilPainter
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
-import dev.berete.gameres.domain.models.enums.Platform
+import dev.berete.gameres.domain.models.enums.PlatformType
 import dev.berete.gameres.ui.theme.*
-import dev.berete.gameres.ui.utils.FakeGame
 import dev.berete.gameres.ui.utils.bannerUrl
 import dev.berete.gameres.ui.utils.logo
 
@@ -52,12 +46,12 @@ fun GameResLogo(style: TextStyle = MaterialTheme.typography.body1) {
 
 @Composable
 fun PlatformLogos(
-    platformList: List<Platform>,
+    platformTypeList: List<PlatformType>,
     modifier: Modifier = Modifier,
     singleLogoModifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
-        for (platform in platformList) {
+        for (platform in platformTypeList) {
             Image(
                 painter = painterResource(platform.logo),
                 contentDescription = null,
@@ -103,7 +97,11 @@ fun GameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier) {
                     .padding(bottom = 8.dp, top = 4.dp)
                     .fillMaxWidth(),
             ) {
-                PlatformLogos(platformList = game.platformList)
+                PlatformLogos(
+                    platformTypeList = remember(game.id) {
+                        game.platformList.groupBy { it.platformType }.keys.toList()
+                    },
+                )
                 GameScore(score = game.rating.toInt())
             }
         }

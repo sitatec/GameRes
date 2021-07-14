@@ -1,7 +1,6 @@
 package dev.berete.gameres.ui.screens.game_details
 
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import android.view.ContextThemeWrapper
 import androidx.compose.foundation.*
@@ -81,11 +80,18 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Column(modifier = Modifier
-                .background(
-                    Brush.verticalGradient(listOf(Color.Transparent, MaterialTheme.colors.surface)),
-                )
-                .padding(top = 48.dp)) {
+            Column(
+                modifier = Modifier
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color.Transparent,
+                                MaterialTheme.colors.surface
+                            )
+                        ),
+                    )
+                    .padding(top = 48.dp)
+            ) {
 
                 Row(verticalAlignment = Alignment.Bottom) {
                     Image(
@@ -111,7 +117,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                                 .fillMaxWidth(),
                         ) {
                             PlatformLogos(
-                                platformList = game.platformList,
+                                platformTypeList = remember { game.platformList.groupBy { it.platformType }.keys.toList() },
                                 singleLogoModifier = Modifier.height(14.dp),
                             )
                             Spacer(Modifier.width(16.dp))
@@ -217,9 +223,11 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-            Text(text = game.summary,
+            Text(
+                text = game.summary,
                 modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colors.onSurface.copy(0.8f))
+                color = MaterialTheme.colors.onSurface.copy(0.8f)
+            )
 
             if (game.videoList.isNotEmpty()) {
                 SectionTitle("Videos")
@@ -243,22 +251,24 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                         Card(Modifier
                             .clickable { shouldVideoDialogShow = true }
                             .size(280.dp, (280 / 1.8).dp)) {
-                                Image(
-                                    painter = rememberCoilPainter(request = video.thumbnailUrl),
-                                    contentDescription = video.title,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize(),
+                            Image(
+                                painter = rememberCoilPainter(request = video.thumbnailUrl),
+                                contentDescription = video.title,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                            Surface(
+                                modifier = Modifier.wrapContentSize(Alignment.TopCenter),
+                                shape = RoundedCornerShape(
+                                    bottomStart = 5.dp,
+                                    bottomEnd = 5.dp
+                                ),
+                            ) {
+                                Text(
+                                    text = video.title,
+                                    modifier = Modifier.padding(horizontal = 8.dp)
                                 )
-                                Surface(
-                                    modifier = Modifier.wrapContentSize(Alignment.TopCenter),
-                                    shape = RoundedCornerShape(bottomStart = 5.dp,
-                                        bottomEnd = 5.dp),
-                                ) {
-                                    Text(
-                                        text = video.title,
-                                        modifier = Modifier.padding(horizontal = 8.dp)
-                                    )
-                                }
+                            }
                             Box(contentAlignment = Alignment.Center) {
                                 Card(
                                     Modifier
@@ -346,9 +356,9 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
         ) {
             for ((index, platform) in game.platformList.withIndex()) {
                 Row {
-                    Text(platform.platformName, color = MaterialTheme.colors.primary)
+                    Text(platform.name, color = MaterialTheme.colors.primary)
                     if (index < game.platformList.lastIndex) {
-                        Text(",")
+                        Text(",", Modifier.alpha(0.7f))
                     }
                 }
             }
@@ -364,7 +374,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
             for (release in game.releases) {
                 Row(Modifier.border(1.dp, Color.DarkGray)) {
                     TableCell(release.formattedDate)
-                    TableCell(release.platform.platformName)
+                    TableCell(release.platform.name)
                     TableCell(release.region)
                 }
             }
@@ -373,9 +383,11 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
 
         SectionTitle("Age Rating")
 
-        Row(Modifier
-            .horizontalScroll(rememberScrollState())
-            .alpha(0.9f)) {
+        Row(
+            Modifier
+                .horizontalScroll(rememberScrollState())
+                .alpha(0.9f)
+        ) {
             for (ageRating in game.ageRatings) {
                 Spacer(Modifier.width(16.dp))
                 Image(painter = rememberCoilPainter(ageRating.labelUrl), contentDescription = null)
@@ -466,19 +478,22 @@ fun RowScope.TableTitleCell(
 
 @Composable
 fun RowScope.TableCell(text: String, weight: Float = 1f) {
-    Text(text = text,
+    Text(
+        text = text,
         Modifier
             .weight(weight)
-            .padding(8.dp))
+            .padding(8.dp)
+    )
 }
 
 @Composable
 fun VideoDialog(shouldShow: Boolean, videoState: VideoState, onDismiss: () -> Unit) {
-    var isFullScreen by remember { mutableStateOf(false) }
 
-
-    val videoCardModifier = if (isFullScreen) {
-        Modifier.fillMaxSize()
+    val videoCardModifier = if (videoState.isFullScreen.value) {
+        Modifier.size(
+            LocalConfiguration.current.screenWidthDp.dp,
+            LocalConfiguration.current.screenHeightDp.dp
+        )
     } else {
         val videoWidth = LocalConfiguration.current.screenWidthDp * 0.8
         Modifier.size(videoWidth.dp, (videoWidth / 1.8).dp) /* 16:9 */
@@ -489,7 +504,6 @@ fun VideoDialog(shouldShow: Boolean, videoState: VideoState, onDismiss: () -> Un
             Card(videoCardModifier) {
                 VideoPlayer(
                     videoState = videoState,
-                    onFullscreenStateChange = { isFullScreen = it },
                 )
             }
         }
@@ -500,11 +514,8 @@ fun VideoDialog(shouldShow: Boolean, videoState: VideoState, onDismiss: () -> Un
 @Composable
 fun VideoPlayer(
     videoState: VideoState,
-    onFullscreenStateChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    enableFullScreenInLandscape: Boolean = true,
 ) {
-    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     AndroidView(
         factory = { context ->
@@ -514,21 +525,23 @@ fun VideoPlayer(
 
                 getYouTubePlayerWhenReady(object : YouTubePlayerCallback {
                     override fun onYouTubePlayer(youTubePlayer: YouTubePlayer) {
-                        if (isLandscape && enableFullScreenInLandscape) {
+                        youTubePlayer.addListener(videoState)
+                        youTubePlayer.loadVideo(
+                            videoId = videoState.videoId,
+                            videoState.currentSecond
+                        )
+                        if(videoState.isFullScreen.value){
                             enterFullScreen()
                         }
-                        youTubePlayer.addListener(videoState)
-                        youTubePlayer.loadVideo(videoId = videoState.videoId,
-                            videoState.currentSecond)
                     }
                 })
                 addFullScreenListener(object : YouTubePlayerFullScreenListener {
                     override fun onYouTubePlayerEnterFullScreen() {
-                        onFullscreenStateChange(true)
+                        videoState.isFullScreen.value = true
                     }
 
                     override fun onYouTubePlayerExitFullScreen() {
-                        onFullscreenStateChange(false)
+                        videoState.isFullScreen.value = false
                     }
 
                 })

@@ -1,13 +1,20 @@
 package dev.berete.gameres.ui.screens.game_details
 
 import android.os.Parcelable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerListener
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 
 @Parcelize
-data class VideoState(var videoId: String, var currentSecond: Float = 0f) : Parcelable,
+data class VideoState(
+    var videoId: String,
+    var currentSecond: Float = 0f,
+    var isFullScreen: @RawValue MutableState<Boolean> = mutableStateOf(false),
+) : Parcelable,
     YouTubePlayerListener {
 
     override fun onApiChange(youTubePlayer: YouTubePlayer) {}
@@ -20,12 +27,14 @@ data class VideoState(var videoId: String, var currentSecond: Float = 0f) : Parc
     override fun onPlaybackQualityChange(
         youTubePlayer: YouTubePlayer,
         playbackQuality: PlayerConstants.PlaybackQuality,
-    ) {}
+    ) {
+    }
 
     override fun onPlaybackRateChange(
         youTubePlayer: YouTubePlayer,
         playbackRate: PlayerConstants.PlaybackRate,
-    ) {}
+    ) {
+    }
 
     override fun onReady(youTubePlayer: YouTubePlayer) {}
     override fun onVideoId(youTubePlayer: YouTubePlayer, videoId: String) {}

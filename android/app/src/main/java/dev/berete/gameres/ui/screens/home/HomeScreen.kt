@@ -21,10 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -36,7 +34,6 @@ import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.ui.Routes
 import dev.berete.gameres.ui.screens.GameCard
 import dev.berete.gameres.ui.screens.GameResLogo
-import dev.berete.gameres.ui.screens.GameScore
 import dev.berete.gameres.ui.screens.PlatformLogos
 import dev.berete.gameres.ui.theme.*
 import dev.berete.gameres.ui.utils.FakeGameList
@@ -223,8 +220,14 @@ fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier
         Row(
             verticalAlignment = Alignment.Bottom,
             modifier = Modifier
-                .background(Brush.verticalGradient(listOf(Color.Transparent,
-                    MaterialTheme.colors.surface)))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color.Transparent,
+                            MaterialTheme.colors.surface
+                        )
+                    )
+                )
                 .padding(bottom = 8.dp),
         ) {
             Image(
@@ -245,7 +248,11 @@ fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier
                     overflow = TextOverflow.Ellipsis,
                 )
                 Spacer(Modifier.height(8.dp))
-                PlatformLogos(game.platformList)
+                PlatformLogos(
+                    remember(game.id) {
+                        game.platformList.groupBy { it.platformType }.keys.toList()
+                    },
+                )
             }
         }
     }
@@ -266,8 +273,10 @@ fun HomeScreenPreview() {
             Spacer(modifier = Modifier.height(8.dp))
             LazyColumn {
                 item {
-                    GamesSection(GamesList = mostPopularGames,
-                        onGameSelected = {}, title = "Popular Games")
+                    GamesSection(
+                        GamesList = mostPopularGames,
+                        onGameSelected = {}, title = "Popular Games"
+                    )
                     Spacer(Modifier.height(16.dp))
                     Text(
                         text = "Trending",
@@ -283,9 +292,11 @@ fun HomeScreenPreview() {
                         modifier = Modifier.padding(horizontal = 16.dp),
                     ) {
                         for (game in rowItems) {
-                            GameCard(game = game,
+                            GameCard(
+                                game = game,
                                 onClick = { },
-                                modifier = Modifier.weight(1F))
+                                modifier = Modifier.weight(1F)
+                            )
                         }
                     }
                     Spacer(Modifier.height(14.dp))

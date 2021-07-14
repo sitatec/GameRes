@@ -1,6 +1,6 @@
 package dev.berete.gameres.domain.models
 
-import dev.berete.gameres.domain.models.enums.Platform
+import dev.berete.gameres.domain.models.enums.PlatformType
 import java.text.SimpleDateFormat
 import java.util.*
 

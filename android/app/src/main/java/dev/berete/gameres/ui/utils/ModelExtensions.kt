@@ -2,11 +2,11 @@ package dev.berete.gameres.ui.utils
 
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
-import dev.berete.gameres.domain.models.enums.Platform
-import dev.berete.gameres.domain.models.enums.Platform.*
+import dev.berete.gameres.domain.models.enums.PlatformType
+import dev.berete.gameres.domain.models.enums.PlatformType.*
 import java.text.SimpleDateFormat
 
-val Platform.logo: Int
+val PlatformType.logo: Int
     get() = when (this) {
         PLAYSTATION -> R.drawable.ic_playstation_logo
         XBOX -> R.drawable.ic_xbox_logo

@@ -74,27 +74,25 @@ fun Genre.toDomainGameGenre(): GameGenre {
 }
 
 /**
- * Converts this Game Platform DTO (Data Transfer Object) instance to the domain's [Platform]
+ * Converts this Game Platform DTO (Data Transfer Object) instance to the domain's [PlatformType]
  */
 fun PlatformDTO.toDomainGamePlatform(): Platform {
-    val name = name.lowercase()
-    return when {
-        name.contains("playstation") -> Platform.PLAYSTATION
-        name.contains("xbox") -> Platform.XBOX
-        name.contains("microsoft windows") -> Platform.WINDOWS
-        name.contains("wii") -> Platform.WII
-        name == "nintendo switch" -> Platform.NINTENDO_SWITCH
-        name == "android" -> Platform.ANDROID
-        name == "mac" || name == "ios" -> Platform.APPLE
-        name == "linux" -> Platform.LINUX
-        else -> Platform.OTHER
-    }.apply {
-        if(this == Platform.WINDOWS){
-            this.platformName = "PC (Windows)"
-        }else{
-            this.platformName = this@toDomainGamePlatform.name
-        }
+    val platformName = name.lowercase()
+    val platformType = when {
+        platformName.contains("playstation") -> PlatformType.PLAYSTATION
+        platformName.contains("xbox") -> PlatformType.XBOX
+        platformName.contains("microsoft windows") -> PlatformType.WINDOWS
+        platformName.contains("wii") -> PlatformType.WII
+        platformName == "nintendo switch" -> PlatformType.NINTENDO_SWITCH
+        platformName == "android" -> PlatformType.ANDROID
+        platformName == "mac" || platformName == "ios" -> PlatformType.APPLE
+        platformName == "linux" -> PlatformType.LINUX
+        else -> PlatformType.OTHER
     }
+    return Platform(
+        platformType = platformType,
+        name = if (platformName.contains("microsoft windows")) "PC Windows" else name
+    )
 }
 
 /**

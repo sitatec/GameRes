@@ -3,9 +3,9 @@ package dev.berete.gameres.domain.models.enums
 import dev.berete.gameres.domain.utils.toLowercaseExceptFirstChar
 
 /**
- * A Game platform e.g XBOX
+ * A Game PlatformType e.g XBOX or PLAYSTATION
  */
-enum class Platform {
+enum class PlatformType {
     PLAYSTATION,
     XBOX,
     WINDOWS,
@@ -17,11 +17,7 @@ enum class Platform {
     OTHER,
     ;
 
-    // Use full for platforms that are not listed above (OTHERS).
-    var platformName: String = name
-
     override fun toString(): String {
-        return if (this == OTHER) platformName
-        else name.toLowercaseExceptFirstChar()
+        return name.toLowercaseExceptFirstChar()
     }
 }
