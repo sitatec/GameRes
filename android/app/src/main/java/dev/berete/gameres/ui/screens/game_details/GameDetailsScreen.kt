@@ -464,7 +464,9 @@ fun CompanyCard(company: GameCompany, modifier: Modifier = Modifier) {
                         "Learn more",
                         color = MaterialTheme.colors.primary,
                         fontSize = 14.sp,
-                        modifier = Modifier.clickable { shouldShowDialog = true }.padding(8.dp),
+                        modifier = Modifier
+                            .clickable { shouldShowDialog = true }
+                            .padding(8.dp),
                     )
                 }
             }
@@ -565,7 +567,9 @@ fun VideoPlayer(
 
             }
         },
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .padding(vertical = 16.dp)
+            .fillMaxSize(),
     )
 }
 
@@ -601,7 +605,10 @@ fun GameCompanyDialog(
             }
         },
         text = {
-                Text(gameCompany.description, fontSize = 15.sp)
+            Text(
+                gameCompany.description, fontSize = 15.sp,
+                modifier = modifier.verticalScroll(rememberScrollState()),
+            )
         },
         modifier = modifier,
         shape = MaterialTheme.shapes.small,
