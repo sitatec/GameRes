@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,25 +39,51 @@ import dev.berete.gameres.ui.screens.PlatformLogos
 import dev.berete.gameres.ui.theme.*
 import dev.berete.gameres.ui.utils.FakeGameList
 import dev.berete.gameres.ui.utils.bannerUrl
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
-    Scaffold(topBar = { GameResTopAppBar({ GameResLogo() }) }) {
+    val scaffoldState = rememberScaffoldState()
+
+    Scaffold(
+        scaffoldState = scaffoldState,
+        topBar = { GameResTopAppBar(title = { GameResLogo() }, scaffoldState = scaffoldState) },
+        drawerContent = {
+            NavDrawer(
+                navController = navController,
+                modifier = Modifier
+                    .background(MaterialTheme.colors.surface)
+                    .padding(16.dp),
+            )
+        }
+    ) {
         Spacer(modifier = Modifier.height(8.dp))
         HomeScreenBody(viewModel, navController)
     }
 }
 
 @Composable
-fun GameResTopAppBar(title: @Composable () -> Unit, modifier: Modifier = Modifier) {
+fun GameResTopAppBar(
+    title: @Composable () -> Unit,
+    scaffoldState: ScaffoldState,
+    modifier: Modifier = Modifier
+) {
+    val coroutineScope = rememberCoroutineScope()
+
     TopAppBar(
         title = title,
         navigationIcon = {
-            Icon(
-                imageVector = Icons.Default.Menu,
-                contentDescription = stringResource(R.string.menu_button_content_description),
-                modifier = modifier.padding(start = 8.dp),
-            )
+            IconButton(onClick = {
+                coroutineScope.launch {
+                    scaffoldState.drawerState.open()
+                }
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = stringResource(R.string.menu_button_content_description),
+                    modifier = modifier.padding(start = 8.dp),
+                )
+            }
         },
         actions = {
             Icon(
@@ -258,6 +285,122 @@ fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier
     }
 }
 
+@Composable
+fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
+    Column(modifier.fillMaxSize()) {
+
+        Row(Modifier.padding(top = 16.dp)) {
+            Image(
+                painter = painterResource(id = R.drawable.new_release_icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .size(22.dp),
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column {
+                Text(
+                    "New releases",
+                    style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
+                )
+                Text(
+                    "Last 7 days",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+                Text(
+                    "Last 30 days",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+                Text(
+                    "This year",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+            }
+        }
+
+        Row(Modifier.padding(top = 16.dp)) {
+            Icon(
+                painter = painterResource(id = R.drawable.top_100_icon),
+                contentDescription = null,
+                tint = MaterialTheme.colors.primary,
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .size(24.dp),
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column {
+                Text(
+                    "Top 100",
+                    style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
+                )
+
+                Text(
+                    "All time",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+                Text(
+                    "This year",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+                Text(
+                    "Last 5 years",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+            }
+        }
+
+        Row(Modifier.padding(top = 16.dp)) {
+            Image(
+                painter = painterResource(id = R.drawable.upcoming_release_icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .size(22.dp),
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column {
+                Text(
+                    "Upcoming releases",
+                    style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
+                )
+
+                Text(
+                    "Next week",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+                Text(
+                    "Next month",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+            }
+
+        }
+
+    }
+}
+
 // ------------------------- PREVIEWS -------------------------- //
 
 @ExperimentalFoundationApi
@@ -265,7 +408,7 @@ fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier
 @Composable
 fun HomeScreenPreview() {
     GameResTheme {
-        Scaffold(topBar = { GameResTopAppBar({ GameResLogo() }) }) {
+        Scaffold(topBar = { GameResTopAppBar({ GameResLogo() }, rememberScaffoldState()) }) {
             val mostPopularGames = FakeGameList
             val trendingGameList = FakeGameList
             val numberOfItemsByRow = LocalConfiguration.current.screenWidthDp / 150

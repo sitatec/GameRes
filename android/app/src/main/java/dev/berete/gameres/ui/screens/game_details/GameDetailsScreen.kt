@@ -211,7 +211,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                             )
                         }
                         .fillMaxWidth(0.8f)
-                        .aspectRatio(1.5f),
+                        .aspectRatio(1.6f),
                 ) {
                     Image(
                         painter = rememberCoilPainter(request = game.allImageUrls[pageIndex]),
