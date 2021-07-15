@@ -12,13 +12,14 @@ import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.domain.models.enums.GameMode
 import dev.berete.gameres.domain.repositories.GameListRepository
+import dev.berete.gameres.ui.screens.shared.view_models.BaseViewModel
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(private val gameListRepository: GameListRepository) :
-    ViewModel() {
+    BaseViewModel() {
 
     /**
      * A random timestamp from 2000 to the last year, so each time the user launches the app,
@@ -26,11 +27,10 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
      *
      * TODO implement a smartest algo.
      */
-    private val minReleaseDate: Long
-        get() {
+    private val minReleaseDate: Long by lazy {
             val numberOfYearsSince2000 = Calendar.getInstance().get(Calendar.YEAR) - 2000
             val randomYearFrom2000toLastYear = Random().nextInt(numberOfYearsSince2000 - 1) + 2000
-            return getYearTimestamp(randomYearFrom2000toLastYear)
+            getYearTimestamp(randomYearFrom2000toLastYear)
         }
 
     private val _gameList: MutableLiveData<List<Game>> = MutableLiveData(emptyList())
@@ -45,31 +45,23 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
     private val _upComingGames: MutableLiveData<List<Game>> = MutableLiveData(emptyList())
     val upComingGames: LiveData<List<Game>> = _upComingGames
 
-    private var currentPage = 0
-
-    private var _loadNextPage = suspend {
-        val loadedGames = gameListRepository.getPopularGames(
-            startTimeStamp = minReleaseDate,
-            endTimestamp = getYearTimestamp(),
-            page = ++currentPage,
-        ).sortedByDescending { it.rating }
-
-        _gameList.value = _gameList.value!!.plus(loadedGames)
-    }
-
     var isNextPageLoading by mutableStateOf(false)
         private set
-
-    /**
-     * Game genre names to show in the tabs
-     */
-    val gameTypeNames =
-        listOf(*GameGenre.genreNames.toTypedArray(), "Battle Royale", "Multiplayer").sorted()
 
     init {
         fetchNewGames()
         fetchGameList()
         fetchUpComingGames()
+
+        fetchNextPage =  {
+            val loadedGames = gameListRepository.getPopularGames(
+                startTimeStamp = minReleaseDate,
+                endTimestamp = getYearTimestamp(),
+                page = ++currentPage,
+            ).sortedByDescending { it.rating }
+
+            _gameList.value = _gameList.value!!.plus(loadedGames)
+        }
     }
 
     private fun fetchNewGames() {
@@ -99,34 +91,29 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
 
     private fun setPopularAndHighlyRatedGames(gameList: List<Game>) {
         _mostPopularGames.value = gameList.subList(0, 10)
-        _gameList.value =
-            gameList.subList(10, gameList.size).sortedByDescending { it.rating }
+        _gameList.value = gameList.subList(10, gameList.size).sortedByDescending { it.rating }
     }
 
-    fun onGameTypeSelected(genreName: String) {
-        when (genreName) {
-            "Multiplayer" -> filterByGameMode(GameMode.MULTIPLAYER)
-            "Battle Royale" -> filterByGameMode(GameMode.BATTLE_ROYALE)
-            else -> filterByGameGenre(GameGenre.valueOf(genreName))
-        }
+    override fun resetFilter() {
+        fetchGameList()
     }
 
-    private fun filterByGameMode(gameMode: GameMode) {
+    override fun filterByGameMode(gameMode: GameMode) {
         // TODO filter the current game list first and check if it content enough game and return the
         //  the filtered list before making api call.
         currentPage = 0
         viewModelScope.launch {
-            setPopularAndHighlyRatedGames(gameListRepository.getPopularGamesByMode(
+            setPopularAndHighlyRatedGames(gameListRepository.getPopularGames(
                 startTimeStamp = minReleaseDate,
                 endTimestamp = getYearTimestamp(),
                 gameMode = gameMode,
             ))
         }
-        _loadNextPage = {
-            val loadedGames = gameListRepository.getPopularGamesByMode(
+        fetchNextPage = {
+            val loadedGames = gameListRepository.getPopularGames(
                 startTimeStamp = minReleaseDate,
                 endTimestamp = getYearTimestamp(),
-                page = currentPage++,
+                page = ++currentPage,
                 gameMode = gameMode,
             ).sortedByDescending { it.rating }
 
@@ -134,44 +121,27 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
         }
     }
 
-    private fun filterByGameGenre(gameGenre: GameGenre) {
+    override fun filterByGameGenre(gameGenre: GameGenre) {
         // TODO filter the current game list first and check if it content enough game and return the
         //  the filtered list before making api call.
         currentPage = 0
         viewModelScope.launch {
-            setPopularAndHighlyRatedGames(gameListRepository.getPopularGamesByGenre(
+            setPopularAndHighlyRatedGames(gameListRepository.getPopularGames(
                 startTimeStamp = minReleaseDate,
                 endTimestamp = getYearTimestamp(),
-                genre = gameGenre,
+                gameGenre = gameGenre,
             ))
         }
-        _loadNextPage = {
-            val loadedGames = gameListRepository.getPopularGamesByGenre(
+        fetchNextPage = {
+            val loadedGames = gameListRepository.getPopularGames(
                 startTimeStamp = minReleaseDate,
                 endTimestamp = getYearTimestamp(),
-                page = currentPage++,
-                genre = gameGenre,
+                page = ++currentPage,
+                gameGenre = gameGenre,
             ).sortedByDescending { it.rating }
 
             _gameList.value = _gameList.value!!.plus(loadedGames)
         }
     }
 
-    fun loadNextPage() {
-        viewModelScope.launch {
-            isNextPageLoading = true
-            _loadNextPage()
-            isNextPageLoading = false
-        }
-    }
-
-    /**
-     * Returns the timestamp of the given [year] or the current year if no parameter is given,
-     * the month will be _January_ and the day will be the first of month (01).
-     *
-     * I.e the timestamp of 01-01-[year]
-     */
-    private fun getYearTimestamp(year: Int = Calendar.getInstance().get(Calendar.YEAR)): Long {
-        return Calendar.getInstance().apply { set(year, 0, 1) }.timeInMillis
-    }
 }

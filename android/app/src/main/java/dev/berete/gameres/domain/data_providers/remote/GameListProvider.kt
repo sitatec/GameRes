@@ -17,6 +17,8 @@ interface GameListProvider {
         endTimestamp: Long,
         page: Int = 0,
         count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
+        gameGenre: GameGenre? = null,
+        gameMode: GameMode? = null,
     ): List<Game>
 
     /**
@@ -27,6 +29,8 @@ interface GameListProvider {
         timestamp: Long,
         page: Int = 0,
         count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
+        gameGenre: GameGenre? = null,
+        gameMode: GameMode? = null,
     ): List<Game>
 
     /**
@@ -37,33 +41,8 @@ interface GameListProvider {
         limitTimestamp: Long = 0,
         page: Int = 0,
         count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
-    ): List<Game>
-
-    /**
-     * Returns the popular games (from [startTimeStamp] to [endTimestamp]) of the given [genre].
-     *
-     * e.g: Action games that were popular in the interval of 23/04/2017 to 18/11/2019
-     */
-    suspend fun getPopularGamesByGenre(
-        startTimeStamp: Long,
-        endTimestamp: Long,
-        genre: GameGenre,
-        page: Int = 0,
-        count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
-    ): List<Game>
-
-
-    /**
-     * Returns the popular games (from [startTimeStamp] to [endTimestamp]) of the given [gameMode].
-     *
-     * e.g: Battle Royale games that were popular in the interval of 23/04/2017 to 18/11/2019
-     */
-    suspend fun getPopularGamesByMode(
-        startTimeStamp: Long,
-        endTimestamp: Long,
-        gameMode: GameMode,
-        page: Int = 0,
-        count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
+        gameGenre: GameGenre? = null,
+        gameMode: GameMode? = null,
     ): List<Game>
 
     /**

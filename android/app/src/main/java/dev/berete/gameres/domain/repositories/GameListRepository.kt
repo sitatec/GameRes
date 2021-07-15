@@ -24,8 +24,10 @@ class GameListRepository @Inject constructor(
         endTimestamp: Long,
         page: Int = 0,
         count: Int = GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST,
+        gameGenre: GameGenre? = null,
+        gameMode: GameMode? = null,
     ): List<Game> {
-        return gameListProvider.getPopularGames(startTimeStamp, endTimestamp, page,count)
+        return gameListProvider.getPopularGames(startTimeStamp, endTimestamp, page,count, gameGenre, gameMode)
     }
 
     /**
@@ -37,8 +39,10 @@ class GameListRepository @Inject constructor(
         timestamp: Long,
         page: Int = 0,
         count: Int = GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST,
+        gameGenre: GameGenre? = null,
+        gameMode: GameMode? = null,
     ): List<Game> {
-        return gameListProvider.getGamesReleasedAfter(timestamp, page, count)
+        return gameListProvider.getGamesReleasedAfter(timestamp, page, count, gameGenre, gameMode)
     }
 
     /**
@@ -50,52 +54,10 @@ class GameListRepository @Inject constructor(
         limitTimestamp: Long = 0,
         page: Int = 0,
         count: Int = GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST,
+        gameGenre: GameGenre? = null,
+        gameMode: GameMode? = null,
     ): List<Game> {
-        return gameListProvider.getUpcomingGames(limitTimestamp, page, count)
-    }
-
-    /**
-     * Returns the popular games (from [startTimeStamp] to [endTimestamp]) of the given [genre].
-     * The result may be retrieved from the local database if an internet connection is not available
-     *
-     * e.g: Action games that were popular in the interval of 23/04/2017 to 18/11/2019
-     */
-    suspend fun getPopularGamesByGenre(
-        startTimeStamp: Long,
-        endTimestamp: Long,
-        genre: GameGenre,
-        page: Int = 0,
-        count: Int = GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST,
-    ): List<Game> {
-        return gameListProvider.getPopularGamesByGenre(
-            startTimeStamp,
-            endTimestamp,
-            genre,
-            page,
-            count,
-        )
-    }
-
-    /**
-     * Returns the popular games (from [startTimeStamp] to [endTimestamp]) of the given [gameMode].
-     * The result may be retrieved from the local database if an internet connection is not available
-     *
-     * e.g: Battle Royale games that were popular in the interval of 23/04/2017 to 18/11/2019
-     */
-    suspend fun getPopularGamesByMode(
-        startTimeStamp: Long,
-        endTimestamp: Long,
-        gameMode: GameMode,
-        page: Int = 0,
-        count: Int = GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST,
-    ): List<Game> {
-        return gameListProvider.getPopularGamesByMode(
-            startTimeStamp,
-            endTimestamp,
-            gameMode,
-            page,
-            count,
-        )
+        return gameListProvider.getUpcomingGames(limitTimestamp, page, count, gameGenre, gameMode)
     }
 
 

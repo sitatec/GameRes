@@ -42,11 +42,17 @@ class IGDBAPIClient(
         endTimestamp: Long,
         page: Int,
         count: Int,
+        gameGenre: GameGenre?,
+        gameMode: GameMode?,
     ): List<Game> {
+        // TODO refactor & improve readability
         val numberOfGamesToFetch = regularizeGameCount(count)
         val queryBuilder = apiCalypse.newBuilder()
             .fields(gameSummaryFields)
-            .where("first_release_date > ${startTimeStamp.toFixed10Digits()} & first_release_date < ${endTimestamp.toFixed10Digits()} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
+            .where(
+                "first_release_date > ${startTimeStamp.toFixed10Digits()} & first_release_date < ${endTimestamp.toFixed10Digits()} " +
+                        "${getGameGenreQuery(gameGenre)}  ${getGameModeQuery(gameMode)} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0",
+            )
             .sort("total_rating_count", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
             .offset(page * count)
@@ -56,11 +62,20 @@ class IGDBAPIClient(
         }
     }
 
-    override suspend fun getGamesReleasedAfter(timestamp: Long, page: Int, count: Int): List<Game> {
+    override suspend fun getGamesReleasedAfter(
+        timestamp: Long,
+        page: Int,
+        count: Int,
+        gameGenre: GameGenre?,
+        gameMode: GameMode?,
+    ): List<Game> {
         val numberOfGamesToFetch = regularizeGameCount(count)
         val queryBuilder = apiCalypse.newBuilder()
             .fields(gameSummaryFields)
-            .where("first_release_date > ${timestamp.toFixed10Digits()} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
+            .where(
+                "first_release_date > ${timestamp.toFixed10Digits()} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0" +
+                        "${getGameGenreQuery(gameGenre)}  ${getGameModeQuery(gameMode)}",
+            )
             .sort("first_release_date", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
             .offset(page * count)
@@ -70,7 +85,11 @@ class IGDBAPIClient(
         }
     }
 
-    override suspend fun getUpcomingGames(limitTimestamp: Long, page: Int, count: Int): List<Game> {
+    override suspend fun getUpcomingGames(
+        limitTimestamp: Long, page: Int, count: Int,
+        gameGenre: GameGenre?,
+        gameMode: GameMode?,
+    ): List<Game> {
         val numberOfGamesToFetch = regularizeGameCount(count)
         val tomorrowTimeStamp =
             Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.timeInMillis
@@ -82,7 +101,8 @@ class IGDBAPIClient(
 
         val queryBuilder = apiCalypse.newBuilder()
             .fields(gameSummaryFieldsWithGamePrefix)
-            .where("date > ${tomorrowTimeStamp.toFixed10Digits()} $maxReleaseDateQuery & game.platforms = (${getIGDBPlatformIDs()})")
+            .where("date > ${tomorrowTimeStamp.toFixed10Digits()} $maxReleaseDateQuery & game.platforms = (${getIGDBPlatformIDs()})" +
+                    "${getGameGenreQuery(gameGenre, "game.")}  ${getGameModeQuery(gameMode, "game.")}")
             .sort("date", Sort.ASCENDING)
             .limit(numberOfGamesToFetch)
             .offset(page * count)
@@ -92,52 +112,53 @@ class IGDBAPIClient(
         }
     }
 
-    override suspend fun getPopularGamesByGenre(
-        startTimeStamp: Long,
-        endTimestamp: Long,
-        genre: GameGenre,
-        page: Int,
-        count: Int,
-    ): List<Game> {
-        val numberOfGamesToFetch = regularizeGameCount(count)
-        val queryBuilder = apiCalypse.newBuilder()
-            .fields(gameSummaryFields)
-            .where("first_release_date > ${startTimeStamp.toFixed10Digits()} & first_release_date < ${endTimestamp.toFixed10Digits()} & ${
-                getGameGenreQuery(genre)
-            } & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
-            .sort("total_rating_count", Sort.DESCENDING)
-            .limit(numberOfGamesToFetch)
-            .offset(page * count)
-
-        return withContext(IO) {
-            iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
-        }
-    }
-
-    override suspend fun getPopularGamesByMode(
-        startTimeStamp: Long,
-        endTimestamp: Long,
-        gameMode: GameMode,
-        page: Int,
-        count: Int,
-    ): List<Game> {
-        val numberOfGamesToFetch = regularizeGameCount(count)
-        val queryBuilder = apiCalypse.newBuilder()
-            .fields(gameSummaryFields)
-            .where("first_release_date > ${startTimeStamp.toFixed10Digits()} & first_release_date < ${endTimestamp.toFixed10Digits()} & ${
-                getGameModeQuery(gameMode)
-            } & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
-            .sort("total_rating_count", Sort.DESCENDING)
-            .limit(numberOfGamesToFetch)
-            .offset(page * count)
-
-        return withContext(IO) {
-            iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
-        }
-    }
+//    override suspend fun getPopularGamesByGenre(
+//        startTimeStamp: Long,
+//        endTimestamp: Long,
+//        genre: GameGenre,
+//        page: Int,
+//        count: Int,
+//    ): List<Game> {
+//        val numberOfGamesToFetch = regularizeGameCount(count)
+//        val queryBuilder = apiCalypse.newBuilder()
+//            .fields(gameSummaryFields)
+//            .where("first_release_date > ${startTimeStamp.toFixed10Digits()} & first_release_date < ${endTimestamp.toFixed10Digits()} & ${
+//                getGameGenreQuery(genre)
+//            } & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
+//            .sort("total_rating_count", Sort.DESCENDING)
+//            .limit(numberOfGamesToFetch)
+//            .offset(page * count)
+//
+//        return withContext(IO) {
+//            iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
+//        }
+//    }
+//
+//    override suspend fun getPopularGamesByMode(
+//        startTimeStamp: Long,
+//        endTimestamp: Long,
+//        gameMode: GameMode,
+//        page: Int,
+//        count: Int,
+//    ): List<Game> {
+//        val numberOfGamesToFetch = regularizeGameCount(count)
+//        val queryBuilder = apiCalypse.newBuilder()
+//            .fields(gameSummaryFields)
+//            .where("first_release_date > ${startTimeStamp.toFixed10Digits()} & first_release_date < ${endTimestamp.toFixed10Digits()} & ${
+//                getGameModeQuery(gameMode)
+//            } & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0")
+//            .sort("total_rating_count", Sort.DESCENDING)
+//            .limit(numberOfGamesToFetch)
+//            .offset(page * count)
+//
+//        return withContext(IO) {
+//            iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
+//        }
+//    }
 
     override suspend fun getGamesByIds(gameIds: List<Long>): List<Game> {
-        val queryBuilder = apiCalypse.newBuilder().fields(gameSummaryFields).where("id = (${gameIds.joinToString()})")
+        val queryBuilder = apiCalypse.newBuilder().fields(gameSummaryFields)
+            .where("id = (${gameIds.joinToString()})")
 
         return withContext(IO) {
             iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
@@ -162,29 +183,34 @@ class IGDBAPIClient(
         }
     }
 
-    private fun getGameGenreQuery(genre: GameGenre): String {
-        if (genre == GameGenre.ACTION) return "themes.name = \"Action\""
+    private fun getGameGenreQuery(genre: GameGenre?, prefix: String = ""): String {
+        if (genre != null) {
+            if (genre == GameGenre.ACTION) return "& ${prefix}themes.name = \"Action\""
 
-        return if (genre != GameGenre.OTHERS) {
-            "genres.name = \"${genre.iGDBCompatibleName()}\""
-        } else {
-            val allGenreNames = GameGenre.genreValues.map(GameGenre::iGDBCompatibleName)
-            "genres.name != (${allGenreNames.joinToString()}})"
+            return if (genre != GameGenre.OTHERS) {
+                "& ${prefix}genres.name = \"${genre.iGDBCompatibleName()}\""
+            } else {
+                val allGenreNames = GameGenre.genreValues.map(GameGenre::iGDBCompatibleName)
+                "& ${prefix}genres.name != (${allGenreNames.joinToString()}})"
+            }
         }
-
+        return ""
     }
 
-    private fun getGameModeQuery(gameMode: GameMode): String {
-        val modeName = when (gameMode) {
-            GameMode.BATTLE_ROYALE -> "Battle Royale"
-            GameMode.MULTIPLAYER -> "Multiplayer"
-            GameMode.SINGLE_PLAYER -> "Single player"
-            GameMode.MMO -> "Massively Multiplayer Online (MMO)"
-            GameMode.SPLIT_SCREEN -> "Split screen"
-            GameMode.COOPERATIVE -> "Co-operative"
-            GameMode.OTHERS -> throw IllegalArgumentException("The value `GameMode.OTHERS` is not supported yet")
+    private fun getGameModeQuery(gameMode: GameMode?, prefix: String = ""): String {
+        if (gameMode != null) {
+            val modeName = when (gameMode) {
+                GameMode.BATTLE_ROYALE -> "Battle Royale"
+                GameMode.MULTIPLAYER -> "Multiplayer"
+                GameMode.SINGLE_PLAYER -> "Single player"
+                GameMode.MMO -> "Massively Multiplayer Online (MMO)"
+                GameMode.SPLIT_SCREEN -> "Split screen"
+                GameMode.COOPERATIVE -> "Co-operative"
+                GameMode.OTHERS -> throw IllegalArgumentException("The value `GameMode.OTHERS` is not supported yet")
+            }
+            return "& ${prefix}game_modes.name = \"$modeName\""
         }
-        return "game_modes.name = \"$modeName\""
+        return ""
     }
 
     private fun getIGDBPlatformIDs(): String {

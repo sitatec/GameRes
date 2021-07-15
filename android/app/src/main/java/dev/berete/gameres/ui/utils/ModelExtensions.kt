@@ -2,6 +2,7 @@ package dev.berete.gameres.ui.utils
 
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
+import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.domain.models.enums.PlatformType
 import dev.berete.gameres.domain.models.enums.PlatformType.*
 import java.text.SimpleDateFormat
@@ -33,3 +34,9 @@ val Game.formattedInitialReleaseDate : String
     get() {
        return SimpleDateFormat.getDateInstance().format(firstReleaseDate!!)
     }
+
+/**
+ * Game genre names to show in the tabs
+ */
+val gameTypeNames : List<String>
+    get() = listOf(*GameGenre.genreNames.toTypedArray(), "All", "Battle Royale", "Multiplayer").sorted()
