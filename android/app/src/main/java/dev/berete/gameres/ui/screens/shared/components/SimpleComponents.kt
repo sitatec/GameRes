@@ -1,19 +1,22 @@
-package dev.berete.gameres.ui.screens
+package dev.berete.gameres.ui.screens.shared.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.material.*
+import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -22,6 +25,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.accompanist.coil.rememberCoilPainter
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
@@ -29,6 +33,7 @@ import dev.berete.gameres.domain.models.enums.PlatformType
 import dev.berete.gameres.ui.theme.*
 import dev.berete.gameres.ui.utils.bannerUrl
 import dev.berete.gameres.ui.utils.logo
+import kotlinx.coroutines.launch
 
 @Composable
 fun GameResLogo(style: TextStyle = MaterialTheme.typography.body1) {
@@ -133,3 +138,191 @@ fun GameScore(
     )
 }
 
+
+@Composable
+fun GameResTopAppBar(
+    title: @Composable () -> Unit,
+    scaffoldState: ScaffoldState,
+    modifier: Modifier = Modifier
+) {
+    val coroutineScope = rememberCoroutineScope()
+
+    TopAppBar(
+        title = title,
+        navigationIcon = {
+            IconButton(onClick = {
+                coroutineScope.launch {
+                    scaffoldState.drawerState.open()
+                }
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = stringResource(R.string.menu_button_content_description),
+                    modifier = modifier.padding(start = 8.dp),
+                )
+            }
+        },
+        actions = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = stringResource(R.string.search_btn_content_description),
+                modifier = modifier.padding(end = 8.dp),
+            )
+        },
+        modifier = modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .height(50.dp)
+            .clip(MaterialTheme.shapes.medium),
+        elevation = 1.dp
+    )
+}
+
+@Composable
+fun NavDrawer(navController: NavController, currentRoute: String, modifier: Modifier = Modifier) {
+    Column(modifier.fillMaxSize()) {
+
+        Row(Modifier.padding(top = 16.dp)) {
+            Image(
+                painter = painterResource(id = R.drawable.new_release_icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .size(22.dp),
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column {
+                Text(
+                    "New releases",
+                    style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
+                )
+                Text(
+                    "Last 7 days",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+                Text(
+                    "Last 30 days",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+                Text(
+                    "This year",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+            }
+        }
+
+        Row(Modifier.padding(top = 16.dp)) {
+            Icon(
+                painter = painterResource(id = R.drawable.top_100_icon),
+                contentDescription = null,
+                tint = MaterialTheme.colors.primary,
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .size(24.dp),
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column {
+                Text(
+                    "Top 100",
+                    style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
+                )
+
+                Text(
+                    "All time",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+                Text(
+                    "This year",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+                Text(
+                    "Last 5 years",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+            }
+        }
+
+        Row(Modifier.padding(top = 16.dp)) {
+            Image(
+                painter = painterResource(id = R.drawable.upcoming_release_icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(top = 2.dp)
+                    .size(22.dp),
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column {
+                Text(
+                    "Upcoming releases",
+                    style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
+                )
+
+                Text(
+                    "Next week",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+                Text(
+                    "Next month",
+                    Modifier
+                        .clickable { }
+                        .padding(vertical = 8.dp),
+                )
+            }
+
+        }
+
+    }
+}
+
+@Composable
+fun Tabs(titles: List<String>, onTabSelected: (selectedTabTitle: String) -> Unit) {
+    var selectedTabIndex by remember { mutableStateOf(0) }
+
+    ScrollableTabRow(
+        selectedTabIndex = selectedTabIndex,
+        edgePadding = 0.dp,
+        indicator = { tabPositions ->
+            TabRowDefaults.Indicator(
+                height = 2.dp,
+                modifier = Modifier
+                    .tabIndicatorOffset((tabPositions[selectedTabIndex]))
+                    .width(3.dp),
+                color = MaterialTheme.colors.primary,
+            )
+        },
+    ) {
+        titles.forEachIndexed { index, title ->
+            Tab(
+                selected = index == selectedTabIndex,
+                selectedContentColor = MaterialTheme.colors.primary,
+                unselectedContentColor = MaterialTheme.colors.onSurface.copy(0.87F),
+                text = { Text(text = title, fontSize = 13.sp) },
+                onClick = {
+                    if (selectedTabIndex != index) {
+                        selectedTabIndex = index
+                        onTabSelected(title)
+                    }
+                },
+            )
+        }
+    }
+}

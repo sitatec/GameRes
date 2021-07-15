@@ -63,7 +63,7 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
     /**
      * Game genre names to show in the tabs
      */
-    val gameGenreNames =
+    val gameTypeNames =
         listOf(*GameGenre.genreNames.toTypedArray(), "Battle Royale", "Multiplayer").sorted()
 
     init {

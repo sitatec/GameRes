@@ -24,7 +24,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -45,9 +44,9 @@ import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.GameCompany
 import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.ui.Routes
-import dev.berete.gameres.ui.screens.GameCard
-import dev.berete.gameres.ui.screens.GameScore
-import dev.berete.gameres.ui.screens.PlatformLogos
+import dev.berete.gameres.ui.screens.shared.components.GameCard
+import dev.berete.gameres.ui.screens.shared.components.GameScore
+import dev.berete.gameres.ui.screens.shared.components.PlatformLogos
 import dev.berete.gameres.ui.utils.allImageUrls
 import dev.berete.gameres.ui.utils.bannerUrl
 import dev.berete.gameres.ui.utils.formattedInitialReleaseDate

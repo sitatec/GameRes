@@ -5,13 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,7 +15,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,13 +27,10 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.ui.Routes
-import dev.berete.gameres.ui.screens.GameCard
-import dev.berete.gameres.ui.screens.GameResLogo
-import dev.berete.gameres.ui.screens.PlatformLogos
+import dev.berete.gameres.ui.screens.shared.components.*
 import dev.berete.gameres.ui.theme.*
 import dev.berete.gameres.ui.utils.FakeGameList
 import dev.berete.gameres.ui.utils.bannerUrl
-import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
@@ -51,6 +42,7 @@ fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
         drawerContent = {
             NavDrawer(
                 navController = navController,
+                currentRoute = Routes.Home,
                 modifier = Modifier
                     .background(MaterialTheme.colors.surface)
                     .padding(16.dp),
@@ -60,44 +52,6 @@ fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
         Spacer(modifier = Modifier.height(8.dp))
         HomeScreenBody(viewModel, navController)
     }
-}
-
-@Composable
-fun GameResTopAppBar(
-    title: @Composable () -> Unit,
-    scaffoldState: ScaffoldState,
-    modifier: Modifier = Modifier
-) {
-    val coroutineScope = rememberCoroutineScope()
-
-    TopAppBar(
-        title = title,
-        navigationIcon = {
-            IconButton(onClick = {
-                coroutineScope.launch {
-                    scaffoldState.drawerState.open()
-                }
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = stringResource(R.string.menu_button_content_description),
-                    modifier = modifier.padding(start = 8.dp),
-                )
-            }
-        },
-        actions = {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = stringResource(R.string.search_btn_content_description),
-                modifier = modifier.padding(end = 8.dp),
-            )
-        },
-        modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .height(50.dp)
-            .clip(MaterialTheme.shapes.medium),
-        elevation = 1.dp
-    )
 }
 
 @Composable
@@ -111,38 +65,12 @@ fun HomeScreenBody(
     val newGames by viewModel.newGames.observeAsState(initial = emptyList())
     val upcomingGames by viewModel.upComingGames.observeAsState(initial = emptyList())
 
-    var selectedTabIndex by remember { mutableStateOf(0) }
-    val numberOfItemsByRow = LocalConfiguration.current.screenWidthDp / 200
-
     Column {
-        ScrollableTabRow(
-            selectedTabIndex = selectedTabIndex,
-            edgePadding = 0.dp,
-            indicator = { tabPositions ->
-                TabRowDefaults.Indicator(
-                    height = 2.dp,
-                    modifier = Modifier
-                        .tabIndicatorOffset((tabPositions[selectedTabIndex]))
-                        .width(3.dp),
-                    color = MaterialTheme.colors.primary,
-                )
-            },
-        ) {
-            viewModel.gameGenreNames.forEachIndexed { index, genreName ->
-                Tab(
-                    selected = index == selectedTabIndex,
-                    selectedContentColor = MaterialTheme.colors.primary,
-                    unselectedContentColor = MaterialTheme.colors.onSurface.copy(0.87F),
-                    onClick = {
-                        if (selectedTabIndex != index) {
-                            selectedTabIndex = index
-                            viewModel.onGameTypeSelected(genreName)
-                        }
-                    },
-                    text = { Text(text = genreName, fontSize = 13.sp) },
-                )
-            }
-        }
+
+        Tabs(titles = viewModel.gameTypeNames, viewModel::onGameTypeSelected)
+
+        val numberOfItemsByRow = LocalConfiguration.current.screenWidthDp / 200
+
         SwipeRefresh(
             onRefresh = { viewModel.loadNextPage() },
             bottomRefreshIndicatorState = rememberSwipeRefreshState(isRefreshing = viewModel.isNextPageLoading),
@@ -285,121 +213,6 @@ fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier
     }
 }
 
-@Composable
-fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
-    Column(modifier.fillMaxSize()) {
-
-        Row(Modifier.padding(top = 16.dp)) {
-            Image(
-                painter = painterResource(id = R.drawable.new_release_icon),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(top = 2.dp)
-                    .size(22.dp),
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Column {
-                Text(
-                    "New releases",
-                    style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
-                )
-                Text(
-                    "Last 7 days",
-                    Modifier
-                        .clickable { }
-                        .padding(vertical = 8.dp),
-                )
-                Text(
-                    "Last 30 days",
-                    Modifier
-                        .clickable { }
-                        .padding(vertical = 8.dp),
-                )
-                Text(
-                    "This year",
-                    Modifier
-                        .clickable { }
-                        .padding(vertical = 8.dp),
-                )
-            }
-        }
-
-        Row(Modifier.padding(top = 16.dp)) {
-            Icon(
-                painter = painterResource(id = R.drawable.top_100_icon),
-                contentDescription = null,
-                tint = MaterialTheme.colors.primary,
-                modifier = Modifier
-                    .padding(top = 2.dp)
-                    .size(24.dp),
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Column {
-                Text(
-                    "Top 100",
-                    style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
-                )
-
-                Text(
-                    "All time",
-                    Modifier
-                        .clickable { }
-                        .padding(vertical = 8.dp),
-                )
-                Text(
-                    "This year",
-                    Modifier
-                        .clickable { }
-                        .padding(vertical = 8.dp),
-                )
-                Text(
-                    "Last 5 years",
-                    Modifier
-                        .clickable { }
-                        .padding(vertical = 8.dp),
-                )
-            }
-        }
-
-        Row(Modifier.padding(top = 16.dp)) {
-            Image(
-                painter = painterResource(id = R.drawable.upcoming_release_icon),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(top = 2.dp)
-                    .size(22.dp),
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Column {
-                Text(
-                    "Upcoming releases",
-                    style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
-                )
-
-                Text(
-                    "Next week",
-                    Modifier
-                        .clickable { }
-                        .padding(vertical = 8.dp),
-                )
-                Text(
-                    "Next month",
-                    Modifier
-                        .clickable { }
-                        .padding(vertical = 8.dp),
-                )
-            }
-
-        }
-
-    }
-}
 
 // ------------------------- PREVIEWS -------------------------- //
 
