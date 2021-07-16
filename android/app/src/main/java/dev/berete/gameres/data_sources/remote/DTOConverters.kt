@@ -236,9 +236,17 @@ fun WebsiteDTO.toDomainWebsite() = when (category!!) {
 }
 
 fun ReleaseDateDTO.toDomainRelease() = Release(
-    Date(date.seconds * 1000),
-    platform.toDomainGamePlatform(),
-    region.name.toLowercaseExceptFirstChar().replace("_", " "),
+    date = Date(date.seconds * 1000),
+    platform = platform.toDomainGamePlatform(),
+    region = region.name.toLowercaseExceptFirstChar().replace("_", " "),
+    gameId = game.id,
+    gameName = game.name,
+    gameCoverUrl = imageBuilder(game.cover.imageId, ImageSize.COVER_BIG),
+    artWorkUrl = if (game.artworksList.isEmpty()) ""
+    else imageBuilder(
+        game.artworksList.first().imageId,
+        ImageSize.SCREENSHOT_MEDIUM,
+    )
 )
 
 // ------------- Domain Models to Data Transfer Object Converters --------------- //

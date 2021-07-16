@@ -1,6 +1,7 @@
 package dev.berete.gameres.domain.data_providers.remote
 
 import dev.berete.gameres.domain.models.Game
+import dev.berete.gameres.domain.models.Release
 import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.domain.models.enums.GameMode
 
@@ -34,16 +35,16 @@ interface GameListProvider {
     ): List<Game>
 
     /**
-     * Returns the games that will be released before the given [limitTimestamp] and after the current
-     * date plus one day.
+     * Returns the [Release]s that will happen before the given [limitTimestamp] and after the current
+     * date plus one day, if no [limitTimestamp] is given, there will not be a limit date.
      */
-    suspend fun getUpcomingGames(
+    suspend fun getUpcomingReleases(
         limitTimestamp: Long = 0,
         page: Int = 0,
         count: Int = DEFAULT_GAME_COUNT_BY_REQUEST,
         gameGenre: GameGenre? = null,
         gameMode: GameMode? = null,
-    ): List<Game>
+    ): List<Release>
 
     /**
      * Return the games that have their id in the [gameIds] list.

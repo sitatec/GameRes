@@ -1,15 +1,12 @@
 package dev.berete.gameres.ui.screens.home
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.berete.gameres.domain.data_providers.remote.GameListProvider
 import dev.berete.gameres.domain.models.Game
+import dev.berete.gameres.domain.models.Release
 import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.domain.models.enums.GameMode
 import dev.berete.gameres.domain.repositories.GameListRepository
@@ -44,8 +41,8 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
     private val _newGames: MutableLiveData<List<Game>> = MutableLiveData(emptyList())
     val newGames: LiveData<List<Game>> = _newGames
 
-    private val _upComingGames: MutableLiveData<List<Game>> = MutableLiveData(emptyList())
-    val upComingGames: LiveData<List<Game>> = _upComingGames
+    private val _upComingReleases: MutableLiveData<List<Release>> = MutableLiveData(emptyList())
+    val upComingReleases: LiveData<List<Release>> = _upComingReleases
 
     init {
         fetchNewGames()
@@ -86,7 +83,7 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
 
     private fun fetchUpComingGames(){
         viewModelScope.launch {
-            _upComingGames.value = gameListRepository.getUpcomingGames(count = 10)
+            _upComingReleases.value = gameListRepository.getUpcomingReleases(count = 10)
         }
     }
 

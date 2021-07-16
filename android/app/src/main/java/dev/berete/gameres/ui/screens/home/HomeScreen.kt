@@ -62,7 +62,7 @@ fun HomeScreenBody(
     val gameList by viewModel.gameList.observeAsState(initial = emptyList())
     val mostPopularGames by viewModel.mostPopularGames.observeAsState(initial = emptyList())
     val newGames by viewModel.newGames.observeAsState(initial = emptyList())
-    val upcomingGames by viewModel.upComingGames.observeAsState(initial = emptyList())
+    val upcomingRelease by viewModel.upComingReleases.observeAsState(initial = emptyList())
 
     Column {
 
@@ -79,7 +79,7 @@ fun HomeScreenBody(
                     Spacer(Modifier.height(16.dp))
                     GamesSection(
                         title = stringResource(R.string.popular_txt),
-                        GamesList = mostPopularGames,
+                        gameList = mostPopularGames,
                         onGameSelected = {
                             navController.navigate(Routes.gameDetails(it.id))
                         },
@@ -87,19 +87,36 @@ fun HomeScreenBody(
                     Spacer(Modifier.height(16.dp))
                     GamesSection(
                         title = stringResource(R.string.new_txt),
-                        GamesList = newGames,
+                        gameList = newGames,
                         onGameSelected = {
                             navController.navigate(Routes.gameDetails(it.id))
                         },
                     )
                     Spacer(Modifier.height(16.dp))
-                    GamesSection(
-                        title = stringResource(R.string.upcoming_txt),
-                        GamesList = upcomingGames,
-                        onGameSelected = {
-                            navController.navigate(Routes.gameDetails(it.id))
-                        },
-                    )
+
+                    Column(modifier) {
+                        Text(
+                            text = stringResource(R.string.upcoming_txt),
+                            style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
+                            modifier = Modifier.padding(start = 16.dp),
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        LazyRow {
+                            items(items = upcomingRelease) { release ->
+                                Spacer(Modifier.width(13.dp))
+                                ReleaseCard(
+                                    release = release,
+                                    onClick = {
+                                        navController.navigate(Routes.gameDetails(release.gameId))
+                                    },
+                                )
+                            }
+                            item{
+                                Spacer(Modifier.width(16.dp))
+                            }
+                        }
+                    }
+
                     Spacer(Modifier.height(16.dp))
                     Text(
                         text = stringResource(R.string.highly_rated_txt),
@@ -146,7 +163,7 @@ fun HomeScreenBody(
 
 @Composable
 fun GamesSection(
-    GamesList: List<Game>,
+    gameList: List<Game>,
     title: String,
     onGameSelected: (Game) -> Unit,
     modifier: Modifier = Modifier,
@@ -159,9 +176,12 @@ fun GamesSection(
         )
         Spacer(Modifier.height(10.dp))
         LazyRow {
-            items(items = GamesList) { game ->
+            items(items = gameList) { game ->
                 Spacer(Modifier.width(14.dp))
                 LargeGameCard(game = game, onClick = { onGameSelected(game) })
+            }
+            item{
+                Spacer(Modifier.width(16.dp))
             }
         }
     }
@@ -243,7 +263,7 @@ fun HomeScreenPreview() {
             LazyColumn {
                 item {
                     GamesSection(
-                        GamesList = mostPopularGames,
+                        gameList = mostPopularGames,
                         onGameSelected = {}, title = "Popular Games"
                     )
                     Spacer(Modifier.height(16.dp))

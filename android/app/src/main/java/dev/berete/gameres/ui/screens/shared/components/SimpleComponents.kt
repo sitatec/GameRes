@@ -2,6 +2,7 @@ package dev.berete.gameres.ui.screens.shared.components
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material.icons.Icons
@@ -13,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -31,6 +33,7 @@ import androidx.navigation.Navigator
 import com.google.accompanist.coil.rememberCoilPainter
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
+import dev.berete.gameres.domain.models.Release
 import dev.berete.gameres.domain.models.enums.PlatformType
 import dev.berete.gameres.ui.Routes
 import dev.berete.gameres.ui.theme.*
@@ -208,7 +211,11 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
 
         Divider(modifier = Modifier.padding(top = 8.dp))
 
-        Row(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(
                 imageVector = Icons.Filled.Home,
                 contentDescription = null,
@@ -222,9 +229,13 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                 modifier = Modifier.clickable { navController.navigate(Routes.Home) }
             )
         }
-        Row(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(
-                imageVector = Icons.Filled.Home,
+                imageVector = Icons.Filled.Search,
                 contentDescription = null,
                 tint = MaterialTheme.colors.primary,
                 modifier = Modifier.size(22.dp),
@@ -237,7 +248,11 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
             )
         }
 
-        Row(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.upcoming_release_icon),
                 contentDescription = null,
@@ -253,7 +268,11 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
             )
         }
 
-        Row(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp)) {
+        Row(
+            Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp)
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.new_release_icon),
                 contentDescription = null,
@@ -312,7 +331,11 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
             }
         }
 
-        Row(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp)) {
+        Row(
+            Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp)
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.top_100_icon),
                 contentDescription = null,
@@ -348,6 +371,68 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                         .clickable { }
                         .padding(vertical = 8.dp),
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun ReleaseCard(release: Release, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Card(
+        Modifier
+            .clickable { onClick() }
+            .size(225.dp, 140.dp)
+            .then(modifier),
+        shape = MaterialTheme.shapes.medium,
+        elevation = 5.dp
+    ) {
+        Image(
+            painter = rememberCoilPainter(
+                request = release.artWorkUrl,
+                previewPlaceholder = R.drawable.apex_legends_artwork,
+            ),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+        )
+        Column(
+            verticalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier
+                .background(Color.Black.copy(0.75f))
+                .padding(8.dp),
+        ) {
+
+            Text(
+                text = release.gameName,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Image(
+                    painter = rememberCoilPainter(
+                        request = release.gameCoverUrl,
+                        previewPlaceholder = R.drawable.apex_legends_cover,
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .width(80.dp)
+                        .padding(end = 8.dp)
+                        .clip(MaterialTheme.shapes.small),
+                )
+                Column {
+                    ProvideTextStyle(
+                        value = TextStyle(
+                            fontSize = 14.sp,
+                        ),
+                    ) {
+                        Text(release.formattedDate, color = MaterialTheme.colors.primary)
+                        Text(release.region)
+                        Text(release.platform.name, color = MaterialTheme.colors.primary)
+                    }
+                }
             }
         }
     }

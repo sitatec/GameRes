@@ -1,8 +1,8 @@
 package dev.berete.gameres.domain.repositories
 
-import dev.berete.gameres.domain.data_providers.local.CachedGamesProvider
 import dev.berete.gameres.domain.data_providers.remote.GameListProvider
 import dev.berete.gameres.domain.models.Game
+import dev.berete.gameres.domain.models.Release
 import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.domain.models.enums.GameMode
 import javax.inject.Inject
@@ -46,18 +46,18 @@ class GameListRepository @Inject constructor(
     }
 
     /**
-     * Returns the games that will be released before the given [limitTimestamp] and after the current
-     * date plus one day, if no [limitTimestamp] is passed, there will not be a limit date.
+     * Returns the [Release]s that will happen before the given [limitTimestamp] and after the current
+     * date plus one day, if no [limitTimestamp] is given, there will not be a limit date.
      * The result may be retrieved from the local database if an internet connection is not available
      */
-    suspend fun getUpcomingGames(
+    suspend fun getUpcomingReleases(
         limitTimestamp: Long = 0,
         page: Int = 0,
         count: Int = GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST,
         gameGenre: GameGenre? = null,
         gameMode: GameMode? = null,
-    ): List<Game> {
-        return gameListProvider.getUpcomingGames(limitTimestamp, page, count, gameGenre, gameMode)
+    ): List<Release> {
+        return gameListProvider.getUpcomingReleases(limitTimestamp, page, count, gameGenre, gameMode)
     }
 
 

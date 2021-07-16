@@ -10,11 +10,13 @@ import proto.Game as GameDTO
 import dev.berete.gameres.domain.data_providers.remote.GameDetailsProvider
 import dev.berete.gameres.domain.data_providers.remote.GameListProvider
 import dev.berete.gameres.domain.models.Game
+import dev.berete.gameres.domain.models.Release
 import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.domain.models.enums.GameMode
 import dev.berete.gameres.domain.utils.toLowercaseExceptFirstChar
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
+import proto.ReleaseDate
 import java.util.*
 import kotlin.IllegalArgumentException
 
@@ -28,8 +30,8 @@ class IGDBAPIClient(
     private val gameSummaryFields =
         "name, cover.image_id, total_rating, platforms.name, screenshots.image_id, status, artworks.image_id, total_rating_count"
 
-    private val gameSummaryFieldsWithGamePrefix =
-        "game.name, game.cover.image_id, game.total_rating, game.platforms.name, game.status, game.artworks.image_id, game.total_rating_count"
+    private val releaseFields =
+        "date, region, game.name, game.cover.image_id, platform.name, game.artworks.image_id"//, game.status, game.artworks.image_id, game.total_rating_count"
 
     private val completeGameFields =
         "$gameSummaryFields, genres.name, game_modes.name, age_ratings.rating, first_release_date, themes.name, websites.category, websites.url," +
@@ -85,11 +87,11 @@ class IGDBAPIClient(
         }
     }
 
-    override suspend fun getUpcomingGames(
+    override suspend fun getUpcomingReleases(
         limitTimestamp: Long, page: Int, count: Int,
         gameGenre: GameGenre?,
         gameMode: GameMode?,
-    ): List<Game> {
+    ): List<Release> {
         val numberOfGamesToFetch = regularizeGameCount(count)
         val tomorrowTimeStamp =
             Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.timeInMillis
@@ -100,7 +102,7 @@ class IGDBAPIClient(
         }
 
         val queryBuilder = apiCalypse.newBuilder()
-            .fields(gameSummaryFieldsWithGamePrefix)
+            .fields(releaseFields)
             .where("date > ${tomorrowTimeStamp.toFixed10Digits()} $maxReleaseDateQuery & game.platforms = (${getIGDBPlatformIDs()})" +
                     "${getGameGenreQuery(gameGenre, "game.")}  ${getGameModeQuery(gameMode, "game.")}")
             .sort("date", Sort.ASCENDING)
@@ -108,7 +110,7 @@ class IGDBAPIClient(
             .offset(page * count)
 
         return withContext(IO) {
-            iGDBAPIWrapper.releaseDates(queryBuilder).map { it.game.toDomainGame() }
+            iGDBAPIWrapper.releaseDates(queryBuilder).map(ReleaseDate::toDomainRelease)
         }
     }
 
