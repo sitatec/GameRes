@@ -1,18 +1,18 @@
 package dev.berete.gameres.ui.screens.shared.components
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -94,7 +94,9 @@ fun GameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier) {
                     previewPlaceholder = R.drawable.apex_legends_cover,
                 ),
                 contentDescription = game.name,
-                modifier = Modifier.fillMaxWidth().height(130.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(130.dp),
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.TopCenter
             )
@@ -193,23 +195,79 @@ fun GameResTopAppBar(
 fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
     val currentDate = Clock.System.now()
 
-    Column(modifier.fillMaxSize()) {
+    Column(
+        modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.nav_drawer_header),
+            contentDescription = null,
+            modifier = Modifier.fillMaxWidth(),
+        )
 
-        Row(Modifier.padding(top = 16.dp)) {
+        Divider(modifier = Modifier.padding(top = 8.dp))
+
+        Row(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Filled.Home,
+                contentDescription = null,
+                tint = MaterialTheme.colors.primary,
+                modifier = Modifier.size(22.dp),
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                "Home",
+                style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+                modifier = Modifier.clickable { navController.navigate(Routes.Home) }
+            )
+        }
+        Row(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Filled.Home,
+                contentDescription = null,
+                tint = MaterialTheme.colors.primary,
+                modifier = Modifier.size(22.dp),
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                "Search",
+                style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+                modifier = Modifier.clickable { navController.navigate(Routes.Search) }
+            )
+        }
+
+        Row(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painterResource(id = R.drawable.upcoming_release_icon),
+                contentDescription = null,
+                tint = MaterialTheme.colors.primary,
+                modifier = Modifier.size(19.dp),
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                "Upcoming Releases",
+                style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+            )
+        }
+
+        Row(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp)) {
             Image(
                 painter = painterResource(id = R.drawable.new_release_icon),
                 contentDescription = null,
                 modifier = Modifier
-                    .padding(top = 2.dp)
-                    .size(22.dp),
+                    .padding(top = 3.dp)
+                    .size(19.dp),
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
             Column {
                 Text(
                     "New Games",
-                    style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
+                    style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
                 )
                 Text(
                     "Last 7 days",
@@ -254,22 +312,22 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
             }
         }
 
-        Row(Modifier.padding(top = 16.dp)) {
+        Row(Modifier.padding(horizontal = 16.dp).padding(top = 16.dp)) {
             Icon(
                 painter = painterResource(id = R.drawable.top_100_icon),
                 contentDescription = null,
                 tint = MaterialTheme.colors.primary,
                 modifier = Modifier
-                    .padding(top = 2.dp)
-                    .size(24.dp),
+                    .padding(top = 3.dp)
+                    .size(20.dp),
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
             Column {
                 Text(
                     "Top 100",
-                    style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
+                    style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
                 )
 
                 Text(
@@ -292,40 +350,6 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                 )
             }
         }
-
-        Row(Modifier.padding(top = 16.dp)) {
-            Image(
-                painter = painterResource(id = R.drawable.upcoming_release_icon),
-                contentDescription = null,
-                modifier = Modifier
-                    .padding(top = 2.dp)
-                    .size(22.dp),
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Column {
-                Text(
-                    "Upcoming Releases",
-                    style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
-                )
-
-                Text(
-                    "Next week",
-                    Modifier
-                        .clickable { }
-                        .padding(vertical = 8.dp),
-                )
-                Text(
-                    "Next month",
-                    Modifier
-                        .clickable { }
-                        .padding(vertical = 8.dp),
-                )
-            }
-
-        }
-
     }
 }
 

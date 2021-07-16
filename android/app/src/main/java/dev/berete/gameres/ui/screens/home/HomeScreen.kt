@@ -45,7 +45,6 @@ fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
                 navController = navController,
                 modifier = Modifier
                     .background(MaterialTheme.colors.surface)
-                    .padding(16.dp),
             )
         }
     ) {
@@ -97,7 +96,9 @@ fun HomeScreenBody(
                     GamesSection(
                         title = stringResource(R.string.upcoming_txt),
                         GamesList = upcomingGames,
-                        onGameSelected = {},
+                        onGameSelected = {
+                            navController.navigate(Routes.gameDetails(it.id))
+                        },
                     )
                     Spacer(Modifier.height(16.dp))
                     Text(
