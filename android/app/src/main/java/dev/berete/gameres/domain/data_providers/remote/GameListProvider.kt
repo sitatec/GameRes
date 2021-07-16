@@ -38,6 +38,7 @@ interface GameListProvider {
      * Returns the [Release]s that will happen before the given [limitTimestamp] and after the current
      * date plus one day, if no [limitTimestamp] is given, there will not be a limit date.
      */
+    // TODO create a release provider interface and move this method their.
     suspend fun getUpcomingReleases(
         limitTimestamp: Long = 0,
         page: Int = 0,

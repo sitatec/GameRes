@@ -265,6 +265,7 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
             Text(
                 "Upcoming Releases",
                 style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+                modifier = Modifier.clickable { navController.navigate(Routes.UpcomingReleases) }
             )
         }
 
@@ -381,7 +382,7 @@ fun ReleaseCard(release: Release, onClick: () -> Unit, modifier: Modifier = Modi
     Card(
         Modifier
             .clickable { onClick() }
-            .size(225.dp, 140.dp)
+            .size(250.dp, 130.dp)
             .then(modifier),
         shape = MaterialTheme.shapes.medium,
         elevation = 5.dp
@@ -394,46 +395,42 @@ fun ReleaseCard(release: Release, onClick: () -> Unit, modifier: Modifier = Modi
             contentDescription = null,
             contentScale = ContentScale.Crop,
         )
-        Column(
-            verticalArrangement = Arrangement.SpaceEvenly,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .background(Color.Black.copy(0.75f))
+                .fillMaxWidth()
+                .background(Color.Black.copy(0.8f))
                 .padding(8.dp),
         ) {
-
-            Text(
-                text = release.gameName,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
+            Image(
+                painter = rememberCoilPainter(
+                    request = release.gameCoverUrl,
+                    previewPlaceholder = R.drawable.apex_legends_cover,
+                ),
+                contentDescription = null,
+                modifier = Modifier
+                    .width(80.dp)
+                    .padding(end = 8.dp)
+                    .clip(MaterialTheme.shapes.small),
             )
-            Spacer(modifier = Modifier.height(5.dp))
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Image(
-                    painter = rememberCoilPainter(
-                        request = release.gameCoverUrl,
-                        previewPlaceholder = R.drawable.apex_legends_cover,
-                    ),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .width(80.dp)
-                        .padding(end = 8.dp)
-                        .clip(MaterialTheme.shapes.small),
+            Column {
+                Text(
+                    text = release.gameName,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
-                Column {
-                    ProvideTextStyle(
-                        value = TextStyle(
-                            fontSize = 14.sp,
-                        ),
-                    ) {
-                        Text(release.formattedDate, color = MaterialTheme.colors.primary)
-                        Text(release.region)
-                        Text(release.platform.name, color = MaterialTheme.colors.primary)
-                    }
+                Spacer(modifier = Modifier.height(4.dp))
+                ProvideTextStyle(
+                    value = TextStyle(
+                        fontSize = 14.sp,
+                    ),
+                ) {
+                    Text(release.formattedDate, color = MaterialTheme.colors.primary)
+                    Text(release.region)
+                    Text(release.platform.name, color = MaterialTheme.colors.primary)
                 }
             }
+
         }
     }
 }

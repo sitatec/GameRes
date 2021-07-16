@@ -17,11 +17,13 @@ import dev.berete.gameres.ui.screens.game_details.GameDetailsViewModel
 import dev.berete.gameres.ui.screens.home.HomeScreen
 import dev.berete.gameres.ui.screens.new_games.NewGamesScreen
 import dev.berete.gameres.ui.screens.new_games.NewGamesViewModel
+import dev.berete.gameres.ui.screens.upcoming_releases.UpcomingReleaseScreen
 
 object Routes {
     const val Home = "home"
     const val GameDetails = "game_details/{gameId}"
     const val NewGames = "new_games/{minReleaseTimestamp}/{subtitle}"
+    const val UpcomingReleases = "upcoming_releases"
     const val Search = "search"
 
     fun gameDetails(gameId: Long) = "game_details/$gameId"
@@ -67,6 +69,10 @@ fun Navigation() {
                 navController = navController,
                 subtitle = subtitle,
             )
+        }
+
+        composable(Routes.UpcomingReleases){
+            UpcomingReleaseScreen(viewModel = hiltViewModel(), navController = navController)
         }
     }
 }
