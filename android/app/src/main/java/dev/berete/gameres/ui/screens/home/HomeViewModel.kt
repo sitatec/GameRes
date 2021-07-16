@@ -13,6 +13,7 @@ import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.domain.models.enums.GameMode
 import dev.berete.gameres.domain.repositories.GameListRepository
 import dev.berete.gameres.ui.screens.shared.view_models.BaseViewModel
+import dev.berete.gameres.ui.utils.getYearTimestamp
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
@@ -44,9 +45,6 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
 
     private val _upComingGames: MutableLiveData<List<Game>> = MutableLiveData(emptyList())
     val upComingGames: LiveData<List<Game>> = _upComingGames
-
-    var isNextPageLoading by mutableStateOf(false)
-        private set
 
     init {
         fetchNewGames()

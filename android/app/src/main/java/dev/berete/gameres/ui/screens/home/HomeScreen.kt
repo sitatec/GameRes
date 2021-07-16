@@ -31,6 +31,7 @@ import dev.berete.gameres.ui.screens.shared.components.*
 import dev.berete.gameres.ui.theme.*
 import dev.berete.gameres.ui.utils.FakeGameList
 import dev.berete.gameres.ui.utils.bannerUrl
+import dev.berete.gameres.ui.utils.gameTypeNames
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
@@ -42,7 +43,6 @@ fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
         drawerContent = {
             NavDrawer(
                 navController = navController,
-                currentRoute = Routes.Home,
                 modifier = Modifier
                     .background(MaterialTheme.colors.surface)
                     .padding(16.dp),
@@ -67,7 +67,7 @@ fun HomeScreenBody(
 
     Column {
 
-        Tabs(titles = viewModel.gameTypeNames, viewModel::onGameTypeSelected)
+        Tabs(titles = gameTypeNames, viewModel::onGameTypeSelected)
 
         val numberOfItemsByRow = LocalConfiguration.current.screenWidthDp / 200
 

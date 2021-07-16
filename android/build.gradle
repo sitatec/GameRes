@@ -18,6 +18,15 @@ buildscript {
         // in the individual module build.gradle files
     }
 }
+
+allprojects {
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+        kotlinOptions {
+            freeCompilerArgs += '-Xopt-in=kotlin.RequiresOptIn'
+        }
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }

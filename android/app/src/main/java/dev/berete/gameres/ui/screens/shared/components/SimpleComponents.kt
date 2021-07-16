@@ -26,14 +26,26 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
+import androidx.navigation.Navigator
 import com.google.accompanist.coil.rememberCoilPainter
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.enums.PlatformType
+import dev.berete.gameres.ui.Routes
 import dev.berete.gameres.ui.theme.*
 import dev.berete.gameres.ui.utils.bannerUrl
+import dev.berete.gameres.ui.utils.getYearTimestamp
 import dev.berete.gameres.ui.utils.logo
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.toLocalDateTime
+import java.sql.Timestamp
+import java.time.Instant
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
 
 @Composable
 fun GameResLogo(style: TextStyle = MaterialTheme.typography.body1) {
@@ -143,7 +155,14 @@ fun GameScore(
 fun GameResTopAppBar(
     title: @Composable () -> Unit,
     scaffoldState: ScaffoldState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    actions: @Composable RowScope.() -> Unit = {
+        Icon(
+            imageVector = Icons.Default.Search,
+            contentDescription = stringResource(R.string.search_btn_content_description),
+            modifier = Modifier.padding(end = 8.dp),
+        )
+    },
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -158,17 +177,11 @@ fun GameResTopAppBar(
                 Icon(
                     imageVector = Icons.Default.Menu,
                     contentDescription = stringResource(R.string.menu_button_content_description),
-                    modifier = modifier.padding(start = 8.dp),
+                    modifier = Modifier.padding(start = 8.dp),
                 )
             }
         },
-        actions = {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = stringResource(R.string.search_btn_content_description),
-                modifier = modifier.padding(end = 8.dp),
-            )
-        },
+        actions = actions,
         modifier = modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .height(50.dp)
@@ -177,8 +190,11 @@ fun GameResTopAppBar(
     )
 }
 
+@OptIn(ExperimentalTime::class)
 @Composable
-fun NavDrawer(navController: NavController, currentRoute: String, modifier: Modifier = Modifier) {
+fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
+    val currentDate = Clock.System.now()
+
     Column(modifier.fillMaxSize()) {
 
         Row(Modifier.padding(top = 16.dp)) {
@@ -194,25 +210,47 @@ fun NavDrawer(navController: NavController, currentRoute: String, modifier: Modi
 
             Column {
                 Text(
-                    "New releases",
+                    "New Games",
                     style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
                 )
                 Text(
                     "Last 7 days",
                     Modifier
-                        .clickable { }
+                        .clickable {
+                            navController.navigate(
+                                Routes.newGames(
+                                    currentDate
+                                        .minus(Duration.days(7))
+                                        .toEpochMilliseconds(),
+                                    "Released in the last 7 days",
+                                )
+                            )
+                        }
                         .padding(vertical = 8.dp),
                 )
                 Text(
                     "Last 30 days",
                     Modifier
-                        .clickable { }
+                        .clickable {
+                            navController.navigate(
+                                Routes.newGames(
+                                    currentDate
+                                        .minus(Duration.days(30))
+                                        .toEpochMilliseconds(),
+                                    "Released in the last 30 days",
+                                )
+                            )
+                        }
                         .padding(vertical = 8.dp),
                 )
                 Text(
                     "This year",
                     Modifier
-                        .clickable { }
+                        .clickable {
+                            navController.navigate(
+                                Routes.newGames(getYearTimestamp(), "Released this year"),
+                            )
+                        }
                         .padding(vertical = 8.dp),
                 )
             }
@@ -270,7 +308,7 @@ fun NavDrawer(navController: NavController, currentRoute: String, modifier: Modi
 
             Column {
                 Text(
-                    "Upcoming releases",
+                    "Upcoming Releases",
                     style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
                 )
 

@@ -6,6 +6,7 @@ import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.domain.models.enums.PlatformType
 import dev.berete.gameres.domain.models.enums.PlatformType.*
 import java.text.SimpleDateFormat
+import java.util.*
 
 val PlatformType.logo: Int
     get() = when (this) {
@@ -30,13 +31,27 @@ val Game.bannerUrl: String
 val Game.allImageUrls: List<String>
     get() = artWorkUrls + screenshotUrls
 
-val Game.formattedInitialReleaseDate : String
+val Game.formattedInitialReleaseDate: String
     get() {
-       return SimpleDateFormat.getDateInstance().format(firstReleaseDate!!)
+        return SimpleDateFormat.getDateInstance().format(firstReleaseDate!!)
     }
 
 /**
  * Game genre names to show in the tabs
  */
-val gameTypeNames : List<String>
-    get() = listOf(*GameGenre.genreNames.toTypedArray(), "All", "Battle Royale", "Multiplayer").sorted()
+val gameTypeNames: List<String>
+    get() = listOf("ALL") + listOf(
+        *GameGenre.genreNames.toTypedArray(),
+        "BATTLE ROYALE",
+        "MULTIPLAYER"
+    ).sorted()
+
+/**
+ * Returns the timestamp of the given [year] or the current year if no parameter is given,
+ * the month will be _January_ and the day will be the first of month (01).
+ *
+ * I.e the timestamp of 01-01-[year]
+ */
+fun getYearTimestamp(year: Int = Calendar.getInstance().get(Calendar.YEAR)): Long {
+    return Calendar.getInstance().apply { set(year, 0, 1) }.timeInMillis
+}

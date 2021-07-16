@@ -16,7 +16,8 @@ abstract class BaseViewModel : ViewModel() {
 
     protected lateinit var fetchNextPage: suspend () -> Unit
 
-    private var isNextPageLoading by mutableStateOf(false)
+    var isNextPageLoading by mutableStateOf(false)
+        private set
 
     fun onGameTypeSelected(genreName: String) {
         when (genreName) {
@@ -39,15 +40,5 @@ abstract class BaseViewModel : ViewModel() {
             fetchNextPage()
             isNextPageLoading = false
         }
-    }
-
-    /**
-     * Returns the timestamp of the given [year] or the current year if no parameter is given,
-     * the month will be _January_ and the day will be the first of month (01).
-     *
-     * I.e the timestamp of 01-01-[year]
-     */
-    protected fun getYearTimestamp(year: Int = Calendar.getInstance().get(Calendar.YEAR)): Long {
-        return Calendar.getInstance().apply { set(year, 0, 1) }.timeInMillis
     }
 }
