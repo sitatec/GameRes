@@ -8,14 +8,13 @@ import androidx.lifecycle.viewModelScope
 import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.domain.models.enums.GameMode
 import kotlinx.coroutines.launch
-import java.util.*
 
 abstract class BaseViewModel : ViewModel() {
 
     protected var currentPage = 0
-
     protected lateinit var fetchNextPage: suspend () -> Unit
-
+    var isLastPageReached by mutableStateOf(false)
+        protected set
     var isNextPageLoading by mutableStateOf(false)
         private set
 
@@ -35,6 +34,8 @@ abstract class BaseViewModel : ViewModel() {
     protected abstract fun filterByGameGenre(gameGenre: GameGenre)
 
     fun loadNextPage() {
+        if(isLastPageReached) return
+
         viewModelScope.launch {
             isNextPageLoading = true
             fetchNextPage()

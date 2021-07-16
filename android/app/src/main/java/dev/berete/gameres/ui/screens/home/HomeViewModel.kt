@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.berete.gameres.domain.data_providers.remote.GameListProvider
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.domain.models.enums.GameMode
@@ -57,6 +58,8 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
                 endTimestamp = getYearTimestamp(),
                 page = ++currentPage,
             ).sortedByDescending { it.rating }
+
+            isLastPageReached = loadedGames.size < GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST
 
             _gameList.value = _gameList.value!!.plus(loadedGames)
         }
@@ -115,6 +118,7 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
                 gameMode = gameMode,
             ).sortedByDescending { it.rating }
 
+            isLastPageReached = loadedGames.size < GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST
             _gameList.value = _gameList.value!!.plus(loadedGames)
         }
     }
@@ -138,6 +142,7 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
                 gameGenre = gameGenre,
             ).sortedByDescending { it.rating }
 
+            isLastPageReached = loadedGames.size < GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST
             _gameList.value = _gameList.value!!.plus(loadedGames)
         }
     }

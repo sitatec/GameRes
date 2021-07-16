@@ -94,9 +94,7 @@ fun GameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier) {
                     previewPlaceholder = R.drawable.apex_legends_cover,
                 ),
                 contentDescription = game.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(130.dp),
+                modifier = Modifier.fillMaxWidth().height(130.dp),
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.TopCenter
             )

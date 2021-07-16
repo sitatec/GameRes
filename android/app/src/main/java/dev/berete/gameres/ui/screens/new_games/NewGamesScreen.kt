@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -65,7 +66,11 @@ fun NewGamesScreen(
             },
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-            NewGamesScreenBody(viewModel = viewModel, navController = navController, subtitle = subtitle,)
+            NewGamesScreenBody(
+                viewModel = viewModel,
+                navController = navController,
+                subtitle = subtitle,
+            )
         }
     } else {
         NewGamesScreenPlaceholder()
@@ -74,7 +79,11 @@ fun NewGamesScreen(
 
 @ExperimentalFoundationApi
 @Composable
-fun NewGamesScreenBody(viewModel: NewGamesViewModel, navController: NavController, subtitle: String) {
+fun NewGamesScreenBody(
+    viewModel: NewGamesViewModel,
+    navController: NavController,
+    subtitle: String
+) {
     val newGames by viewModel.newGame.observeAsState(emptyList())
     val numberOfItemsByRow = LocalConfiguration.current.screenWidthDp / 200
 
@@ -85,9 +94,9 @@ fun NewGamesScreenBody(viewModel: NewGamesViewModel, navController: NavControlle
             onRefresh = { viewModel.loadNextPage() },
             bottomRefreshIndicatorState = rememberSwipeRefreshState(isRefreshing = viewModel.isNextPageLoading),
         ) {
-            LazyColumn( Modifier.padding(horizontal = 16.dp)) {
+            LazyColumn(Modifier.padding(horizontal = 16.dp)) {
 
-                item{
+                item {
                     Spacer(Modifier.height(20.dp))
                     Text(
                         text = subtitle,
@@ -111,11 +120,23 @@ fun NewGamesScreenBody(viewModel: NewGamesViewModel, navController: NavControlle
                         }
                         // If the last row do not contains enough items to fill the row without
                         // expanding them, we add placeholders to keep the same size for all items.
-                        repeat(numberOfItemsByRow - rowItems.size){
-                            Box(Modifier.weight(1F)){}
+                        repeat(numberOfItemsByRow - rowItems.size) {
+                            Box(Modifier.weight(1F)) {}
                         }
                     }
                     Spacer(Modifier.height(14.dp))
+                }
+
+                if (viewModel.isLastPageReached) {
+                    item {
+                        Card(elevation = 15.dp, backgroundColor = Color.Gray.copy(0.1F)) {
+                            Text(
+                                "Oops, there are no more games to load, you have reached the end of the page.",
+                                modifier = Modifier.padding(16.dp),
+                            )
+                        }
+                        Spacer(Modifier.height(16.dp))
+                    }
                 }
 
             }

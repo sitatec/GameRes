@@ -125,6 +125,18 @@ fun HomeScreenBody(
                     }
                     Spacer(Modifier.height(14.dp))
                 }
+
+                if (viewModel.isLastPageReached) {
+                    item {
+                        Card(elevation = 15.dp, backgroundColor = Color.Gray.copy(0.1F)) {
+                            Text(
+                                "Oops, there are no more games to load, you have reached the end of the page.",
+                                modifier = Modifier.padding(16.dp),
+                            )
+                        }
+                        Spacer(Modifier.height(16.dp))
+                    }
+                }
             }
         }
     }
