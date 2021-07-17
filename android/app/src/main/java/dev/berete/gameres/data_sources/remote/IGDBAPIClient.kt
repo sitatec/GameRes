@@ -2,10 +2,13 @@ package dev.berete.gameres.data_sources.remote
 
 import com.api.igdb.apicalypse.APICalypse
 import com.api.igdb.apicalypse.Sort
+import com.api.igdb.exceptions.RequestException
 import com.api.igdb.request.IGDBWrapper
 import com.api.igdb.request.games
 import com.api.igdb.request.releaseDates
 import com.api.igdb.utils.ImageSize
+import dev.berete.gameres.BuildConfig
+import dev.berete.gameres.data_sources.remote.access_token.AccessTokenProvider
 import proto.Game as GameDTO
 import dev.berete.gameres.domain.data_providers.remote.GameDetailsProvider
 import dev.berete.gameres.domain.data_providers.remote.GameListProvider
@@ -14,7 +17,9 @@ import dev.berete.gameres.domain.models.Release
 import dev.berete.gameres.domain.models.enums.GameGenre
 import dev.berete.gameres.domain.models.enums.GameMode
 import dev.berete.gameres.domain.utils.toLowercaseExceptFirstChar
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import proto.ReleaseDate
 import java.util.*
@@ -23,9 +28,29 @@ import kotlin.IllegalArgumentException
 class IGDBAPIClient(
     private val iGDBAPIWrapper: IGDBWrapper,
     private val apiCalypse: APICalypse,
+    private val accessTokenProvider: AccessTokenProvider,
 ) : GameListProvider, GameDetailsProvider {
 
     //TODO REFACTORING: delegate the common code between the get* methods to another function.
+
+    init {
+        val threadLock = Object()
+        CoroutineScope(IO).launch {
+            val accessToken = accessTokenProvider.getAccessToken()
+            iGDBAPIWrapper.setCredentials(BuildConfig.CLIENT_ID, accessToken)
+
+            synchronized(threadLock) {
+                threadLock.notify() // unblock the thread block below with [Object.wait()]
+            }
+        }
+        // Waiting for the iGDBAPIWrapper to be initialized with the credential, otherwise any api
+        // call will throw a exception.
+        synchronized(threadLock) {
+            threadLock.wait(2000)
+        }
+    }
+
+    private var numberRetriedRequests = 0
 
     private val gameSummaryFields =
         "name, cover.image_id, total_rating, platforms.name, screenshots.image_id, status, artworks.image_id, total_rating_count"
@@ -60,7 +85,35 @@ class IGDBAPIClient(
             .offset(page * count)
 
         return withContext(IO) {
-            iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
+            try {
+                iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame).also {
+                    numberRetriedRequests = 0 // reset on success
+                }
+            } catch (e: RequestException) {
+                // TODO REFACTOR
+                when {
+                    // The server will return et response with status code 429 if it receive more than 4
+                    // request by second, if that happen we retry again and again 3 times.
+                    e.statusCode == 429 && numberRetriedRequests <= 3 -> {
+                        numberRetriedRequests++
+                        getPopularGames(startTimeStamp, endTimestamp, page, count, gameGenre, gameMode)
+                    }
+
+                    // When the access token is invalid the server return a response with status code 401.
+                    e.statusCode == 401 -> {
+                        iGDBAPIWrapper.setCredentials(
+                            BuildConfig.CLIENT_ID,
+                            accessTokenProvider.fetchFromServerAndSave()
+                        )
+                        getPopularGames(startTimeStamp, endTimestamp, page, count, gameGenre, gameMode)
+                    }
+
+                    else -> {
+                        numberRetriedRequests = 0
+                        throw e
+                    }
+                }
+            }
         }
     }
 
@@ -77,14 +130,46 @@ class IGDBAPIClient(
             .fields(gameSummaryFields)
             .where(
                 "first_release_date > ${timestamp.toFixed10Digits()} & first_release_date < ${todayTimestamp.toFixed10Digits()}" +
-                        " & platforms = (${getIGDBPlatformIDs()}) ${getGameGenreQuery(gameGenre)}  ${getGameModeQuery(gameMode)}",
+                        " & platforms = (${getIGDBPlatformIDs()}) ${getGameGenreQuery(gameGenre)}  ${
+                            getGameModeQuery(
+                                gameMode
+                            )
+                        }",
             )
             .sort("first_release_date", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
             .offset(page * count)
 
         return withContext(IO) {
-            iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
+            try {
+                iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame).also {
+                    numberRetriedRequests = 0 // reset on success
+                }
+            } catch (e: RequestException) {
+                // TODO REFACTOR
+                // The server will return et response with status code 429 if it receive more than 4
+                // request by second, if that happen we retry again and again 3 times.
+                when {
+                    e.statusCode == 429 && numberRetriedRequests <= 3 -> {
+                        numberRetriedRequests++
+                        getGamesReleasedAfter(timestamp, page, count, gameGenre, gameMode)
+                    }
+
+                    // When the access token is invalid the server return a response with status code 401.
+                    e.statusCode == 401 -> {
+                        iGDBAPIWrapper.setCredentials(
+                            BuildConfig.CLIENT_ID,
+                            accessTokenProvider.fetchFromServerAndSave()
+                        )
+                        getGamesReleasedAfter(timestamp, page, count, gameGenre, gameMode)
+                    }
+
+                    else -> {
+                        numberRetriedRequests = 0
+                        throw e
+                    }
+                }
+            }
         }
     }
 
@@ -105,14 +190,47 @@ class IGDBAPIClient(
             .fields(releaseFields)
             .where(
                 "date >= ${todayTimestamp.toFixed10Digits()} $maxReleaseDateQuery & game.platforms = (${getIGDBPlatformIDs()})" +
-                        "${getGameGenreQuery(gameGenre, "game.")} ${getGameModeQuery(gameMode, "game.")}"
+                        "${getGameGenreQuery(gameGenre, "game.")} ${
+                            getGameModeQuery(
+                                gameMode,
+                                "game."
+                            )
+                        }"
             )
             .sort("date", Sort.ASCENDING)
             .limit(numberOfGamesToFetch)
             .offset(page * count)
 
         return withContext(IO) {
-            iGDBAPIWrapper.releaseDates(queryBuilder).map(ReleaseDate::toDomainRelease)
+            try {
+                iGDBAPIWrapper.releaseDates(queryBuilder).map(ReleaseDate::toDomainRelease).also {
+                    numberRetriedRequests = 0 // reset on success
+                }
+            } catch (e: RequestException) {
+                // TODO REFACTOR
+                // The server will return et response with status code 429 if it receive more than 4
+                // request by second, if that happen we retry again and again 3 times.
+                when {
+                    e.statusCode == 429 && numberRetriedRequests <= 3 -> {
+                        numberRetriedRequests++
+                        getUpcomingReleases(limitTimestamp, page, count, gameGenre, gameMode)
+                    }
+
+                    // When the access token is invalid the server return a response with status code 401.
+                    e.statusCode == 401 -> {
+                        iGDBAPIWrapper.setCredentials(
+                            BuildConfig.CLIENT_ID,
+                            accessTokenProvider.fetchFromServerAndSave()
+                        )
+                        getUpcomingReleases(limitTimestamp, page, count, gameGenre, gameMode)
+                    }
+
+                    else -> {
+                        numberRetriedRequests = 0
+                        throw e
+                    }
+                }
+            }
         }
     }
 
@@ -165,7 +283,35 @@ class IGDBAPIClient(
             .where("id = (${gameIds.joinToString()})")
 
         return withContext(IO) {
-            iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
+            try {
+                iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame).also {
+                    numberRetriedRequests = 0 // reset on success
+                }
+            } catch (e: RequestException) {
+                // TODO REFACTOR
+                // The server will return et response with status code 429 if it receive more than 4
+                // request by second, if that happen we retry again and again 3 times.
+                when {
+                    e.statusCode == 429 && numberRetriedRequests <= 3 -> {
+                        numberRetriedRequests++
+                        getGamesByIds(gameIds)
+                    }
+
+                    // When the access token is invalid the server return a response with status code 401.
+                    e.statusCode == 401 -> {
+                        iGDBAPIWrapper.setCredentials(
+                            BuildConfig.CLIENT_ID,
+                            accessTokenProvider.fetchFromServerAndSave()
+                        )
+                        getGamesByIds(gameIds)
+                    }
+
+                    else -> {
+                        numberRetriedRequests = 0
+                        throw e
+                    }
+                }
+            }
         }
     }
 
@@ -175,16 +321,74 @@ class IGDBAPIClient(
             .search(query)
             .where("version_parent = null & first_release_date != null")
 
+
         return withContext(IO) {
-            iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
+            try {
+                iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame).also {
+                    numberRetriedRequests = 0 // reset on success
+                }
+            } catch (e: RequestException) {
+                // TODO REFACTOR
+                // The server will return et response with status code 429 if it receive more than 4
+                // request by second, if that happen we retry again and again 3 times.
+                when {
+                    e.statusCode == 429 && numberRetriedRequests <= 3 -> {
+                        numberRetriedRequests++
+                        searchGames(query)
+                    }
+
+                    // When the access token is invalid the server return a response with status code 401.
+                    e.statusCode == 401 -> {
+                        iGDBAPIWrapper.setCredentials(
+                            BuildConfig.CLIENT_ID,
+                            accessTokenProvider.fetchFromServerAndSave()
+                        )
+                        searchGames(query)
+                    }
+
+                    else -> {
+                        numberRetriedRequests = 0
+                        throw e
+                    }
+                }
+            }
         }
     }
 
     override suspend fun getGameDetails(gameId: Long): Game {
         val queryBuilder = apiCalypse.newBuilder().fields(completeGameFields).where("id = $gameId")
 
+
         return withContext(IO) {
-            iGDBAPIWrapper.games(queryBuilder).first().toDomainGame(ImageSize.HD)
+            try {
+                iGDBAPIWrapper.games(queryBuilder).first().toDomainGame(ImageSize.HD).also {
+                    numberRetriedRequests = 0 // reset on success
+                }
+            } catch (e: RequestException) {
+                // TODO REFACTOR
+                // The server will return et response with status code 429 if it receive more than 4
+                // request by second, if that happen we retry again and again 3 times.
+                when {
+                    e.statusCode == 429 && numberRetriedRequests <= 3 -> {
+                        numberRetriedRequests++
+                        getGameDetails(gameId)
+                    }
+
+                    // When the access token is invalid the server return a response with status code 401.
+                    e.statusCode == 401 -> {
+                        iGDBAPIWrapper.setCredentials(
+                            BuildConfig.CLIENT_ID,
+                            accessTokenProvider.fetchFromServerAndSave()
+                        )
+                        getGameDetails(gameId)
+                    }
+
+                    else -> {
+                        numberRetriedRequests = 0
+                        throw e
+                    }
+                }
+            }
         }
     }
 

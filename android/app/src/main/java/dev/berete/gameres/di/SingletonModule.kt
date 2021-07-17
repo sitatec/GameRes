@@ -26,23 +26,7 @@ class SingletonModule {
 
     @Provides
     fun providesIGDBAPIClient(accessTokenProvider: AccessTokenProvider): IGDBAPIClient {
-        lateinit var iGDBAPIClient: IGDBAPIClient
-        val threadLock = Object()
-        CoroutineScope(IO).launch {
-            val accessToken = accessTokenProvider.getAccessToken()
-            val iGdbWrapper = IGDBWrapper.apply {
-                setCredentials(BuildConfig.CLIENT_ID, accessToken)
-            }
-
-            iGDBAPIClient = IGDBAPIClient(iGdbWrapper, APICalypse())
-            synchronized(threadLock) {
-                threadLock.notify()
-            }
-        }
-        synchronized(threadLock) {
-            threadLock.wait(3000)
-        }
-        return iGDBAPIClient
+        return IGDBAPIClient(IGDBWrapper, APICalypse(), accessTokenProvider)
     }
 
     @Provides
