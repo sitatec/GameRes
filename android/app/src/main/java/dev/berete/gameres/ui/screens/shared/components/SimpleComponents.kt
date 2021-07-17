@@ -200,16 +200,15 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
 
     Column(
         modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .fillMaxHeight()
+            .verticalScroll(rememberScrollState())
+            .background(MaterialTheme.colors.surface),
     ) {
         Image(
             painter = painterResource(id = R.drawable.nav_drawer_header),
             contentDescription = null,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.padding(start = 40.dp, end = 56.dp),
         )
-
-        Divider(modifier = Modifier.padding(top = 8.dp))
 
         Row(
             Modifier
@@ -222,17 +221,16 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                 tint = MaterialTheme.colors.primary,
                 modifier = Modifier.size(22.dp),
             )
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
                 "Home",
                 style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-                modifier = Modifier.clickable { navController.navigate(Routes.Home) }
+                modifier = Modifier.clickable { navController.navigate(Routes.Home) }.padding(8.dp)
             )
         }
         Row(
             Modifier
-                .padding(horizontal = 16.dp)
-                .padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Filled.Search,
@@ -240,18 +238,17 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                 tint = MaterialTheme.colors.primary,
                 modifier = Modifier.size(22.dp),
             )
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
                 "Search",
                 style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-                modifier = Modifier.clickable { navController.navigate(Routes.Search) }
+                modifier = Modifier.clickable { navController.navigate(Routes.Search) }.padding(8.dp)
             )
         }
 
         Row(
             Modifier
-                .padding(horizontal = 16.dp)
-                .padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.upcoming_release_icon),
@@ -260,19 +257,19 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                 modifier = Modifier.size(19.dp),
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(4.dp))
 
             Text(
                 "Upcoming Releases",
                 style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-                modifier = Modifier.clickable { navController.navigate(Routes.UpcomingReleases) }
+                modifier = Modifier.clickable { navController.navigate(Routes.UpcomingReleases) }.padding(8.dp)
             )
         }
 
         Row(
             Modifier
                 .padding(horizontal = 16.dp)
-                .padding(top = 16.dp)
+                .padding(top = 11.dp)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.new_release_icon),
@@ -302,7 +299,7 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                                 )
                             )
                         }
-                        .padding(vertical = 8.dp),
+                        .padding(8.dp),
                 )
                 Text(
                     "Last 30 days",
@@ -317,7 +314,7 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                                 )
                             )
                         }
-                        .padding(vertical = 8.dp),
+                        .padding(8.dp),
                 )
                 Text(
                     "This year",
@@ -327,7 +324,7 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                                 Routes.newGames(getYearTimestamp(), "Released this year"),
                             )
                         }
-                        .padding(vertical = 8.dp),
+                        .padding(8.dp),
                 )
             }
         }
@@ -358,19 +355,19 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                     "All time",
                     Modifier
                         .clickable { }
-                        .padding(vertical = 8.dp),
+                        .padding(8.dp),
                 )
                 Text(
                     "This year",
                     Modifier
                         .clickable { }
-                        .padding(vertical = 8.dp),
+                        .padding(8.dp),
                 )
                 Text(
                     "Last 5 years",
                     Modifier
                         .clickable { }
-                        .padding(vertical = 8.dp),
+                        .padding(8.dp),
                 )
             }
         }

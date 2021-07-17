@@ -45,7 +45,7 @@ fun UpcomingReleaseScreen(
         scaffoldState = scaffoldState,
         topBar = {
             GameResTopAppBar(
-                title = { Text("Upcoming Releases") },
+                title = { Text("Upcoming Releases", fontSize = 18.sp) },
                 scaffoldState = scaffoldState,
                 actions = {
                     Icon(

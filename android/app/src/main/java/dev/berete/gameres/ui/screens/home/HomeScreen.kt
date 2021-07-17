@@ -43,10 +43,11 @@ fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
         drawerContent = {
             NavDrawer(
                 navController = navController,
-                modifier = Modifier
-                    .background(MaterialTheme.colors.surface)
             )
-        }
+        },
+        drawerBackgroundColor = Color.Transparent,
+        drawerScrimColor = MaterialTheme.colors.surface.copy(0.63f),
+        drawerElevation = 0.dp,
     ) {
         Spacer(modifier = Modifier.height(8.dp))
         HomeScreenBody(viewModel, navController)

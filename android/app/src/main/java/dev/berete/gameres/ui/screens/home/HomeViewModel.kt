@@ -68,7 +68,7 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
             _newGames.value = gameListRepository.getGamesReleasedAfter(
                 timestamp = getYearTimestamp(lastYear),
                 count = 10,
-            ).sortedByDescending { it.rating }
+            )
         }
     }
 

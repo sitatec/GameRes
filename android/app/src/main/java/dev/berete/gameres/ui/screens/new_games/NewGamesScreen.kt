@@ -37,7 +37,7 @@ fun NewGamesScreen(
         scaffoldState = scaffoldState,
         topBar = {
             GameResTopAppBar(
-                title = { Text("New Games") },
+                title = { Text("New Games", fontSize = 18.sp) },
                 scaffoldState = scaffoldState,
                 actions = {
                     Icon(
