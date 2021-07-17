@@ -14,7 +14,7 @@ enum class GameGenre {
     SHOOTER,
     SIMULATOR,
     STRATEGY,
-    OTHERS
+    OTHER
     ;
 
     /**
@@ -25,12 +25,12 @@ enum class GameGenre {
     companion object{
 
         /**
-         * All values except [OTHERS]
+         * All values except [OTHER]
          */
-        val genreValues = values().filter { it != OTHERS }
+        val genreValues = values().filter { it != OTHER }
 
         /**
-         * All value names except for [OTHERS]
+         * All value names except for [OTHER]
          */
         val genreNames = genreValues.map { it.name }
     }

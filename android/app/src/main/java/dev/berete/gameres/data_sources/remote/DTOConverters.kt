@@ -69,7 +69,7 @@ fun Genre.toDomainGameGenre(): GameGenre {
     return try {
         GameGenre.valueOf(name.uppercase())
     } catch (e: IllegalArgumentException) {
-        GameGenre.OTHERS
+        GameGenre.OTHER
     }
 }
 
@@ -106,7 +106,7 @@ fun GameModeDTO.toDomainGameMode(): GameMode {
         "Split screen" -> GameMode.SPLIT_SCREEN
         "Massively Multiplayer Online (MMO)" -> GameMode.MMO
         "Battle Royale" -> GameMode.BATTLE_ROYALE
-        else -> GameMode.OTHERS
+        else -> GameMode.OTHER
     }
 }
 
@@ -122,7 +122,7 @@ fun PlayerPerspectiveDTO.toDomainPlayerPerspective(): PlayerPerspective {
         "Side view" -> PlayerPerspective.SIDE_VIEW
         "Text" -> PlayerPerspective.TEXT
         "Virtual Reality" -> PlayerPerspective.VIRTUAL_REALITY
-        else -> PlayerPerspective.OTHERS
+        else -> PlayerPerspective.OTHER
     }
 }
 

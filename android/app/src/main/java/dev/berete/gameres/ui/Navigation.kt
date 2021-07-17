@@ -20,6 +20,7 @@ import dev.berete.gameres.ui.screens.new_games.NewGamesScreen
 import dev.berete.gameres.ui.screens.new_games.NewGamesViewModel
 import dev.berete.gameres.ui.screens.popular_games.PopularGamesScreen
 import dev.berete.gameres.ui.screens.popular_games.PopularGamesViewModel
+import dev.berete.gameres.ui.screens.search.SearchScreen
 import dev.berete.gameres.ui.screens.upcoming_releases.UpcomingReleaseScreen
 
 object Routes {
@@ -98,6 +99,10 @@ fun Navigation() {
                 navController = navController,
                 subtitle = subtitle,
             )
+        }
+
+        composable(Routes.Search){
+            SearchScreen(viewModel = hiltViewModel(), navController = navController)
         }
     }
 }

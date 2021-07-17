@@ -52,6 +52,11 @@ interface GameListProvider {
      */
     suspend fun getGamesByIds(gameIds: List<Long>): List<Game>
 
+    /**
+     * Return a list of games whose names match the given [query].
+     */
+    suspend fun searchGames(query: String): List<Game>
+
     companion object {
         const val MAX_GAME_COUNT_BY_REQUEST = 100
         const val DEFAULT_GAME_COUNT_BY_REQUEST = 30

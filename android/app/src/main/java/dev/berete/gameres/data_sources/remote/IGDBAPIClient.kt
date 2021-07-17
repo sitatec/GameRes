@@ -71,12 +71,13 @@ class IGDBAPIClient(
         gameGenre: GameGenre?,
         gameMode: GameMode?,
     ): List<Game> {
+        val todayTimestamp = Calendar.getInstance().timeInMillis
         val numberOfGamesToFetch = regularizeGameCount(count)
         val queryBuilder = apiCalypse.newBuilder()
             .fields(gameSummaryFields)
             .where(
-                "first_release_date > ${timestamp.toFixed10Digits()} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0" +
-                        "${getGameGenreQuery(gameGenre)}  ${getGameModeQuery(gameMode)}",
+                "first_release_date > ${timestamp.toFixed10Digits()} & first_release_date < ${todayTimestamp.toFixed10Digits()}" +
+                        " & platforms = (${getIGDBPlatformIDs()}) ${getGameGenreQuery(gameGenre)}  ${getGameModeQuery(gameMode)}",
             )
             .sort("first_release_date", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
@@ -93,8 +94,7 @@ class IGDBAPIClient(
         gameMode: GameMode?,
     ): List<Release> {
         val numberOfGamesToFetch = regularizeGameCount(count)
-        val tomorrowTimeStamp =
-            Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.timeInMillis
+        val todayTimestamp = Calendar.getInstance().timeInMillis
 
         var maxReleaseDateQuery = ""
         if (limitTimestamp > 0) {
@@ -103,8 +103,10 @@ class IGDBAPIClient(
 
         val queryBuilder = apiCalypse.newBuilder()
             .fields(releaseFields)
-            .where("date > ${tomorrowTimeStamp.toFixed10Digits()} $maxReleaseDateQuery & game.platforms = (${getIGDBPlatformIDs()})" +
-                    "${getGameGenreQuery(gameGenre, "game.")}  ${getGameModeQuery(gameMode, "game.")}")
+            .where(
+                "date >= ${todayTimestamp.toFixed10Digits()} $maxReleaseDateQuery & game.platforms = (${getIGDBPlatformIDs()})" +
+                        "${getGameGenreQuery(gameGenre, "game.")} ${getGameModeQuery(gameMode, "game.")}"
+            )
             .sort("date", Sort.ASCENDING)
             .limit(numberOfGamesToFetch)
             .offset(page * count)
@@ -167,6 +169,17 @@ class IGDBAPIClient(
         }
     }
 
+    override suspend fun searchGames(query: String): List<Game> {
+        val queryBuilder = apiCalypse.newBuilder()
+            .fields("name, cover.image_id, platforms.name")
+            .search(query)
+            .where("version_parent = null & first_release_date != null")
+
+        return withContext(IO) {
+            iGDBAPIWrapper.games(queryBuilder).map(GameDTO::toDomainGame)
+        }
+    }
+
     override suspend fun getGameDetails(gameId: Long): Game {
         val queryBuilder = apiCalypse.newBuilder().fields(completeGameFields).where("id = $gameId")
 
@@ -189,7 +202,7 @@ class IGDBAPIClient(
         if (genre != null) {
             if (genre == GameGenre.ACTION) return "& ${prefix}themes.name = \"Action\""
 
-            return if (genre != GameGenre.OTHERS) {
+            return if (genre != GameGenre.OTHER) {
                 "& ${prefix}genres.name = \"${genre.iGDBCompatibleName()}\""
             } else {
                 val allGenreNames = GameGenre.genreValues.map(GameGenre::iGDBCompatibleName)
@@ -208,7 +221,7 @@ class IGDBAPIClient(
                 GameMode.MMO -> "Massively Multiplayer Online (MMO)"
                 GameMode.SPLIT_SCREEN -> "Split screen"
                 GameMode.COOPERATIVE -> "Co-operative"
-                GameMode.OTHERS -> throw IllegalArgumentException("The value `GameMode.OTHERS` is not supported yet")
+                GameMode.OTHER -> throw IllegalArgumentException("The value `GameMode.OTHERS` is not supported yet")
             }
             return "& ${prefix}game_modes.name = \"$modeName\""
         }

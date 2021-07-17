@@ -52,6 +52,7 @@ fun NewGamesScreen(
             NavDrawer(
                 navController = navController,
                 modifier = Modifier.background(MaterialTheme.colors.surface),
+                state = scaffoldState.drawerState,
             )
         },
         drawerBackgroundColor = Color.Transparent,

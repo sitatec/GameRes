@@ -144,7 +144,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                     withStyle(SpanStyle(color = MaterialTheme.colors.primary, fontSize = 14.sp)) {
                         append(
                             game.genres
-                                .filter { it != GameGenre.OTHERS }
+                                .filter { it != GameGenre.OTHER }
                                 .joinToString { it.toString() },
                         )
                     }
@@ -174,55 +174,64 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                 lineHeight = 21.sp,
             )
 
-            val pagerState = rememberPagerState(
-                pageCount = game.allImageUrls.size,
-                initialOffscreenLimit = 2,
-                initialPage = 1, // Initial image is the second in the list because the first
-                // may be show in the header. And by starting at with the second image, it will be more
-                // intuitive for the user to know that he can swipe on the image without showing a indicator.
-            )
+            val allImageUrls = remember { game.allImageUrls }
 
-            Spacer(Modifier.height(25.dp))
-            HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { pageIndex ->
-                Card(
-                    modifier = Modifier
-                        .graphicsLayer {
-                            // Calculate the absolute offset for the current page from the
-                            // scroll position. We use the absolute value which allows us to mirror
-                            // any effects for both directions
-                            val pageOffset = calculateCurrentOffsetForPage(pageIndex).absoluteValue
+            if (allImageUrls.isNotEmpty()) {
+                val pagerState = rememberPagerState(
+                    pageCount = allImageUrls.size,
+                    initialOffscreenLimit = 2,
+                    initialPage = if (allImageUrls.size > 1) 1 else 0, // Initial image is the second in the list because the first
+                    // may be show in the header. And by starting at with the second image, it will be more
+                    // intuitive for the user to know that he can swipe on the image without showing a indicator.
+                )
 
-                            // We animate the scaleX + scaleY, between 85% and 100%
-                            lerp(
-                                start = 0.85f,
-                                stop = 1f,
-                                fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                            ).also { scale ->
-                                scaleX = scale
-                                scaleY = scale
+                Spacer(Modifier.height(25.dp))
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxWidth()
+                ) { pageIndex ->
+                    Card(
+                        modifier = Modifier
+                            .graphicsLayer {
+                                // Calculate the absolute offset for the current page from the
+                                // scroll position. We use the absolute value which allows us to mirror
+                                // any effects for both directions
+                                val pageOffset =
+                                    calculateCurrentOffsetForPage(pageIndex).absoluteValue
+
+                                // We animate the scaleX + scaleY, between 85% and 100%
+                                lerp(
+                                    start = 0.85f,
+                                    stop = 1f,
+                                    fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                ).also { scale ->
+                                    scaleX = scale
+                                    scaleY = scale
+                                }
+
+                                // We animate the alpha, between 50% and 100%
+                                alpha = lerp(
+                                    start = 0.5f,
+                                    stop = 1f,
+                                    fraction = 1f - pageOffset.coerceIn(0f, 1f)
+                                )
                             }
-
-                            // We animate the alpha, between 50% and 100%
-                            alpha = lerp(
-                                start = 0.5f,
-                                stop = 1f,
-                                fraction = 1f - pageOffset.coerceIn(0f, 1f)
-                            )
-                        }
-                        .fillMaxWidth(0.8f)
-                        .aspectRatio(1.6f),
-                ) {
-                    Image(
-                        painter = rememberCoilPainter(request = game.allImageUrls[pageIndex]),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        alignment = Alignment.TopCenter,
-                        contentScale = ContentScale.Crop,
-                    )
+                            .fillMaxWidth(0.8f)
+                            .aspectRatio(1.6f),
+                    ) {
+                        Image(
+                            painter = rememberCoilPainter(request = game.allImageUrls[pageIndex]),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            alignment = Alignment.TopCenter,
+                            contentScale = ContentScale.Crop,
+                        )
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = game.summary,
                 modifier = Modifier.padding(horizontal = 16.dp),

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -39,10 +41,25 @@ fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
 
     Scaffold(
         scaffoldState = scaffoldState,
-        topBar = { GameResTopAppBar(title = { GameResLogo() }, scaffoldState = scaffoldState) },
+        topBar = {
+            GameResTopAppBar(
+                title = { GameResLogo(modifier = Modifier.padding(top = 4.dp)) },
+                scaffoldState = scaffoldState,
+                actions = {
+                    IconButton(onClick = { navController.navigate(Routes.Search) }) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = stringResource(R.string.search_btn_content_description),
+                            modifier = Modifier.padding(end = 8.dp),
+                        )
+                    }
+                }
+            )
+        },
         drawerContent = {
             NavDrawer(
                 navController = navController,
+                state = scaffoldState.drawerState,
             )
         },
         drawerBackgroundColor = Color.Transparent,
@@ -112,7 +129,7 @@ fun HomeScreenBody(
                                     },
                                 )
                             }
-                            item{
+                            item {
                                 Spacer(Modifier.width(16.dp))
                             }
                         }
@@ -181,7 +198,7 @@ fun GamesSection(
                 Spacer(Modifier.width(14.dp))
                 LargeGameCard(game = game, onClick = { onGameSelected(game) })
             }
-            item{
+            item {
                 Spacer(Modifier.width(16.dp))
             }
         }
@@ -255,7 +272,15 @@ fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier
 @Composable
 fun HomeScreenPreview() {
     GameResTheme {
-        Scaffold(topBar = { GameResTopAppBar({ GameResLogo() }, rememberScaffoldState()) }) {
+        Scaffold(topBar = {
+            GameResTopAppBar(
+                title = { GameResLogo() },
+                scaffoldState = rememberScaffoldState(),
+                actions = {
+
+                },
+            )
+        }) {
             val mostPopularGames = FakeGameList
             val trendingGameList = FakeGameList
             val numberOfItemsByRow = LocalConfiguration.current.screenWidthDp / 150

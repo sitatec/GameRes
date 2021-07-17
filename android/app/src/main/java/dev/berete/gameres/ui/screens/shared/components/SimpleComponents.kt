@@ -48,7 +48,7 @@ import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 @Composable
-fun GameResLogo(style: TextStyle = MaterialTheme.typography.body1) {
+fun GameResLogo(style: TextStyle = MaterialTheme.typography.body1, modifier: Modifier = Modifier) {
     Text(
         text = buildAnnotatedString {
             append("Game")
@@ -58,6 +58,7 @@ fun GameResLogo(style: TextStyle = MaterialTheme.typography.body1) {
         },
         fontFamily = Sportypo,
         style = style,
+        modifier = modifier
     )
 }
 
@@ -156,13 +157,7 @@ fun GameResTopAppBar(
     title: @Composable () -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
-    actions: @Composable RowScope.() -> Unit = {
-        Icon(
-            imageVector = Icons.Default.Search,
-            contentDescription = stringResource(R.string.search_btn_content_description),
-            modifier = Modifier.padding(end = 8.dp),
-        )
-    },
+    actions: @Composable RowScope.() -> Unit = {},
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -192,8 +187,15 @@ fun GameResTopAppBar(
 
 @OptIn(ExperimentalTime::class)
 @Composable
-fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
+fun NavDrawer(navController: NavController, state: DrawerState, modifier: Modifier = Modifier) {
     val currentDate = Clock.System.now()
+    val coroutineScope = rememberCoroutineScope()
+
+    val closeDrawer = {
+        coroutineScope.launch {
+            state.close()
+        }
+    }
 
     Card(elevation = 8.dp) {
         Column(
@@ -224,7 +226,10 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                     "Home",
                     style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
                     modifier = Modifier
-                        .clickable { navController.navigate(Routes.Home) }
+                        .clickable {
+                            navController.navigate(Routes.Home)
+                            closeDrawer()
+                        }
                         .padding(8.dp)
                 )
             }
@@ -243,7 +248,10 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                     "Search",
                     style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
                     modifier = Modifier
-                        .clickable { navController.navigate(Routes.Search) }
+                        .clickable {
+                            navController.navigate(Routes.Search)
+                            closeDrawer()
+                        }
                         .padding(8.dp)
                 )
             }
@@ -265,7 +273,10 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                     "Upcoming Releases",
                     style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
                     modifier = Modifier
-                        .clickable { navController.navigate(Routes.UpcomingReleases) }
+                        .clickable {
+                            navController.navigate(Routes.UpcomingReleases)
+                            closeDrawer()
+                        }
                         .padding(8.dp)
                 )
             }
@@ -302,6 +313,7 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                                         "Released in the last 7 days",
                                     )
                                 )
+                                closeDrawer()
                             }
                             .padding(8.dp),
                     )
@@ -317,6 +329,7 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                                         "Released in the last 30 days",
                                     )
                                 )
+                                closeDrawer()
                             }
                             .padding(8.dp),
                     )
@@ -327,6 +340,7 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                                 navController.navigate(
                                     Routes.newGames(getYearTimestamp(), "Released this year"),
                                 )
+                                closeDrawer()
                             }
                             .padding(8.dp),
                     )
@@ -336,7 +350,7 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
             Row(
                 Modifier
                     .padding(horizontal = 16.dp)
-                    .padding(top = 16.dp)
+                    .padding(top = 13.dp)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.top_100_icon),
@@ -362,6 +376,7 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                                 navController.navigate(
                                     Routes.popularGames(getYearTimestamp(), "Released this year")
                                 )
+                                closeDrawer()
                             }
                             .padding(8.dp),
                     )
@@ -369,6 +384,9 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                         "Last 5 years",
                         Modifier
                             .clickable {
+                                coroutineScope.launch {
+                                    state.close()
+                                }
                                 navController.navigate(
                                     Routes.popularGames(
                                         getYearTimestamp(currentDate.toLocalDateTime(TimeZone.currentSystemDefault()).year - 5),
@@ -385,6 +403,7 @@ fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
                                 navController.navigate(
                                     Routes.popularGames(0, " ")
                                 )
+                                closeDrawer()
                             }
                             .padding(8.dp),
                     )

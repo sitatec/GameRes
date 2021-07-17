@@ -63,9 +63,19 @@ class GameListRepository @Inject constructor(
 
     /**
      * Return the games that have their id in the [gameIds].
+     * The result may be retrieved from the local database if an internet connection is not available
      */
     suspend fun getGamesByIds(gameIds: List<Long>): List<Game> {
         return gameListProvider.getGamesByIds(gameIds)
+    }
+
+
+    /**
+     * Return a list of games whose names match the given [query].
+     * The result may be retrieved from the local database if an internet connection is not available
+     */
+    suspend fun searchGames(query: String): List<Game> {
+        return gameListProvider.searchGames(query)
     }
 
 }
