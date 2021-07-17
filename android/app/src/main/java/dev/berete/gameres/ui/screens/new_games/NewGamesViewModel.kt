@@ -1,5 +1,6 @@
 package dev.berete.gameres.ui.screens.new_games
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -18,6 +19,7 @@ class NewGamesViewModel @Inject constructor(private val gameListRepository: Game
     BaseViewModel() {
     // TODO Refactor
 
+    private var isInitialized = false
     private var minReleaseTimestamp = 0L
 
     private var _newGames = MutableLiveData<List<Game>>()
@@ -31,12 +33,17 @@ class NewGamesViewModel @Inject constructor(private val gameListRepository: Game
                         .apply {
                             isLastPageReached =
                                 size < GameListProvider.DEFAULT_GAME_COUNT_BY_REQUEST
-                        }
+                        }.sortedByDescending { it.ratingCount }
                 )
         }
     }
 
     fun initialize(minReleaseTimestamp: Long) {
+        // The `NavHost` call the `composable` function twice the first time, so we prevent fetching
+        // the data twice.
+        if (isInitialized) return
+        isInitialized = true
+
         this.minReleaseTimestamp = minReleaseTimestamp
         fetchNewGames()
     }

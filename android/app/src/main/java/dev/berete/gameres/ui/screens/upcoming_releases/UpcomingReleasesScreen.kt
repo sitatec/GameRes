@@ -47,13 +47,14 @@ fun UpcomingReleaseScreen(
             GameResTopAppBar(
                 title = { Text("Upcoming Releases", fontSize = 18.sp) },
                 scaffoldState = scaffoldState,
-                actions = {
-                    Icon(
-                        imageVector = Icons.Default.Sort,
-                        contentDescription = null,
-                        modifier = Modifier.padding(end = 8.dp),
-                    )
-                }
+                // TODO implement sorting feature
+//                actions = {
+//                    Icon(
+//                        imageVector = Icons.Default.Sort,
+//                        contentDescription = null,
+//                        modifier = Modifier.padding(end = 8.dp),
+//                    )
+//                }
             )
         },
         drawerContent = {
@@ -63,6 +64,9 @@ fun UpcomingReleaseScreen(
                     .background(MaterialTheme.colors.surface),
             )
         },
+        drawerBackgroundColor = Color.Transparent,
+        drawerScrimColor = MaterialTheme.colors.surface.copy(0.63f),
+        drawerElevation = 0.dp,
     ) {
         Spacer(modifier = Modifier.height(8.dp))
         UpcomingReleaseScreenBody(

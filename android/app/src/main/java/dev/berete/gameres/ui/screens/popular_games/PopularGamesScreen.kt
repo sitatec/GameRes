@@ -1,12 +1,10 @@
-package dev.berete.gameres.ui.screens.new_games
+package dev.berete.gameres.ui.screens.popular_games
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -26,8 +24,8 @@ import dev.berete.gameres.ui.screens.shared.components.Tabs
 import dev.berete.gameres.ui.utils.gameTypeNames
 
 @Composable
-fun NewGamesScreen(
-    viewModel: NewGamesViewModel,
+fun PopularGamesScreen(
+    viewModel: PopularGamesViewModel,
     navController: NavController,
     subtitle: String,
 ) {
@@ -37,15 +35,8 @@ fun NewGamesScreen(
         scaffoldState = scaffoldState,
         topBar = {
             GameResTopAppBar(
-                title = { Text("New Games", fontSize = 18.sp) },
+                title = { Text("Popular Games", fontSize = 18.sp) },
                 scaffoldState = scaffoldState,
-//                actions = {
-//                    Icon(
-//                        imageVector = Icons.Default.Sort,
-//                        contentDescription = null,
-//                        modifier = Modifier.padding(end = 8.dp),
-//                    )
-//                }
             )
         },
         drawerContent = {
@@ -69,16 +60,17 @@ fun NewGamesScreen(
 
 @Composable
 fun NewGamesScreenBody(
-    viewModel: NewGamesViewModel,
+    viewModel: PopularGamesViewModel,
     navController: NavController,
-    subtitle: String
+    subtitle: String,
 ) {
-    val newGames by viewModel.newGame.observeAsState(emptyList())
+    val popularGames by viewModel.popularGames.observeAsState(emptyList())
     val numberOfItemsByRow = LocalConfiguration.current.screenWidthDp / 200
 
     Column {
         Tabs(titles = gameTypeNames, viewModel::onGameTypeSelected)
-        if (newGames.isNullOrEmpty()) {
+
+        if (popularGames.isNullOrEmpty()) {
             NewGamesScreenPlaceholder()
         } else {
             SwipeRefresh(
@@ -88,15 +80,17 @@ fun NewGamesScreenBody(
                 LazyColumn(Modifier.padding(horizontal = 16.dp)) {
 
                     item {
-                        Spacer(Modifier.height(20.dp))
-                        Text(
-                            text = subtitle,
-                            style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
-                        )
+                        if (subtitle.isNotBlank()) {
+                            Spacer(Modifier.height(20.dp))
+                            Text(
+                                text = subtitle,
+                                style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
+                            )
+                        }
                         Spacer(Modifier.height(13.dp))
                     }
 
-                    items(items = newGames.chunked(numberOfItemsByRow)) { rowItems ->
+                    items(items = popularGames.chunked(numberOfItemsByRow)) { rowItems ->
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(14.dp),
                         ) {

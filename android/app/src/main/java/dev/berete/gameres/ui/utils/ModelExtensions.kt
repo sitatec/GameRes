@@ -47,8 +47,8 @@ val gameTypeNames: List<String>
     ).sorted()
 
 /**
- * Returns the timestamp of the given [year] or the current year if no parameter is given,
- * the month will be _January_ and the day will be the first of month (01).
+ * Returns the timestamp of the given [year] or the current year if no parameter is given.
+ * The month will be _January_ and the day will be the first of month (01).
  *
  * I.e the timestamp of 01-01-[year]
  */

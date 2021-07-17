@@ -41,10 +41,7 @@ import dev.berete.gameres.ui.utils.bannerUrl
 import dev.berete.gameres.ui.utils.getYearTimestamp
 import dev.berete.gameres.ui.utils.logo
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.toJavaLocalDate
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.*
 import java.sql.Timestamp
 import java.time.Instant
 import kotlin.time.Duration
@@ -198,177 +195,200 @@ fun GameResTopAppBar(
 fun NavDrawer(navController: NavController, modifier: Modifier = Modifier) {
     val currentDate = Clock.System.now()
 
-    Column(
-        modifier
-            .fillMaxHeight()
-            .verticalScroll(rememberScrollState())
-            .background(MaterialTheme.colors.surface),
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.nav_drawer_header),
-            contentDescription = null,
-            modifier = Modifier.padding(start = 40.dp, end = 56.dp),
-        )
-
-        Row(
-            Modifier
-                .padding(horizontal = 16.dp)
-                .padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Home,
-                contentDescription = null,
-                tint = MaterialTheme.colors.primary,
-                modifier = Modifier.size(22.dp),
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                "Home",
-                style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-                modifier = Modifier.clickable { navController.navigate(Routes.Home) }.padding(8.dp)
-            )
-        }
-        Row(
-            Modifier
-                .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = null,
-                tint = MaterialTheme.colors.primary,
-                modifier = Modifier.size(22.dp),
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                "Search",
-                style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-                modifier = Modifier.clickable { navController.navigate(Routes.Search) }.padding(8.dp)
-            )
-        }
-
-        Row(
-            Modifier
-                .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.upcoming_release_icon),
-                contentDescription = null,
-                tint = MaterialTheme.colors.primary,
-                modifier = Modifier.size(19.dp),
-            )
-
-            Spacer(modifier = Modifier.width(4.dp))
-
-            Text(
-                "Upcoming Releases",
-                style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-                modifier = Modifier.clickable { navController.navigate(Routes.UpcomingReleases) }.padding(8.dp)
-            )
-        }
-
-        Row(
-            Modifier
-                .padding(horizontal = 16.dp)
-                .padding(top = 11.dp)
+    Card(elevation = 8.dp) {
+        Column(
+            modifier
+                .fillMaxHeight()
+                .verticalScroll(rememberScrollState())
+                .background(MaterialTheme.colors.surface),
         ) {
             Image(
-                painter = painterResource(id = R.drawable.new_release_icon),
+                painter = painterResource(id = R.drawable.nav_drawer_header),
                 contentDescription = null,
-                modifier = Modifier
-                    .padding(top = 3.dp)
-                    .size(19.dp),
+                modifier = Modifier.padding(start = 40.dp, end = 56.dp),
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column {
+            Row(
+                Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Home,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.primary,
+                    modifier = Modifier.size(22.dp),
+                )
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    "New Games",
+                    "Home",
                     style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
-                )
-                Text(
-                    "Last 7 days",
-                    Modifier
-                        .clickable {
-                            navController.navigate(
-                                Routes.newGames(
-                                    currentDate
-                                        .minus(Duration.days(7))
-                                        .toEpochMilliseconds(),
-                                    "Released in the last 7 days",
-                                )
-                            )
-                        }
-                        .padding(8.dp),
-                )
-                Text(
-                    "Last 30 days",
-                    Modifier
-                        .clickable {
-                            navController.navigate(
-                                Routes.newGames(
-                                    currentDate
-                                        .minus(Duration.days(30))
-                                        .toEpochMilliseconds(),
-                                    "Released in the last 30 days",
-                                )
-                            )
-                        }
-                        .padding(8.dp),
-                )
-                Text(
-                    "This year",
-                    Modifier
-                        .clickable {
-                            navController.navigate(
-                                Routes.newGames(getYearTimestamp(), "Released this year"),
-                            )
-                        }
-                        .padding(8.dp),
+                    modifier = Modifier
+                        .clickable { navController.navigate(Routes.Home) }
+                        .padding(8.dp)
                 )
             }
-        }
-
-        Row(
-            Modifier
-                .padding(horizontal = 16.dp)
-                .padding(top = 16.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.top_100_icon),
-                contentDescription = null,
-                tint = MaterialTheme.colors.primary,
-                modifier = Modifier
-                    .padding(top = 3.dp)
-                    .size(20.dp),
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column {
+            Row(
+                Modifier
+                    .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.primary,
+                    modifier = Modifier.size(22.dp),
+                )
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    "Top 100",
+                    "Search",
                     style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+                    modifier = Modifier
+                        .clickable { navController.navigate(Routes.Search) }
+                        .padding(8.dp)
+                )
+            }
+
+            Row(
+                Modifier
+                    .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.upcoming_release_icon),
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.primary,
+                    modifier = Modifier.size(19.dp),
                 )
 
+                Spacer(modifier = Modifier.width(4.dp))
+
                 Text(
-                    "All time",
-                    Modifier
-                        .clickable { }
-                        .padding(8.dp),
+                    "Upcoming Releases",
+                    style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+                    modifier = Modifier
+                        .clickable { navController.navigate(Routes.UpcomingReleases) }
+                        .padding(8.dp)
                 )
-                Text(
-                    "This year",
-                    Modifier
-                        .clickable { }
-                        .padding(8.dp),
+            }
+
+            Row(
+                Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 11.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.new_release_icon),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(top = 3.dp)
+                        .size(19.dp),
                 )
-                Text(
-                    "Last 5 years",
-                    Modifier
-                        .clickable { }
-                        .padding(8.dp),
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        "New Games",
+                        style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+                    )
+                    Text(
+                        "Last 7 days",
+                        Modifier
+                            .clickable {
+                                navController.navigate(
+                                    Routes.newGames(
+                                        currentDate
+                                            .minus(Duration.days(7))
+                                            .toEpochMilliseconds(),
+                                        "Released in the last 7 days",
+                                    )
+                                )
+                            }
+                            .padding(8.dp),
+                    )
+                    Text(
+                        "Last 30 days",
+                        Modifier
+                            .clickable {
+                                navController.navigate(
+                                    Routes.newGames(
+                                        currentDate
+                                            .minus(Duration.days(30))
+                                            .toEpochMilliseconds(),
+                                        "Released in the last 30 days",
+                                    )
+                                )
+                            }
+                            .padding(8.dp),
+                    )
+                    Text(
+                        "This year",
+                        Modifier
+                            .clickable {
+                                navController.navigate(
+                                    Routes.newGames(getYearTimestamp(), "Released this year"),
+                                )
+                            }
+                            .padding(8.dp),
+                    )
+                }
+            }
+
+            Row(
+                Modifier
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 16.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.top_100_icon),
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.primary,
+                    modifier = Modifier
+                        .padding(top = 3.dp)
+                        .size(20.dp),
                 )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        "Popular Games",
+                        style = MaterialTheme.typography.h6.copy(fontSize = 17.sp),
+                    )
+
+                    Text(
+                        "This year",
+                        Modifier
+                            .clickable {
+                                navController.navigate(
+                                    Routes.popularGames(getYearTimestamp(), "Released this year")
+                                )
+                            }
+                            .padding(8.dp),
+                    )
+                    Text(
+                        "Last 5 years",
+                        Modifier
+                            .clickable {
+                                navController.navigate(
+                                    Routes.popularGames(
+                                        getYearTimestamp(currentDate.toLocalDateTime(TimeZone.currentSystemDefault()).year - 5),
+                                        "Released in the last 5 years"
+                                    )
+                                )
+                            }
+                            .padding(8.dp),
+                    )
+                    Text(
+                        "All time",
+                        Modifier
+                            .clickable {
+                                navController.navigate(
+                                    Routes.popularGames(0, " ")
+                                )
+                            }
+                            .padding(8.dp),
+                    )
+                }
             }
         }
     }

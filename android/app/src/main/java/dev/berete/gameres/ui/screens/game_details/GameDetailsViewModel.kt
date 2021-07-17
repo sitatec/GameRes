@@ -18,6 +18,7 @@ class GameDetailsViewModel @Inject constructor(
     private val gameListRepository: GameListRepository,
 ) : ViewModel() {
 
+    private var isInitialized = false
     private val _game = MutableLiveData<Game>()
     val game: LiveData<Game> = _game
 
@@ -25,6 +26,11 @@ class GameDetailsViewModel @Inject constructor(
     val similarGames = _similarGames
 
     fun initialize(gameId: Long) {
+        // The `NavHost` call the `composable` function twice the first time, so we prevent fetching
+        // the data twice.
+        if (isInitialized) return
+        isInitialized = true
+
         viewModelScope.launch {
             _game.value = gameDetailsRepository.getGameDetails(gameId)
             _similarGames.value = gameListRepository.getGamesByIds(game.value!!.similarGameIds)
