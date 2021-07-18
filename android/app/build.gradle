@@ -4,6 +4,8 @@ plugins {
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
     id 'kotlin-parcelize'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -100,6 +102,11 @@ dependencies {
     // IGDB API CLIENT
     implementation 'com.github.husnjak:IGDB-API-JVM:1.0.2'
     implementation 'com.google.protobuf:protobuf-java:3.15.3'
+
+    // FIREBASE
+    implementation platform('com.google.firebase:firebase-bom:28.2.1')
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
 
     implementation files('libs/swiperefresh.aar')
     implementation files('libs/youtube_player.aar')
