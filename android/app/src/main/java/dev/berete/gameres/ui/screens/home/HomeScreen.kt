@@ -23,17 +23,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.api.igdb.utils.ImageSize
 import com.google.accompanist.coil.rememberCoilPainter
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
+import dev.berete.gameres.domain.models.Release
 import dev.berete.gameres.ui.Routes
 import dev.berete.gameres.ui.screens.shared.components.*
 import dev.berete.gameres.ui.theme.*
-import dev.berete.gameres.ui.utils.FakeGameList
-import dev.berete.gameres.ui.utils.bannerUrl
-import dev.berete.gameres.ui.utils.gameTypeNames
+import dev.berete.gameres.ui.utils.*
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
@@ -112,28 +115,13 @@ fun HomeScreenBody(
                     )
                     Spacer(Modifier.height(16.dp))
 
-                    Column(modifier) {
-                        Text(
-                            text = stringResource(R.string.upcoming_txt),
-                            style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
-                            modifier = Modifier.padding(start = 16.dp),
-                        )
-                        Spacer(Modifier.height(10.dp))
-                        LazyRow {
-                            items(items = upcomingRelease) { release ->
-                                Spacer(Modifier.width(13.dp))
-                                ReleaseCard(
-                                    release = release,
-                                    onClick = {
-                                        navController.navigate(Routes.gameDetails(release.gameId))
-                                    },
-                                )
-                            }
-                            item {
-                                Spacer(Modifier.width(16.dp))
-                            }
+                    ReleasesSection(
+                        releaseList = upcomingRelease,
+                        title = stringResource(R.string.upcoming_txt),
+                        onReleaseSelected = {
+                            navController.navigate(Routes.gameDetails(it.gameId))
                         }
-                    }
+                    )
 
                     Spacer(Modifier.height(16.dp))
                     Text(
@@ -144,22 +132,41 @@ fun HomeScreenBody(
                     Spacer(Modifier.height(10.dp))
                 }
 
-                items(items = gameList.chunked(numberOfItemsByRow)) { rowItems ->
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                    ) {
-                        for (game in rowItems) {
-                            GameCard(
-                                game = game,
-                                onClick = {
-                                    navController.navigate(Routes.gameDetails(game.id))
-                                },
-                                modifier = Modifier.weight(1F),
-                            )
+                if (gameList.isEmpty()) {
+                    items(items = List(10) { it }.chunked(numberOfItemsByRow)) { rowItems ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        ) {
+                            for (item in rowItems) {
+                                GameCardPlaceholder(Modifier.weight(1F))
+                            }
                         }
+                        Spacer(Modifier.height(14.dp))
                     }
-                    Spacer(Modifier.height(14.dp))
+                } else {
+                    items(items = gameList.chunked(numberOfItemsByRow)) { rowItems ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                        ) {
+                            for (game in rowItems) {
+                                GameCard(
+                                    game = game,
+                                    onClick = {
+                                        navController.navigate(Routes.gameDetails(game.id))
+                                    },
+                                    modifier = Modifier.weight(1F),
+                                )
+                            }
+                            // If the last row do not contains enough items to fill the row without
+                            // expanding them, we add placeholders to keep the same size for all items.
+                            repeat(numberOfItemsByRow - rowItems.size) {
+                                Box(Modifier.weight(1F)) {}
+                            }
+                        }
+                        Spacer(Modifier.height(14.dp))
+                    }
                 }
 
                 if (viewModel.isLastPageReached) {
@@ -185,6 +192,8 @@ fun GamesSection(
     title: String,
     onGameSelected: (Game) -> Unit,
     modifier: Modifier = Modifier,
+    enablePlaceHolder: Boolean = true,
+    placeholderItemsCount: Int = 7,
 ) {
     Column(modifier) {
         Text(
@@ -194,9 +203,16 @@ fun GamesSection(
         )
         Spacer(Modifier.height(10.dp))
         LazyRow {
-            items(items = gameList) { game ->
-                Spacer(Modifier.width(14.dp))
-                LargeGameCard(game = game, onClick = { onGameSelected(game) })
+            if (gameList.isEmpty() && enablePlaceHolder) {
+                items(placeholderItemsCount) {
+                    Spacer(Modifier.width(14.dp))
+                    LargeGameCardPlaceholder()
+                }
+            } else {
+                items(items = gameList) { game ->
+                    Spacer(Modifier.width(14.dp))
+                    LargeGameCard(game = game, onClick = { onGameSelected(game) })
+                }
             }
             item {
                 Spacer(Modifier.width(16.dp))
@@ -206,7 +222,49 @@ fun GamesSection(
 }
 
 @Composable
-fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun ReleasesSection(
+    releaseList: List<Release>,
+    title: String,
+    onReleaseSelected: (Release) -> Unit,
+    modifier: Modifier = Modifier,
+    enablePlaceHolder: Boolean = true,
+    placeholderItemsCount: Int = 7,
+) {
+    Column(modifier) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
+            modifier = Modifier.padding(start = 16.dp),
+        )
+        Spacer(Modifier.height(10.dp))
+        LazyRow {
+            if (releaseList.isEmpty() && enablePlaceHolder) {
+                items(placeholderItemsCount) {
+                    Spacer(Modifier.width(14.dp))
+                    ReleaseCardPlaceholder(Modifier.size(250.dp, 150.dp))
+                }
+            } else {
+                items(items = releaseList) { release ->
+                    Spacer(Modifier.width(14.dp))
+                    ReleaseCard(
+                        release = release, onClick = { onReleaseSelected(release) },
+                        modifier = Modifier.size(250.dp, 150.dp),
+                    )
+                }
+            }
+            item {
+                Spacer(Modifier.width(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun LargeGameCard(
+    game: Game,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Card(
         Modifier
             .clickable { onClick() }
@@ -219,6 +277,7 @@ fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier
             painter = rememberCoilPainter(
                 request = game.bannerUrl,
                 previewPlaceholder = R.drawable.apex_legends_artwork,
+                fadeIn = true,
             ),
             contentDescription = game.name,
             contentScale = ContentScale.Crop,
@@ -236,10 +295,12 @@ fun LargeGameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier
                 )
                 .padding(bottom = 8.dp),
         ) {
+            ImageSize.COVER_BIG
             Image(
                 painter = rememberCoilPainter(
                     request = game.coverUrl,
                     previewPlaceholder = R.drawable.apex_legends_cover,
+                    fadeIn = true,
                 ),
                 contentDescription = null,
                 modifier = Modifier

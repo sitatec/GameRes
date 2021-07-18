@@ -13,22 +13,32 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.accompanist.coil.rememberCoilPainter
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 import dev.berete.gameres.ui.Routes
 import dev.berete.gameres.ui.screens.shared.components.PlatformLogos
+import dev.berete.gameres.ui.utils.buildFakeGameList
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchScreen(viewModel: SearchViewModel, navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
     val searchResult by viewModel.searchResult.observeAsState(emptyList())
-    val focusRequest = remember{ FocusRequester() }
+    val focusRequest = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -58,45 +68,109 @@ fun SearchScreen(viewModel: SearchViewModel, navController: NavController) {
                 },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = { viewModel.search(searchQuery) }),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        viewModel.search(searchQuery)
+                        keyboardController?.hide()
+                    },
+                ),
                 modifier = Modifier.focusRequester(focusRequester = focusRequest)
             )
         }
 
-        LaunchedEffect(Unit){
+        LaunchedEffect(Unit) {
             focusRequest.requestFocus()
         }
 
-        LazyColumn() {
-            item{
-                Spacer(Modifier.height(8.dp))
+        if (viewModel.notFound.value) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Game Not Found",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colors.onSurface.copy(0.6f),
+                )
             }
-            items(searchResult) { game ->
-                Card(
-                    modifier = Modifier
-                        .height(75.dp)
-                        .fillMaxWidth()
-                        .clickable { navController.navigate(Routes.gameDetails(game.id)) },
-                ) {
-                    Row {
-                        Image(
-                            painter = rememberCoilPainter(game.coverUrl),
-                            contentDescription = game.name,
-                            Modifier
-                                .padding(end = 8.dp)
-                                .fillMaxHeight()
-                        )
-                        Column(
-                            verticalArrangement = Arrangement.SpaceEvenly,
-                            modifier = Modifier.fillMaxSize()
+        } else {
+            LazyColumn {
+                item {
+                    Spacer(Modifier.height(8.dp))
+                }
+
+                if (viewModel.isSearching.value) {
+                    items(10) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth(),
                         ) {
-                            Text(game.name)
-                            // TODO Refactor
-                            PlatformLogos(platformTypeList = game.platformList.groupBy { it.platformType }.keys.toList())
+                            Row(verticalAlignment = Alignment.Bottom) {
+                                Box(
+                                    Modifier
+                                        .padding(end = 8.dp)
+                                        .size(68.dp, 75.dp)
+                                        .placeholder(
+                                            visible = true,
+                                            highlight = PlaceholderHighlight.shimmer(),
+                                        )
+                                )
+                                Column(
+                                    verticalArrangement = Arrangement.SpaceEvenly,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Box(
+                                        Modifier
+                                            .placeholder(
+                                                visible = true,
+                                                highlight = PlaceholderHighlight.shimmer(),
+                                            )
+                                            .height(15.dp)
+                                            .fillMaxWidth(0.65f)
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Box(
+                                        Modifier
+                                            .placeholder(
+                                                visible = true,
+                                                highlight = PlaceholderHighlight.shimmer(),
+                                            )
+                                            .height(15.dp)
+                                            .fillMaxWidth(0.35f)
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                }
+                            }
                         }
+                        Spacer(Modifier.height(8.dp))
+                    }
+                } else {
+                    items(searchResult) { game ->
+                        Card(
+                            modifier = Modifier
+                                .height(75.dp)
+                                .fillMaxWidth()
+                                .clickable { navController.navigate(Routes.gameDetails(game.id)) },
+                        ) {
+                            Row {
+                                Image(
+                                    painter = rememberCoilPainter(game.coverUrl),
+                                    contentDescription = game.name,
+                                    Modifier
+                                        .padding(end = 8.dp)
+                                        .fillMaxHeight()
+                                )
+                                Column(
+                                    verticalArrangement = Arrangement.SpaceEvenly,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Text(game.name)
+                                    // TODO Refactor
+                                    PlatformLogos(platformTypeList = game.platformList.groupBy { it.platformType }.keys.toList())
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
                     }
                 }
-                Spacer(Modifier.height(8.dp))
             }
         }
     }

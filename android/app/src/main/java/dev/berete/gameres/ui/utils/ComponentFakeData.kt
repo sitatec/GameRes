@@ -2,7 +2,9 @@ package dev.berete.gameres.ui.utils
 
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.Platform
+import dev.berete.gameres.domain.models.Release
 import dev.berete.gameres.domain.models.enums.PlatformType
+import java.util.*
 
 val FakeGame = Game(
     id = 0,
@@ -14,11 +16,14 @@ val FakeGame = Game(
         Platform(PlatformType.WINDOWS, "Windows 10"),
         Platform(PlatformType.XBOX, "Xbox Serie X"),
         Platform(PlatformType.PLAYSTATION, "Playstation 5"),
-        Platform(PlatformType.ANDROID, "Android"), 
+        Platform(PlatformType.ANDROID, "Android"),
     ),
     artWorkUrls = listOf("https://media.contentapi.ea.com/content/dam/news/www-ea/images/2019/04/apex-featured-image-generic-lineup.jpg.adapt.crop191x100.628p.jpg"),
 )
 
+/**
+ * Fake game list for ide preview
+ */
 val FakeGameList = listOf(
     FakeGame,
     FakeGame.copy(id = 1, rating = 69.0),
@@ -37,3 +42,27 @@ val FakeGameList = listOf(
     FakeGame.copy(id = 15, rating = 79.0),
     FakeGame.copy(id = 16),
 )
+
+fun buildFakeGameList(count: Int): List<Game> {
+    return List(count) {
+        FakeGame.copy(
+            name = "nameplaceholder",
+            artWorkUrls = emptyList(),
+            coverUrl = ""
+        )
+    }
+}
+
+fun buildFakeRelease(count: Int): List<Release> {
+    return List(count) {
+        Release(
+            Date(),
+            Platform(PlatformType.ANDROID, "Android"),
+            "",
+            0,
+            "",
+            "",
+            "placeholder",
+        )
+    }
+}

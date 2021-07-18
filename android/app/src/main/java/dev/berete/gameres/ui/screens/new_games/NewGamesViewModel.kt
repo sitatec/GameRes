@@ -60,6 +60,7 @@ class NewGamesViewModel @Inject constructor(private val gameListRepository: Game
 
     override fun resetFilter() {
         currentPage = 0
+        _newGames.value = emptyList()
         fetchNewGames()
     }
 

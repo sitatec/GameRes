@@ -47,6 +47,7 @@ import dev.berete.gameres.ui.Routes
 import dev.berete.gameres.ui.screens.shared.components.GameCard
 import dev.berete.gameres.ui.screens.shared.components.GameScore
 import dev.berete.gameres.ui.screens.shared.components.PlatformLogos
+import dev.berete.gameres.ui.utils.GameDetailsPlaceholder
 import dev.berete.gameres.ui.utils.allImageUrls
 import dev.berete.gameres.ui.utils.bannerUrl
 import dev.berete.gameres.ui.utils.formattedInitialReleaseDate
@@ -62,7 +63,7 @@ fun GameDetailsScreen(viewModel: GameDetailsViewModel, navController: NavControl
         GameDetailsScreenBody(game = game!!, similarGames, navController = navController)
     } else {
         Surface {
-            GameDetailsScreenPlaceHolder()
+            GameDetailsPlaceholder()
         }
     }
 }
@@ -71,9 +72,10 @@ fun GameDetailsScreen(viewModel: GameDetailsViewModel, navController: NavControl
 @ExperimentalPagerApi
 fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: NavController) {
     Column(Modifier.verticalScroll(rememberScrollState())) {
+
         Box(contentAlignment = Alignment.BottomStart) {
             Image(
-                painter = rememberCoilPainter(request = game.bannerUrl),
+                painter = rememberCoilPainter(request = game.bannerUrl, fadeIn = true),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.TopCenter,
@@ -95,7 +97,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
 
                 Row(verticalAlignment = Alignment.Bottom) {
                     Image(
-                        painter = rememberCoilPainter(request = game.coverUrl),
+                        painter = rememberCoilPainter(request = game.coverUrl, fadeIn = true),
                         contentDescription = null,
                         modifier = Modifier
                             .width(100.dp)
@@ -176,6 +178,8 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
 
             val allImageUrls = remember { game.allImageUrls }
 
+            Spacer(Modifier.height(25.dp))
+
             if (allImageUrls.isNotEmpty()) {
                 val pagerState = rememberPagerState(
                     pageCount = allImageUrls.size,
@@ -185,7 +189,6 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                     // intuitive for the user to know that he can swipe on the image without showing a indicator.
                 )
 
-                Spacer(Modifier.height(25.dp))
                 HorizontalPager(
                     state = pagerState,
                     modifier = Modifier.fillMaxWidth()
@@ -220,7 +223,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                             .aspectRatio(1.6f),
                     ) {
                         Image(
-                            painter = rememberCoilPainter(request = game.allImageUrls[pageIndex]),
+                            painter = rememberCoilPainter(request = game.allImageUrls[pageIndex], fadeIn = true),
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
                             alignment = Alignment.TopCenter,
@@ -257,11 +260,14 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                             shouldVideoDialogShow = false
                         }
 
-                        Card(Modifier
-                            .clickable { shouldVideoDialogShow = true }
-                            .size(280.dp, (280 / 1.8).dp)) {
+                        Card(
+                            Modifier
+                                .clickable { shouldVideoDialogShow = true }
+                                .width(280.dp)
+                                .aspectRatio(16f / 9),
+                        ) {
                             Image(
-                                painter = rememberCoilPainter(request = video.thumbnailUrl),
+                                painter = rememberCoilPainter(request = video.thumbnailUrl, fadeIn = true),
                                 contentDescription = video.title,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize(),
@@ -340,7 +346,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                         modifier = Modifier.padding(8.dp),
                     ) {
                         Image(
-                            painter = rememberCoilPainter(website.logoUrl),
+                            painter = rememberCoilPainter(website.logoUrl, fadeIn = true),
                             contentDescription = null,
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
@@ -399,7 +405,7 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
         ) {
             for (ageRating in game.ageRatings) {
                 Spacer(Modifier.width(16.dp))
-                Image(painter = rememberCoilPainter(ageRating.labelUrl), contentDescription = null)
+                Image(painter = rememberCoilPainter(ageRating.labelUrl, fadeIn = true), contentDescription = null)
             }
         }
 
@@ -423,10 +429,6 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
         }
 
     }
-}
-
-@Composable
-fun GameDetailsScreenPlaceHolder() {
 }
 
 @Composable
@@ -599,7 +601,7 @@ fun GameCompanyDialog(
         title = {
             Row(Modifier.padding(5.dp)) {
                 Image(
-                    rememberCoilPainter(gameCompany.logoUrl),
+                    rememberCoilPainter(gameCompany.logoUrl, fadeIn = true),
                     contentDescription = null,
                     alignment = Alignment.Center,
                 )

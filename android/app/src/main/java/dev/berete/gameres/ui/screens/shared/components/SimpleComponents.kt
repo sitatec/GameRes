@@ -30,7 +30,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigator
+import com.api.igdb.utils.ImageSize
 import com.google.accompanist.coil.rememberCoilPainter
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material.shimmer
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.Release
@@ -48,7 +52,7 @@ import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 @Composable
-fun GameResLogo(style: TextStyle = MaterialTheme.typography.body1, modifier: Modifier = Modifier) {
+fun GameResLogo(modifier: Modifier = Modifier, style: TextStyle = MaterialTheme.typography.body1) {
     Text(
         text = buildAnnotatedString {
             append("Game")
@@ -58,7 +62,7 @@ fun GameResLogo(style: TextStyle = MaterialTheme.typography.body1, modifier: Mod
         },
         fontFamily = Sportypo,
         style = style,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -82,7 +86,11 @@ fun PlatformLogos(
 }
 
 @Composable
-fun GameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun GameCard(
+    game: Game,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Surface(
         modifier = modifier.clickable { onClick() },
         color = Color.Gray.copy(0.05F),
@@ -93,6 +101,7 @@ fun GameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier) {
                 painter = rememberCoilPainter(
                     request = game.bannerUrl,
                     previewPlaceholder = R.drawable.apex_legends_cover,
+                    fadeIn = true,
                 ),
                 contentDescription = game.name,
                 modifier = Modifier
@@ -103,9 +112,10 @@ fun GameCard(game: Game, onClick: () -> Unit, modifier: Modifier = Modifier) {
             )
             Text(
                 text = game.name,
-                modifier = Modifier.padding(start = 8.dp, top = 4.dp, bottom = 0.dp),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .padding(start = 8.dp, top = 4.dp, bottom = 0.dp),
             )
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -414,39 +424,48 @@ fun NavDrawer(navController: NavController, state: DrawerState, modifier: Modifi
 }
 
 @Composable
-fun ReleaseCard(release: Release, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Card(
-        Modifier
-            .clickable { onClick() }
-            .size(250.dp, 130.dp)
-            .then(modifier),
-        shape = MaterialTheme.shapes.medium,
+fun ReleaseCard(
+    release: Release,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(modifier.clickable { onClick() },
+        shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
         elevation = 5.dp
     ) {
         Image(
             painter = rememberCoilPainter(
                 request = release.artWorkUrl,
                 previewPlaceholder = R.drawable.apex_legends_artwork,
+                fadeIn = true,
             ),
             contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.Crop
         )
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Bottom,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.Black.copy(0.8f))
-                .padding(8.dp),
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color.Transparent,
+                            MaterialTheme.colors.surface
+                        )
+                    )
+                )
+                .padding(vertical = 8.dp),
         ) {
             Image(
                 painter = rememberCoilPainter(
                     request = release.gameCoverUrl,
                     previewPlaceholder = R.drawable.apex_legends_cover,
+                    fadeIn = true,
                 ),
                 contentDescription = null,
                 modifier = Modifier
                     .width(80.dp)
-                    .padding(end = 8.dp)
+                    .padding(horizontal = 8.dp)
                     .clip(MaterialTheme.shapes.small),
             )
             Column {
@@ -455,18 +474,26 @@ fun ReleaseCard(release: Release, onClick: () -> Unit, modifier: Modifier = Modi
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    release.formattedDate, color = MaterialTheme.colors.primary,
+                    fontSize = 14.sp,
+                )
                 ProvideTextStyle(
-                    value = TextStyle(
-                        fontSize = 14.sp,
-                    ),
+                    value = TextStyle(fontSize = 12.sp),
                 ) {
-                    Text(release.formattedDate, color = MaterialTheme.colors.primary)
-                    Text(release.region)
-                    Text(release.platform.name, color = MaterialTheme.colors.primary)
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(release.region)
+                        Text(
+                            release.platform.name,
+                            modifier = Modifier.padding(end = 4.dp),
+                        )
+                    }
                 }
             }
-
         }
     }
 }

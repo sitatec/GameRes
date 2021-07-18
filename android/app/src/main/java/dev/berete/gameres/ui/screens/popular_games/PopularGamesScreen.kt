@@ -21,6 +21,8 @@ import dev.berete.gameres.ui.screens.shared.components.GameCard
 import dev.berete.gameres.ui.screens.shared.components.GameResTopAppBar
 import dev.berete.gameres.ui.screens.shared.components.NavDrawer
 import dev.berete.gameres.ui.screens.shared.components.Tabs
+import dev.berete.gameres.ui.utils.GameCardPlaceholder
+import dev.berete.gameres.ui.utils.buildFakeGameList
 import dev.berete.gameres.ui.utils.gameTypeNames
 
 @Composable
@@ -70,27 +72,35 @@ fun NewGamesScreenBody(
 
     Column {
         Tabs(titles = gameTypeNames, viewModel::onGameTypeSelected)
+        SwipeRefresh(
+            onRefresh = { viewModel.loadNextPage() },
+            bottomRefreshIndicatorState = rememberSwipeRefreshState(isRefreshing = viewModel.isNextPageLoading),
+        ) {
+            LazyColumn(Modifier.padding(horizontal = 16.dp)) {
 
-        if (popularGames.isNullOrEmpty()) {
-            NewGamesScreenPlaceholder()
-        } else {
-            SwipeRefresh(
-                onRefresh = { viewModel.loadNextPage() },
-                bottomRefreshIndicatorState = rememberSwipeRefreshState(isRefreshing = viewModel.isNextPageLoading),
-            ) {
-                LazyColumn(Modifier.padding(horizontal = 16.dp)) {
-
-                    item {
-                        if (subtitle.isNotBlank()) {
-                            Spacer(Modifier.height(20.dp))
-                            Text(
-                                text = subtitle,
-                                style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
-                            )
-                        }
-                        Spacer(Modifier.height(13.dp))
+                item {
+                    if (subtitle.isNotBlank()) {
+                        Spacer(Modifier.height(20.dp))
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.h6.copy(fontSize = 18.sp),
+                        )
                     }
+                    Spacer(Modifier.height(13.dp))
+                }
 
+                if (popularGames.isEmpty()) {
+                    items(items = List(10){it}.chunked(numberOfItemsByRow)) { rowItems ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        ) {
+                            for (item in rowItems) {
+                                GameCardPlaceholder(Modifier.weight(1F))
+                            }
+                        }
+                        Spacer(Modifier.height(14.dp))
+                    }
+                } else {
                     items(items = popularGames.chunked(numberOfItemsByRow)) { rowItems ->
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -112,26 +122,20 @@ fun NewGamesScreenBody(
                         }
                         Spacer(Modifier.height(14.dp))
                     }
+                }
 
-                    if (viewModel.isLastPageReached) {
-                        item {
-                            Card(elevation = 15.dp, backgroundColor = Color.Gray.copy(0.1F)) {
-                                Text(
-                                    "Oops, there are no more games to load, you have reached the end of the page.",
-                                    modifier = Modifier.padding(16.dp),
-                                )
-                            }
-                            Spacer(Modifier.height(16.dp))
+                if (viewModel.isLastPageReached) {
+                    item {
+                        Card(elevation = 15.dp, backgroundColor = Color.Gray.copy(0.1F)) {
+                            Text(
+                                "Oops, there are no more games to load, you have reached the end of the page.",
+                                modifier = Modifier.padding(16.dp),
+                            )
                         }
+                        Spacer(Modifier.height(16.dp))
                     }
                 }
             }
         }
     }
-}
-
-
-@Composable
-fun NewGamesScreenPlaceholder() {
-
 }
