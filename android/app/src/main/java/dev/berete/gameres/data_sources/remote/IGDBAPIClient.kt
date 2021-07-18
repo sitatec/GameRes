@@ -78,7 +78,7 @@ class IGDBAPIClient(
             .fields(gameSummaryFields)
             .where(
                 "first_release_date > ${startTimeStamp.toFixed10Digits()} & first_release_date < ${endTimestamp.toFixed10Digits()} " +
-                        "${getGameGenreQuery(gameGenre)}  ${getGameModeQuery(gameMode)} & platforms = (${getIGDBPlatformIDs()}) & total_rating_count != 0",
+                        "${getGameGenreQuery(gameGenre)}  ${getGameModeQuery(gameMode)} & total_rating_count != 0",
             )
             .sort("total_rating_count", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
@@ -134,9 +134,9 @@ class IGDBAPIClient(
                             getGameModeQuery(
                                 gameMode
                             )
-                        }",
+                        } & total_rating_count != 0",
             )
-            .sort("first_release_date", Sort.DESCENDING)
+            .sort("total_rating_count", Sort.DESCENDING)
             .limit(numberOfGamesToFetch)
             .offset(page * count)
 
@@ -279,6 +279,7 @@ class IGDBAPIClient(
 //    }
 
     override suspend fun getGamesByIds(gameIds: List<Long>): List<Game> {
+        if(gameIds.isEmpty()) return emptyList()
         val queryBuilder = apiCalypse.newBuilder().fields(gameSummaryFields)
             .where("id = (${gameIds.joinToString()})")
 

@@ -1,6 +1,5 @@
 package dev.berete.gameres.ui.screens.game_details
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,7 +21,7 @@ class GameDetailsViewModel @Inject constructor(
     private val _game = MutableLiveData<Game>()
     val game: LiveData<Game> = _game
 
-    private val _similarGames = MutableLiveData<List<Game>>()
+    private val _similarGames = MutableLiveData<List<Game>>(emptyList())
     val similarGames = _similarGames
 
     fun initialize(gameId: Long) {
@@ -33,7 +32,9 @@ class GameDetailsViewModel @Inject constructor(
 
         viewModelScope.launch {
             _game.value = gameDetailsRepository.getGameDetails(gameId)
-            _similarGames.value = gameListRepository.getGamesByIds(game.value!!.similarGameIds)
+            if(game.value!!.similarGameIds.isNotEmpty()){
+                _similarGames.value = gameListRepository.getGamesByIds(game.value!!.similarGameIds)
+            }
         }
     }
 }
