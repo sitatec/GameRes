@@ -19,10 +19,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.berete.gameres.ui.Routes
-import dev.berete.gameres.ui.screens.shared.components.GameCard
-import dev.berete.gameres.ui.screens.shared.components.GameResTopAppBar
-import dev.berete.gameres.ui.screens.shared.components.NavDrawer
-import dev.berete.gameres.ui.screens.shared.components.Tabs
+import dev.berete.gameres.ui.screens.shared.components.*
 import dev.berete.gameres.ui.utils.GameCardPlaceholder
 import dev.berete.gameres.ui.utils.buildFakeGameList
 import dev.berete.gameres.ui.utils.gameTypeNames
@@ -35,12 +32,13 @@ fun NewGamesScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
 
-    Scaffold(
-        scaffoldState = scaffoldState,
-        topBar = {
-            GameResTopAppBar(
-                title = { Text("New Games", fontSize = 18.sp) },
-                scaffoldState = scaffoldState,
+    ScaffoldWrapper {
+        Scaffold(
+            scaffoldState = scaffoldState,
+            topBar = {
+                GameResTopAppBar(
+                    title = { Text("New Games", fontSize = 18.sp) },
+                    scaffoldState = scaffoldState,
 //                actions = {
 //                    Icon(
 //                        imageVector = Icons.Default.Sort,
@@ -48,25 +46,26 @@ fun NewGamesScreen(
 //                        modifier = Modifier.padding(end = 8.dp),
 //                    )
 //                }
-            )
-        },
-        drawerContent = {
-            NavDrawer(
+                )
+            },
+            drawerContent = {
+                NavDrawer(
+                    navController = navController,
+                    modifier = Modifier.background(MaterialTheme.colors.surface),
+                    state = scaffoldState.drawerState,
+                )
+            },
+            drawerBackgroundColor = Color.Transparent,
+            drawerScrimColor = MaterialTheme.colors.surface.copy(0.63f),
+            drawerElevation = 0.dp,
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
+            NewGamesScreenBody(
+                viewModel = viewModel,
                 navController = navController,
-                modifier = Modifier.background(MaterialTheme.colors.surface),
-                state = scaffoldState.drawerState,
+                subtitle = subtitle,
             )
-        },
-        drawerBackgroundColor = Color.Transparent,
-        drawerScrimColor = MaterialTheme.colors.surface.copy(0.63f),
-        drawerElevation = 0.dp,
-    ) {
-        Spacer(modifier = Modifier.height(8.dp))
-        NewGamesScreenBody(
-            viewModel = viewModel,
-            navController = navController,
-            subtitle = subtitle,
-        )
+        }
     }
 }
 

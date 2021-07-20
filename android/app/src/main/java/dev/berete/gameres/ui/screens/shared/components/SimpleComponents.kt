@@ -1,5 +1,6 @@
 package dev.berete.gameres.ui.screens.shared.components
 
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,9 +15,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -48,8 +55,12 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import java.sql.Timestamp
 import java.time.Instant
+import kotlin.math.absoluteValue
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
+
+const val TopAppBarHeight = 50
+const val TopAppBarVerticalPadding = 8
 
 @Composable
 fun GameResLogo(modifier: Modifier = Modifier, style: TextStyle = MaterialTheme.typography.body1) {
@@ -188,8 +199,8 @@ fun GameResTopAppBar(
         },
         actions = actions,
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .height(50.dp)
+            .padding(horizontal = 16.dp, vertical = TopAppBarVerticalPadding.dp)
+            .height(TopAppBarHeight.dp)
             .clip(MaterialTheme.shapes.medium),
         elevation = 1.dp
     )
@@ -429,7 +440,8 @@ fun ReleaseCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(modifier.clickable { onClick() },
+    Card(
+        modifier.clickable { onClick() },
         shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
         elevation = 5.dp
     ) {
@@ -529,5 +541,66 @@ fun Tabs(titles: List<String>, onTabSelected: (selectedTabTitle: String) -> Unit
                 },
             )
         }
+    }
+}
+
+@Composable
+fun ScaffoldWrapper(scaffold: @Composable () -> Unit) {
+    // TODO Refactor
+    val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
+    val totalTopAppBarHeight =
+        remember { (TopAppBarHeight + (TopAppBarVerticalPadding * 2)).toFloat() }
+    val localDensity = LocalDensity.current
+
+    Box(
+        Modifier
+            .verticalScroll(scrollState)
+            .nestedScroll(object : NestedScrollConnection {
+                var yOffset = 0f
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    if (available.y == 0f || source != NestedScrollSource.Drag) return Offset.Zero
+
+                    return if (available.y > 0) {
+                        if (yOffset == 0f) return Offset.Zero
+                        val tempOffset = available.y - yOffset
+                        val dragConsumed = yOffset + tempOffset
+                        yOffset = (yOffset + dragConsumed).coerceAtMost(0f)
+
+                        coroutineScope.launch {
+                            scrollState.animateScrollTo(-localDensity.run {
+                                yOffset.toInt().dp
+                                    .toPx()
+                                    .toInt()
+                            }, animationSpec = SpringSpec(stiffness = 500f))
+                        }
+
+                        Offset(0f, dragConsumed)
+
+                    } else {
+                        if (yOffset <= -totalTopAppBarHeight) return Offset.Zero
+                        val previousOffset = yOffset
+                        yOffset =
+                            -((previousOffset.absoluteValue + available.y.absoluteValue).coerceAtMost(
+                                totalTopAppBarHeight
+                            ))
+
+                        coroutineScope.launch {
+                            scrollState.animateScrollTo(localDensity.run {
+                                yOffset.toInt().dp
+                                    .toPx()
+                                    .toInt()
+                            }.absoluteValue, animationSpec = SpringSpec(stiffness = 500f))
+                        }
+                        val dragConsumed = (yOffset.absoluteValue - previousOffset.absoluteValue)
+                        Offset(0f, -dragConsumed)
+                    }
+                }
+            })
+            .height((LocalConfiguration.current.screenHeightDp + totalTopAppBarHeight).dp),
+//            .offset(y = yOffsetDp.dp),
+        contentAlignment = Alignment.TopCenter,
+    ) {
+        scaffold()
     }
 }

@@ -1,6 +1,9 @@
 package dev.berete.gameres.ui.screens.home
 
+import android.util.Log
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,10 +16,16 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,40 +46,45 @@ import dev.berete.gameres.ui.Routes
 import dev.berete.gameres.ui.screens.shared.components.*
 import dev.berete.gameres.ui.theme.*
 import dev.berete.gameres.ui.utils.*
+import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
     val scaffoldState = rememberScaffoldState()
 
-    Scaffold(
-        scaffoldState = scaffoldState,
-        topBar = {
-            GameResTopAppBar(
-                title = { GameResLogo(modifier = Modifier.padding(top = 4.dp)) },
-                scaffoldState = scaffoldState,
-                actions = {
-                    IconButton(onClick = { navController.navigate(Routes.Search) }) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = stringResource(R.string.search_btn_content_description),
-                            modifier = Modifier.padding(end = 8.dp),
-                        )
+
+    ScaffoldWrapper {
+        Scaffold(
+            scaffoldState = scaffoldState,
+            topBar = {
+                GameResTopAppBar(
+                    title = { GameResLogo(modifier = Modifier.padding(top = 4.dp)) },
+                    scaffoldState = scaffoldState,
+                    actions = {
+                        IconButton(onClick = { navController.navigate(Routes.Search) }) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = stringResource(R.string.search_btn_content_description),
+                                modifier = Modifier.padding(end = 8.dp),
+                            )
+                        }
                     }
-                }
-            )
-        },
-        drawerContent = {
-            NavDrawer(
-                navController = navController,
-                state = scaffoldState.drawerState,
-            )
-        },
-        drawerBackgroundColor = Color.Transparent,
-        drawerScrimColor = MaterialTheme.colors.surface.copy(0.63f),
-        drawerElevation = 0.dp,
-    ) {
-        Spacer(modifier = Modifier.height(8.dp))
-        HomeScreenBody(viewModel, navController)
+                )
+            },
+            drawerContent = {
+                NavDrawer(
+                    navController = navController,
+                    state = scaffoldState.drawerState,
+                )
+            },
+            drawerBackgroundColor = Color.Transparent,
+            drawerScrimColor = MaterialTheme.colors.surface.copy(0.63f),
+            drawerElevation = 0.dp,
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
+            HomeScreenBody(viewModel, navController)
+        }
     }
 }
 

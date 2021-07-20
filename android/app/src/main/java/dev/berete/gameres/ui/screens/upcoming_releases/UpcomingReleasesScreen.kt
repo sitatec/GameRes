@@ -46,13 +46,14 @@ fun UpcomingReleaseScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
 
-    Scaffold(
-        scaffoldState = scaffoldState,
-        topBar = {
-            GameResTopAppBar(
-                title = { Text("Upcoming Releases", fontSize = 18.sp) },
-                scaffoldState = scaffoldState,
-                // TODO implement sorting feature
+    ScaffoldWrapper{
+        Scaffold(
+            scaffoldState = scaffoldState,
+            topBar = {
+                GameResTopAppBar(
+                    title = { Text("Upcoming Releases", fontSize = 18.sp) },
+                    scaffoldState = scaffoldState,
+                    // TODO implement sorting feature
 //                actions = {
 //                    Icon(
 //                        imageVector = Icons.Default.Sort,
@@ -60,25 +61,26 @@ fun UpcomingReleaseScreen(
 //                        modifier = Modifier.padding(end = 8.dp),
 //                    )
 //                }
-            )
-        },
-        drawerContent = {
-            NavDrawer(
+                )
+            },
+            drawerContent = {
+                NavDrawer(
+                    navController = navController,
+                    modifier = Modifier
+                        .background(MaterialTheme.colors.surface),
+                    state = scaffoldState.drawerState,
+                )
+            },
+            drawerBackgroundColor = Color.Transparent,
+            drawerScrimColor = MaterialTheme.colors.surface.copy(0.63f),
+            drawerElevation = 0.dp,
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
+            UpcomingReleaseScreenBody(
+                viewModel = viewModel,
                 navController = navController,
-                modifier = Modifier
-                    .background(MaterialTheme.colors.surface),
-                state = scaffoldState.drawerState,
             )
-        },
-        drawerBackgroundColor = Color.Transparent,
-        drawerScrimColor = MaterialTheme.colors.surface.copy(0.63f),
-        drawerElevation = 0.dp,
-    ) {
-        Spacer(modifier = Modifier.height(8.dp))
-        UpcomingReleaseScreenBody(
-            viewModel = viewModel,
-            navController = navController,
-        )
+        }
     }
 }
 
