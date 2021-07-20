@@ -18,7 +18,7 @@ val PlatformType.logo: Int
         APPLE -> R.drawable.ic_apple_logo
         LINUX -> R.drawable.ic_linux_logo
         WII -> R.drawable.ic_wii_logo
-        OTHER -> R.drawable.ic_other
+        OTHER -> R.drawable.ic_add
     }
 
 val Game.bannerUrl: String

@@ -22,6 +22,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -85,7 +87,7 @@ fun PlatformLogos(
 ) {
     Row(modifier = modifier) {
         for (platform in platformTypeList) {
-            Image(
+            Icon(
                 painter = painterResource(platform.logo),
                 contentDescription = null,
                 modifier = singleLogoModifier
@@ -211,7 +213,6 @@ fun GameResTopAppBar(
 fun NavDrawer(navController: NavController, state: DrawerState, modifier: Modifier = Modifier) {
     val currentDate = Clock.System.now()
     val coroutineScope = rememberCoroutineScope()
-
     val closeDrawer = {
         coroutineScope.launch {
             state.close()
@@ -222,14 +223,17 @@ fun NavDrawer(navController: NavController, state: DrawerState, modifier: Modifi
         Column(
             modifier
                 .fillMaxHeight()
+                .width((LocalConfiguration.current.screenWidthDp * 0.75).dp)
                 .verticalScroll(rememberScrollState())
                 .background(MaterialTheme.colors.surface),
         ) {
             Image(
                 painter = painterResource(id = R.drawable.nav_drawer_header),
                 contentDescription = null,
-                modifier = Modifier.padding(start = 40.dp, end = 56.dp),
+                modifier = Modifier.padding(end = 8.dp).fillMaxWidth()
             )
+
+            Divider(Modifier.padding(top = 8.dp))
 
             Row(
                 Modifier

@@ -7,6 +7,8 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -73,65 +75,77 @@ fun GameDetailsScreen(viewModel: GameDetailsViewModel, navController: NavControl
 fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: NavController) {
     Column(Modifier.verticalScroll(rememberScrollState())) {
 
-        Box(contentAlignment = Alignment.BottomStart) {
-            Image(
-                painter = rememberCoilPainter(request = game.bannerUrl, fadeIn = true),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.TopCenter,
-                modifier = Modifier.fillMaxWidth()
-            )
+        Box(contentAlignment = Alignment.TopStart) {
+            Box(contentAlignment = Alignment.BottomStart) {
+                Image(
+                    painter = rememberCoilPainter(request = game.bannerUrl, fadeIn = true),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.TopCenter,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            Column(
-                modifier = Modifier
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color.Transparent,
-                                MaterialTheme.colors.surface
-                            )
-                        ),
-                    )
-                    .padding(top = 48.dp)
-            ) {
-
-                Row(verticalAlignment = Alignment.Bottom) {
-                    Image(
-                        painter = rememberCoilPainter(request = game.coverUrl, fadeIn = true),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .width(100.dp)
-                            .padding(horizontal = 8.dp)
-                            .clip(MaterialTheme.shapes.small),
-                    )
-                    Column {
-                        Text(
-                            text = game.name,
-                            style = MaterialTheme.typography.h6.copy(color = MaterialTheme.colors.onSurface),
+                Column(
+                    modifier = Modifier
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color.Transparent,
+                                    MaterialTheme.colors.surface
+                                )
+                            ),
                         )
+                        .padding(top = 48.dp)
+                ) {
 
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Image(
+                            painter = rememberCoilPainter(request = game.coverUrl, fadeIn = true),
+                            contentDescription = null,
                             modifier = Modifier
+                                .width(100.dp)
                                 .padding(horizontal = 8.dp)
-                                .padding(bottom = 8.dp, top = 4.dp)
-                                .fillMaxWidth(),
-                        ) {
-                            PlatformLogos(
-                                platformTypeList = remember { game.platformList.groupBy { it.platformType }.keys.toList() },
-                                singleLogoModifier = Modifier.height(14.dp),
+                                .clip(MaterialTheme.shapes.small),
+                        )
+                        Column {
+                            Text(
+                                text = game.name,
+                                style = MaterialTheme.typography.h6.copy(color = MaterialTheme.colors.onSurface),
                             )
-                            Spacer(Modifier.width(16.dp))
-                            GameScore(
-                                score = game.rating.toInt(),
-                                style = MaterialTheme.typography.subtitle2,
-                                modifier = Modifier.padding(end = 8.dp),
-                            )
+
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .padding(bottom = 8.dp, top = 4.dp)
+                                    .fillMaxWidth(),
+                            ) {
+                                PlatformLogos(
+                                    platformTypeList = remember { game.platformList.groupBy { it.platformType }.keys.toList() },
+                                    singleLogoModifier = Modifier.height(14.dp),
+                                )
+                                Spacer(Modifier.width(16.dp))
+                                GameScore(
+                                    score = game.rating.toInt(),
+                                    style = MaterialTheme.typography.subtitle2,
+                                    modifier = Modifier.padding(end = 8.dp),
+                                )
+                            }
                         }
                     }
                 }
             }
+            Icon(
+                imageVector = Icons.Filled.ArrowBack,
+                contentDescription = "Back to previous screen",
+                modifier = Modifier
+                    .clickable { navController.popBackStack() }
+                    .padding(8.dp)
+                    .clip(MaterialTheme.shapes.small)
+                    .background(MaterialTheme.colors.surface.copy(0.5f))
+                    .padding(8.dp),
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -223,7 +237,10 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                             .aspectRatio(1.6f),
                     ) {
                         Image(
-                            painter = rememberCoilPainter(request = game.allImageUrls[pageIndex], fadeIn = true),
+                            painter = rememberCoilPainter(
+                                request = game.allImageUrls[pageIndex],
+                                fadeIn = true
+                            ),
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
                             alignment = Alignment.TopCenter,
@@ -267,7 +284,10 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                                 .aspectRatio(16f / 9),
                         ) {
                             Image(
-                                painter = rememberCoilPainter(request = video.thumbnailUrl, fadeIn = true),
+                                painter = rememberCoilPainter(
+                                    request = video.thumbnailUrl,
+                                    fadeIn = true
+                                ),
                                 contentDescription = video.title,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize(),
@@ -405,7 +425,10 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
         ) {
             for (ageRating in game.ageRatings) {
                 Spacer(Modifier.width(16.dp))
-                Image(painter = rememberCoilPainter(ageRating.labelUrl, fadeIn = true), contentDescription = null)
+                Image(
+                    painter = rememberCoilPainter(ageRating.labelUrl, fadeIn = true),
+                    contentDescription = null
+                )
             }
         }
 

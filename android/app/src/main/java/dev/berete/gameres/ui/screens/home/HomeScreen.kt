@@ -53,7 +53,6 @@ import kotlin.math.absoluteValue
 fun HomeScreen(viewModel: HomeViewModel, navController: NavController) {
     val scaffoldState = rememberScaffoldState()
 
-
     ScaffoldWrapper {
         Scaffold(
             scaffoldState = scaffoldState,

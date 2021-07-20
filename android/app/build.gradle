@@ -112,7 +112,7 @@ dependencies {
     implementation files('libs/youtube_player.aar')
 
     implementation 'com.neovisionaries:nv-i18n:1.28'
-
+    implementation "me.onebone:toolbar-compose:2.1.0"
     implementation "org.jetbrains.kotlinx:kotlinx-datetime:0.2.1"
 
 }
