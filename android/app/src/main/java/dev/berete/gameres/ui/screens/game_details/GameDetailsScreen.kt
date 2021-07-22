@@ -2,7 +2,7 @@ package dev.berete.gameres.ui.screens.game_details
 
 import android.content.Intent
 import android.net.Uri
-import android.view.ContextThemeWrapper
+import android.os.Bundle
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -41,6 +40,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerCallback
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.YouTubePlayerFullScreenListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+import dev.berete.gameres.MainActivity
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.GameCompany
@@ -53,6 +53,8 @@ import dev.berete.gameres.ui.utils.GameDetailsPlaceholder
 import dev.berete.gameres.ui.utils.allImageUrls
 import dev.berete.gameres.ui.utils.bannerUrl
 import dev.berete.gameres.ui.utils.formattedInitialReleaseDate
+import dev.berete.gameres.ui.video_player.FullScreenVideoPlayer
+import dev.berete.gameres.ui.video_player.VideoState
 import kotlin.math.absoluteValue
 
 @Composable
@@ -271,52 +273,52 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                             )
                         }
 
-                        var shouldVideoDialogShow by rememberSaveable { mutableStateOf(false) }
-
-                        VideoDialog(shouldShow = shouldVideoDialogShow, videoState = videoState) {
-                            shouldVideoDialogShow = false
-                        }
+                        var shouldPlayVideo by rememberSaveable { mutableStateOf(false) }
 
                         Card(
                             Modifier
-                                .clickable { shouldVideoDialogShow = true }
+                                .clickable { shouldPlayVideo = true }
                                 .width(280.dp)
                                 .aspectRatio(16f / 9),
                         ) {
-                            Image(
-                                painter = rememberCoilPainter(
-                                    request = video.thumbnailUrl,
-                                    fadeIn = true
-                                ),
-                                contentDescription = video.title,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize(),
-                            )
-                            Surface(
-                                modifier = Modifier.wrapContentSize(Alignment.TopCenter),
-                                shape = RoundedCornerShape(
-                                    bottomStart = 5.dp,
-                                    bottomEnd = 5.dp
-                                ),
-                            ) {
-                                Text(
-                                    text = video.title,
-                                    modifier = Modifier.padding(horizontal = 8.dp)
+                            if (shouldPlayVideo) {
+                                VideoPlayer(videoState)
+                            } else {
+                                Image(
+                                    painter = rememberCoilPainter(
+                                        request = video.thumbnailUrl,
+                                        fadeIn = true
+                                    ),
+                                    contentDescription = video.title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize(),
                                 )
-                            }
-                            Box(contentAlignment = Alignment.Center) {
-                                Card(
-                                    Modifier
-                                        .fillMaxSize(0.3f)
-                                        .padding(8.dp),
-                                    elevation = 15.dp,
-                                    backgroundColor = Color.Black.copy(0.5f),
+                                Surface(
+                                    modifier = Modifier.wrapContentSize(Alignment.TopCenter),
+                                    shape = RoundedCornerShape(
+                                        bottomStart = 5.dp,
+                                        bottomEnd = 5.dp
+                                    ),
                                 ) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.ic_play_arrow_24),
-                                        contentDescription = null,
-                                        alignment = Alignment.Center,
+                                    Text(
+                                        text = video.title,
+                                        modifier = Modifier.padding(horizontal = 8.dp)
                                     )
+                                }
+                                Box(contentAlignment = Alignment.Center) {
+                                    Card(
+                                        Modifier
+                                            .fillMaxSize(0.3f)
+                                            .padding(8.dp),
+                                        elevation = 15.dp,
+                                        backgroundColor = Color.Black.copy(0.5f),
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.ic_play_arrow_24),
+                                            contentDescription = null,
+                                            alignment = Alignment.Center,
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -475,7 +477,7 @@ fun CompanyCard(company: GameCompany, modifier: Modifier = Modifier) {
     var shouldShowDialog by rememberSaveable { mutableStateOf(false) }
 
     Card(elevation = 1.dp, modifier = modifier) {
-        Row(Modifier.padding(5.dp)) {
+        Row(Modifier.padding(5.dp), verticalAlignment = Alignment.CenterVertically) {
             Image(
                 rememberCoilPainter(company.logoUrl),
                 contentDescription = null,
@@ -510,7 +512,6 @@ fun CompanyCard(company: GameCompany, modifier: Modifier = Modifier) {
         GameCompanyDialog(
             gameCompany = company,
             onDismiss = { shouldShowDialog = false },
-            modifier = Modifier.fillMaxWidth(0.8f),
         )
     }
 }
@@ -541,20 +542,13 @@ fun RowScope.TableCell(text: String, weight: Float = 1f) {
 
 @Composable
 fun VideoDialog(shouldShow: Boolean, videoState: VideoState, onDismiss: () -> Unit) {
-
-    val videoCardModifier = if (videoState.isFullScreen.value) {
-        Modifier.size(
-            LocalConfiguration.current.screenWidthDp.dp,
-            LocalConfiguration.current.screenHeightDp.dp
-        )
-    } else {
-        val videoWidth = LocalConfiguration.current.screenWidthDp * 0.8
-        Modifier.size(videoWidth.dp, (videoWidth / 1.8).dp) /* 16:9 */
-    }
-
     if (shouldShow) {
         Dialog(onDismissRequest = onDismiss) {
-            Card(videoCardModifier) {
+            Card(
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(19 / 9f)
+            ) {
                 VideoPlayer(
                     videoState = videoState,
                 )
@@ -571,9 +565,9 @@ fun VideoPlayer(
 ) {
     AndroidView(
         factory = { context ->
-            (context as ContextThemeWrapper).setTheme(R.style.VideoDialogTheme)
+            context.setTheme(R.style.NoBackground)
             YouTubePlayerView(context).apply {
-//                (context as LifecycleOwner).lifecycle.addObserver(this)// TODO Refactor
+                MainActivity.addLifecycleObserver(this)
 
                 getYouTubePlayerWhenReady(object : YouTubePlayerCallback {
                     override fun onYouTubePlayer(youTubePlayer: YouTubePlayer) {
@@ -582,27 +576,23 @@ fun VideoPlayer(
                             videoId = videoState.videoId,
                             videoState.currentSecond
                         )
-                        if (videoState.isFullScreen.value) {
-                            enterFullScreen()
-                        }
                     }
                 })
                 addFullScreenListener(object : YouTubePlayerFullScreenListener {
                     override fun onYouTubePlayerEnterFullScreen() {
+                        val intent = Intent(context, FullScreenVideoPlayer::class.java)
+                        intent.putExtra(FullScreenVideoPlayer.VIDEO_STATE_ARG_KEY, videoState)
+                        context.startActivity(intent)
                         videoState.isFullScreen.value = true
                     }
 
-                    override fun onYouTubePlayerExitFullScreen() {
-                        videoState.isFullScreen.value = false
-                    }
+                    override fun onYouTubePlayerExitFullScreen() {}
 
                 })
 
             }
         },
-        modifier = modifier
-            .padding(vertical = 16.dp)
-            .fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
     )
 }
 
@@ -622,7 +612,7 @@ fun GameCompanyDialog(
             }
         },
         title = {
-            Row(Modifier.padding(5.dp)) {
+            Row(Modifier.padding(5.dp), verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     rememberCoilPainter(gameCompany.logoUrl, fadeIn = true),
                     contentDescription = null,

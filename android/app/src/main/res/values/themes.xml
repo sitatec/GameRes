@@ -21,8 +21,9 @@
         <item name="android:background">@drawable/splash_screen_bg</item>
     </style>
 
-    <style name="VideoDialogTheme" parent="Theme.GameRes">
+    <style name="NoBackground" parent="@style/ThemeOverlay.MaterialComponents.Dialog.Alert">
         <item name="android:background">@null</item>
     </style>
+
 
 </resources>

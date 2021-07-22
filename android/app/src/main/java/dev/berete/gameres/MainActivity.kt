@@ -10,6 +10,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.Surface
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.LifecycleObserver
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,9 +25,10 @@ class MainActivity : ComponentActivity() {
     @ExperimentalPagerApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        instance = this // Refactor
         setContent {
             GameResTheme {
-                Surface(){
+                Surface{
                     Navigation()
                 }
 
@@ -38,5 +40,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    companion object{
+        private lateinit var instance: MainActivity
+        fun addLifecycleObserver(observer: LifecycleObserver){
+            //TODO REFACTOR
+            instance.lifecycle.addObserver(observer)
+        }
+    }
 
 }

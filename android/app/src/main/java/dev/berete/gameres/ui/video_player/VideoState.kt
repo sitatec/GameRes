@@ -1,4 +1,4 @@
-package dev.berete.gameres.ui.screens.game_details
+package dev.berete.gameres.ui.video_player
 
 import android.os.Parcelable
 import androidx.compose.runtime.MutableState
