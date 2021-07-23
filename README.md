@@ -1,3 +1,8 @@
+<div align="center">
+  <img src="https://github.com/sitatec/GameRes/blob/master/assets/logo.png?raw=true" widht="100%" alt="GameRes"/>
+ <img src="https://github.com/sitatec/GameRes/blob/master/assets/store_listing_screenshots.png?raw=true" widht="100%" alt="GameRes - Screenshots"/>
+</div>
+
 # GameRes
 An app built with jetpack compose that provides various information about video games :
  - image
@@ -8,5 +13,8 @@ An app built with jetpack compose that provides various information about video 
  - Realese dates
  - Upcoming games
  ...
-
-<img src="https://github.com/sitatec/GameRes/blob/home/assets/compose_grid_demo.gif?raw=true" height="700">
+ 
+ # Demo
+ >By clicking on the image below, you will be redirected to the video page in Google Drive
+ 
+ <a href="https://drive.google.com/file/d/1VwXxBVYO0NDE3KlbtyqqB4ST09oMNSjM/view?usp=sharing"> <img src="https://github.com/sitatec/GameRes/blob/master/assets/demo_video_thumbnail.png?raw=true" alt="GameRes Demo"/> </a>
