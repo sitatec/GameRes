@@ -3,6 +3,7 @@ package dev.berete.gameres.ui.screens.game_details
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,6 +55,7 @@ import dev.berete.gameres.ui.utils.allImageUrls
 import dev.berete.gameres.ui.utils.bannerUrl
 import dev.berete.gameres.ui.utils.formattedInitialReleaseDate
 import dev.berete.gameres.ui.video_player.FullScreenVideoPlayer
+import dev.berete.gameres.ui.video_player.PlayerState
 import dev.berete.gameres.ui.video_player.VideoState
 import kotlin.math.absoluteValue
 
@@ -277,7 +279,6 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
 
                         Card(
                             Modifier
-                                .clickable { shouldPlayVideo = true }
                                 .width(280.dp)
                                 .aspectRatio(16f / 9),
                         ) {
@@ -308,6 +309,10 @@ fun GameDetailsScreenBody(game: Game, similarGames: List<Game>, navController: N
                                 Box(contentAlignment = Alignment.Center) {
                                     Card(
                                         Modifier
+                                            .clickable {
+                                                videoState.state = PlayerState.PLAYING
+                                                shouldPlayVideo = true
+                                            }
                                             .fillMaxSize(0.3f)
                                             .padding(8.dp),
                                         elevation = 15.dp,
@@ -495,14 +500,16 @@ fun CompanyCard(company: GameCompany, modifier: Modifier = Modifier) {
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(text = company.country, color = Color.White.copy(0.6f))
-                    Text(
-                        "Learn more",
-                        color = MaterialTheme.colors.primary,
-                        fontSize = 14.sp,
-                        modifier = Modifier
-                            .clickable { shouldShowDialog = true }
-                            .padding(8.dp),
-                    )
+                    if(company.description.isNotBlank()){
+                        Text(
+                            "Learn more",
+                            color = MaterialTheme.colors.primary,
+                            fontSize = 14.sp,
+                            modifier = Modifier
+                                .clickable { shouldShowDialog = true }
+                                .padding(8.dp),
+                        )
+                    }
                 }
             }
         }
@@ -540,23 +547,23 @@ fun RowScope.TableCell(text: String, weight: Float = 1f) {
     )
 }
 
-@Composable
-fun VideoDialog(shouldShow: Boolean, videoState: VideoState, onDismiss: () -> Unit) {
-    if (shouldShow) {
-        Dialog(onDismissRequest = onDismiss) {
-            Card(
-                Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(19 / 9f)
-            ) {
-                VideoPlayer(
-                    videoState = videoState,
-                )
-            }
-        }
-    }
-
-}
+//@Composable
+//fun VideoDialog(shouldShow: Boolean, videoState: VideoState, onDismiss: () -> Unit) {
+//    if (shouldShow) {
+//        Dialog(onDismissRequest = onDismiss) {
+//            Card(
+//                Modifier
+//                    .fillMaxWidth()
+//                    .aspectRatio(19 / 9f)
+//            ) {
+//                VideoPlayer(
+//                    videoState = videoState,
+//                )
+//            }
+//        }
+//    }
+//
+//}
 
 @Composable
 fun VideoPlayer(
@@ -576,6 +583,9 @@ fun VideoPlayer(
                             videoId = videoState.videoId,
                             videoState.currentSecond
                         )
+                        if(videoState.state != PlayerState.PLAYING){
+                            youTubePlayer.pause()
+                        }
                     }
                 })
                 addFullScreenListener(object : YouTubePlayerFullScreenListener {
@@ -583,7 +593,7 @@ fun VideoPlayer(
                         val intent = Intent(context, FullScreenVideoPlayer::class.java)
                         intent.putExtra(FullScreenVideoPlayer.VIDEO_STATE_ARG_KEY, videoState)
                         context.startActivity(intent)
-                        videoState.isFullScreen.value = true
+                        videoState.state = PlayerState.PAUSED
                     }
 
                     override fun onYouTubePlayerExitFullScreen() {}
@@ -628,10 +638,9 @@ fun GameCompanyDialog(
             }
         },
         text = {
-            Text(
-                gameCompany.description, fontSize = 15.sp,
-                modifier = modifier.verticalScroll(rememberScrollState()),
-            )
+            Box(modifier = Modifier.verticalScroll(rememberScrollState())){
+                Text(gameCompany.description, fontSize = 15.sp)
+            }
         },
         modifier = modifier,
         shape = MaterialTheme.shapes.small,

@@ -12,6 +12,7 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">@color/dark_bleu</item>
         <item name="android:navigationBarColor">@color/dark_bleu</item>
+<!--        <item name="dialogTheme">@style/DialogTheme</item>-->
         <!-- Customize your theme here. -->
     </style>
 
@@ -21,9 +22,15 @@
         <item name="android:background">@drawable/splash_screen_bg</item>
     </style>
 
-    <style name="NoBackground" parent="@style/ThemeOverlay.MaterialComponents.Dialog.Alert">
+    <style name="NoBackground" parent="Theme.GameRes">
         <item name="android:background">@null</item>
     </style>
 
+    <style name="DialogTheme" parent="@style/ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="windowMinWidthMinor">70%</item>
+        <item name="windowMinWidthMajor">80%</item>
+        <item name="windowFixedHeightMinor">80%</item>
+        <item name="windowFixedHeightMajor">92%</item>
+    </style>
 
 </resources>

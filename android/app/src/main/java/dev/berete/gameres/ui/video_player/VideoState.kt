@@ -13,7 +13,8 @@ import kotlinx.parcelize.RawValue
 data class VideoState(
     var videoId: String,
     var currentSecond: Float = 0f,
-    var isFullScreen: @RawValue MutableState<Boolean> = mutableStateOf(false),
+    var isFullScreen: Boolean = false,
+    var state: PlayerState = PlayerState.UNKNOWN,
 ) : Parcelable,
     YouTubePlayerListener {
 
@@ -41,5 +42,23 @@ data class VideoState(
     override fun onVideoDuration(youTubePlayer: YouTubePlayer, duration: Float) {}
     override fun onError(youTubePlayer: YouTubePlayer, error: PlayerConstants.PlayerError) {}
     override fun onVideoLoadedFraction(youTubePlayer: YouTubePlayer, loadedFraction: Float) {}
-    override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {}
+    override fun onStateChange(youTubePlayer: YouTubePlayer, state: PlayerConstants.PlayerState) {
+        when(state){
+            PlayerConstants.PlayerState.UNKNOWN,
+            PlayerConstants.PlayerState.BUFFERING,
+            PlayerConstants.PlayerState.VIDEO_CUED -> this.state = PlayerState.UNKNOWN
+            PlayerConstants.PlayerState.UNSTARTED -> this.state = PlayerState.UNSTARTED
+            PlayerConstants.PlayerState.ENDED -> this.state = PlayerState.ENDED
+            PlayerConstants.PlayerState.PLAYING -> this.state = PlayerState.PLAYING
+            PlayerConstants.PlayerState.PAUSED -> this.state = PlayerState.PAUSED
+        }
+    }
+}
+
+enum class PlayerState {
+    PLAYING,
+    PAUSED,
+    ENDED,
+    UNSTARTED,
+    UNKNOWN,
 }
