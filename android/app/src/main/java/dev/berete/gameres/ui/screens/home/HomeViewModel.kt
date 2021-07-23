@@ -13,8 +13,12 @@ import dev.berete.gameres.domain.repositories.GameListRepository
 import dev.berete.gameres.ui.screens.shared.view_models.BaseViewModel
 import dev.berete.gameres.ui.utils.getYearTimestamp
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
 import java.util.*
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(private val gameListRepository: GameListRepository) :
@@ -62,11 +66,12 @@ class HomeViewModel @Inject constructor(private val gameListRepository: GameList
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun fetchNewGames() {
         viewModelScope.launch {
-            val lastYear = Calendar.getInstance().get(Calendar.YEAR) - 1
+            val threeMonthAgo = Clock.System.now().minus(Duration.days(30 * 3))
             _newGames.value = gameListRepository.getGamesReleasedAfter(
-                timestamp = getYearTimestamp(lastYear),
+                timestamp = threeMonthAgo.toEpochMilliseconds(),
                 count = 10,
             )
         }

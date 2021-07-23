@@ -242,11 +242,17 @@ fun ReleaseDateDTO.toDomainRelease() = Release(
     gameId = game.id,
     gameName = game.name,
     gameCoverUrl = imageBuilder(game.cover.imageId, ImageSize.COVER_BIG),
-    artWorkUrl = if (game.artworksList.isEmpty()) ""
-    else imageBuilder(
-        game.artworksList.first().imageId,
-        ImageSize.SCREENSHOT_MEDIUM,
-    )
+    artWorkUrl = when {
+        game.artworksList.isNotEmpty() ->  imageBuilder(
+            game.artworksList.first().imageId,
+            ImageSize.SCREENSHOT_MEDIUM,
+        )
+        game.screenshotsList.isNotEmpty() -> imageBuilder(
+            game.screenshotsList.first().imageId,
+            ImageSize.SCREENSHOT_MEDIUM,
+        )
+        else -> ""
+    }
 )
 
 // ------------- Domain Models to Data Transfer Object Converters --------------- //
