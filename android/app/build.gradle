@@ -9,6 +9,18 @@ plugins {
 }
 
 android {
+
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file("local.properties").newDataInputStream())
+
+    signingConfigs {
+        release {
+            storeFile file('/Users/berete/DevTools/keystore/GameRes')
+            storePassword properties.getProperty("KEYSTORE_PASSWORD")
+            keyAlias properties.getProperty("KEYALIAS")
+            keyPassword properties.getProperty("KEYPASSWORD")
+        }
+    }
     compileSdk 30
     buildToolsVersion "30.0.3"
 
@@ -24,9 +36,6 @@ android {
             useSupportLibrary true
         }
 
-        Properties properties = new Properties()
-        properties.load(project.rootProject.file("local.properties").newDataInputStream())
-
         buildConfigField "String", "BACKEND_URL", properties.getProperty("BACKEND_URL")
         buildConfigField "String", "BACKEND_ACCESS_KEY", properties.getProperty("BACKEND_ACCESS_KEY")
         buildConfigField "String", "CLIENT_ID", properties.getProperty("CLIENT_ID")
@@ -34,8 +43,11 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+//            shrinkResources true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            debuggable true
         }
     }
     compileOptions {

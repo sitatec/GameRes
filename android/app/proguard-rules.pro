@@ -19,3 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keepclassmembernames class * extends com.google.protobuf.GeneratedMessageV3 { *; }
+-keepclassmembernames class * extends com.google.protobuf.GeneratedMessage { *; }
