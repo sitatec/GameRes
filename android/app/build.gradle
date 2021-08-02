@@ -28,8 +28,8 @@ android {
         applicationId "dev.berete.gameres"
         minSdk 21
         targetSdk 30
-        versionCode 3
-        versionName "1.0.1-beta"
+        versionCode 4
+        versionName "1.0.2-beta"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
