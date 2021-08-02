@@ -19,7 +19,6 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.berete.gameres.ui.Routes
 import dev.berete.gameres.ui.screens.shared.components.*
 import dev.berete.gameres.ui.utils.GameCardPlaceholder
-import dev.berete.gameres.ui.utils.buildFakeGameList
 import dev.berete.gameres.ui.utils.gameTypeNames
 
 @Composable
@@ -28,35 +27,28 @@ fun PopularGamesScreen(
     navController: NavController,
     subtitle: String,
 ) {
-    val scaffoldState = rememberScaffoldState()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
 
-    ScaffoldWrapper {
-        Scaffold(
-            scaffoldState = scaffoldState,
-            topBar = {
-                GameResTopAppBar(
-                    title = { Text("Popular Games", fontSize = 18.sp) },
-                    scaffoldState = scaffoldState,
-                )
-            },
-            drawerContent = {
-                NavDrawer(
-                    navController = navController,
-                    modifier = Modifier.background(MaterialTheme.colors.surface),
-                    state = scaffoldState.drawerState,
-                )
-            },
-            drawerBackgroundColor = Color.Transparent,
-            drawerScrimColor = MaterialTheme.colors.surface.copy(0.63f),
-            drawerElevation = 0.dp,
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
-            NewGamesScreenBody(
-                viewModel = viewModel,
-                navController = navController,
-                subtitle = subtitle,
+    CollapsingTabBarScaffold(
+        topAppBar = {
+            GameResTopAppBar(
+                title = { Text("Popular Games", fontSize = 18.sp) },
+                drawerState = drawerState,
             )
-        }
+                    },
+        drawerState = drawerState,
+        drawerContent = {
+            NavDrawer(
+                navController = navController,
+                modifier = Modifier.background(MaterialTheme.colors.surface),
+                state = drawerState,
+            )
+        }) {
+        NewGamesScreenBody(
+            viewModel = viewModel,
+            navController = navController,
+            subtitle = subtitle,
+        )
     }
 }
 

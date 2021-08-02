@@ -1,42 +1,26 @@
 package dev.berete.gameres.ui.screens.upcoming_releases
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.accompanist.coil.rememberCoilPainter
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.placeholder
-import com.google.accompanist.placeholder.material.shimmer
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.berete.gameres.R
-import dev.berete.gameres.domain.models.Release
 import dev.berete.gameres.ui.Routes
-import dev.berete.gameres.ui.screens.new_games.NewGamesViewModel
 import dev.berete.gameres.ui.screens.shared.components.*
 import dev.berete.gameres.ui.utils.ReleaseCardPlaceholder
-import dev.berete.gameres.ui.utils.buildFakeRelease
 import dev.berete.gameres.ui.utils.gameTypeNames
 
 @Composable
@@ -44,16 +28,14 @@ fun UpcomingReleaseScreen(
     viewModel: UpcomingReleasesViewModel,
     navController: NavController,
 ) {
-    val scaffoldState = rememberScaffoldState()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
 
-    ScaffoldWrapper{
-        Scaffold(
-            scaffoldState = scaffoldState,
-            topBar = {
-                GameResTopAppBar(
-                    title = { Text("Upcoming Releases", fontSize = 18.sp) },
-                    scaffoldState = scaffoldState,
-                    // TODO implement sorting feature
+    CollapsingTabBarScaffold(
+        topAppBar = {
+            GameResTopAppBar(
+                title = { Text("Upcoming Releases", fontSize = 18.sp) },
+                drawerState = drawerState,
+                // TODO implement sorting feature
 //                actions = {
 //                    Icon(
 //                        imageVector = Icons.Default.Sort,
@@ -61,26 +43,20 @@ fun UpcomingReleaseScreen(
 //                        modifier = Modifier.padding(end = 8.dp),
 //                    )
 //                }
-                )
-            },
-            drawerContent = {
-                NavDrawer(
-                    navController = navController,
-                    modifier = Modifier
-                        .background(MaterialTheme.colors.surface),
-                    state = scaffoldState.drawerState,
-                )
-            },
-            drawerBackgroundColor = Color.Transparent,
-            drawerScrimColor = MaterialTheme.colors.surface.copy(0.63f),
-            drawerElevation = 0.dp,
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
-            UpcomingReleaseScreenBody(
-                viewModel = viewModel,
-                navController = navController,
             )
-        }
+        },
+        drawerState = drawerState,
+        drawerContent = {
+            NavDrawer(
+                navController = navController,
+                modifier = Modifier.background(MaterialTheme.colors.surface),
+                state = drawerState,
+            )
+        }) {
+        UpcomingReleaseScreenBody(
+            viewModel = viewModel,
+            navController = navController,
+        )
     }
 }
 
@@ -167,11 +143,5 @@ fun UpcomingReleaseScreenBody(
             }
         }
     }
-}
-
-
-@Composable
-fun UpcomingReleasesPlaceholder() {
-
 }
 

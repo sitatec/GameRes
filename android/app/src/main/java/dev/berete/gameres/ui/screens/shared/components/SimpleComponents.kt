@@ -14,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -22,8 +21,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -37,13 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavOptions
-import androidx.navigation.Navigator
-import com.api.igdb.utils.ImageSize
 import com.google.accompanist.coil.rememberCoilPainter
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.placeholder
-import com.google.accompanist.placeholder.material.shimmer
 import dev.berete.gameres.R
 import dev.berete.gameres.domain.models.Game
 import dev.berete.gameres.domain.models.Release
@@ -55,8 +46,6 @@ import dev.berete.gameres.ui.utils.getYearTimestamp
 import dev.berete.gameres.ui.utils.logo
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
-import java.sql.Timestamp
-import java.time.Instant
 import kotlin.math.absoluteValue
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -178,7 +167,7 @@ fun GameScore(
 @Composable
 fun GameResTopAppBar(
     title: @Composable () -> Unit,
-    scaffoldState: ScaffoldState,
+    drawerState: DrawerState,
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
@@ -189,7 +178,7 @@ fun GameResTopAppBar(
         navigationIcon = {
             IconButton(onClick = {
                 coroutineScope.launch {
-                    scaffoldState.drawerState.open()
+                    drawerState.open()
                 }
             }) {
                 Icon(
@@ -230,7 +219,9 @@ fun NavDrawer(navController: NavController, state: DrawerState, modifier: Modifi
             Image(
                 painter = painterResource(id = R.drawable.nav_drawer_header),
                 contentDescription = null,
-                modifier = Modifier.padding(end = 8.dp).fillMaxWidth()
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .fillMaxWidth()
             )
 
             Divider(Modifier.padding(top = 8.dp))
@@ -549,7 +540,15 @@ fun Tabs(titles: List<String>, onTabSelected: (selectedTabTitle: String) -> Unit
 }
 
 @Composable
-fun ScaffoldWrapper(scaffold: @Composable () -> Unit) {
+fun CollapsingTabBarScaffold(
+    topAppBar: @Composable () -> Unit,
+    drawerState: DrawerState,
+    drawerContent: @Composable ColumnScope.() -> Unit,
+    drawerBackgroundColor: Color = Color.Transparent,
+    drawerScrimColor: Color = MaterialTheme.colors.surface.copy(0.63f),
+    drawerElevation: Dp = 0.dp,
+    scaffoldContent: @Composable () -> Unit,
+) {
     // TODO Refactor
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
@@ -557,54 +556,66 @@ fun ScaffoldWrapper(scaffold: @Composable () -> Unit) {
         remember { (TopAppBarHeight + (TopAppBarVerticalPadding * 2)).toFloat() }
     val localDensity = LocalDensity.current
 
-    Box(
-        Modifier
-            .verticalScroll(scrollState)
-            .nestedScroll(object : NestedScrollConnection {
-                var yOffset = 0f
-                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                    if (available.y == 0f || source != NestedScrollSource.Drag) return Offset.Zero
+    ModalDrawer(
+        drawerState = drawerState,
+        drawerBackgroundColor = drawerBackgroundColor,
+        scrimColor = drawerScrimColor,
+        drawerElevation = drawerElevation,
+        drawerContent = drawerContent,
+        content = {
+            Box(
+                Modifier
+                    .verticalScroll(scrollState)
+                    .nestedScroll(object : NestedScrollConnection {
+                        var yOffset = 0f
+                        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                            if (available.y == 0f || source != NestedScrollSource.Drag) return Offset.Zero
 
-                    return if (available.y > 0) {
-                        if (yOffset == 0f) return Offset.Zero
-                        val tempOffset = available.y - yOffset
-                        val dragConsumed = yOffset + tempOffset
-                        yOffset = (yOffset + dragConsumed).coerceAtMost(0f)
+                            return if (available.y > 0) {
+                                if (yOffset == 0f) return Offset.Zero
+                                val tempOffset = available.y - yOffset
+                                val dragConsumed = yOffset + tempOffset
+                                yOffset = (yOffset + dragConsumed).coerceAtMost(0f)
 
-                        coroutineScope.launch {
-                            scrollState.animateScrollTo(-localDensity.run {
-                                yOffset.toInt().dp
-                                    .toPx()
-                                    .toInt()
-                            }, animationSpec = SpringSpec(stiffness = 500f))
+                                coroutineScope.launch {
+                                    scrollState.animateScrollTo(-localDensity.run {
+                                        yOffset.toInt().dp
+                                            .toPx()
+                                            .toInt()
+                                    }, animationSpec = SpringSpec(stiffness = 500f))
+                                }
+
+                                Offset(0f, dragConsumed)
+
+                            } else {
+                                if (yOffset <= -totalTopAppBarHeight) return Offset.Zero
+                                val previousOffset = yOffset
+                                yOffset =
+                                    -((previousOffset.absoluteValue + available.y.absoluteValue).coerceAtMost(
+                                        totalTopAppBarHeight
+                                    ))
+
+                                coroutineScope.launch {
+                                    scrollState.animateScrollTo(localDensity.run {
+                                        yOffset.toInt().dp
+                                            .toPx()
+                                            .toInt()
+                                    }.absoluteValue, animationSpec = SpringSpec(stiffness = 500f))
+                                }
+                                val dragConsumed = (yOffset.absoluteValue - previousOffset.absoluteValue)
+                                Offset(0f, -dragConsumed)
+                            }
                         }
-
-                        Offset(0f, dragConsumed)
-
-                    } else {
-                        if (yOffset <= -totalTopAppBarHeight) return Offset.Zero
-                        val previousOffset = yOffset
-                        yOffset =
-                            -((previousOffset.absoluteValue + available.y.absoluteValue).coerceAtMost(
-                                totalTopAppBarHeight
-                            ))
-
-                        coroutineScope.launch {
-                            scrollState.animateScrollTo(localDensity.run {
-                                yOffset.toInt().dp
-                                    .toPx()
-                                    .toInt()
-                            }.absoluteValue, animationSpec = SpringSpec(stiffness = 500f))
-                        }
-                        val dragConsumed = (yOffset.absoluteValue - previousOffset.absoluteValue)
-                        Offset(0f, -dragConsumed)
-                    }
-                }
-            })
-            .height((LocalConfiguration.current.screenHeightDp + totalTopAppBarHeight).dp),
+                    })
+                    .height((LocalConfiguration.current.screenHeightDp + totalTopAppBarHeight).dp),
 //            .offset(y = yOffsetDp.dp),
-        contentAlignment = Alignment.TopCenter,
-    ) {
-        scaffold()
-    }
+                contentAlignment = Alignment.TopCenter,
+            ) {
+                Column {
+                    topAppBar()
+                    scaffoldContent()
+                }
+            }
+        }
+    )
 }

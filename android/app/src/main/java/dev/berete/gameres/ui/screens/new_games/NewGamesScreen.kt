@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -21,7 +19,6 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.berete.gameres.ui.Routes
 import dev.berete.gameres.ui.screens.shared.components.*
 import dev.berete.gameres.ui.utils.GameCardPlaceholder
-import dev.berete.gameres.ui.utils.buildFakeGameList
 import dev.berete.gameres.ui.utils.gameTypeNames
 
 @Composable
@@ -30,42 +27,29 @@ fun NewGamesScreen(
     navController: NavController,
     subtitle: String,
 ) {
-    val scaffoldState = rememberScaffoldState()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
 
-    ScaffoldWrapper {
-        Scaffold(
-            scaffoldState = scaffoldState,
-            topBar = {
-                GameResTopAppBar(
-                    title = { Text("New Games", fontSize = 18.sp) },
-                    scaffoldState = scaffoldState,
-//                actions = {
-//                    Icon(
-//                        imageVector = Icons.Default.Sort,
-//                        contentDescription = null,
-//                        modifier = Modifier.padding(end = 8.dp),
-//                    )
-//                }
-                )
-            },
-            drawerContent = {
-                NavDrawer(
-                    navController = navController,
-                    modifier = Modifier.background(MaterialTheme.colors.surface),
-                    state = scaffoldState.drawerState,
-                )
-            },
-            drawerBackgroundColor = Color.Transparent,
-            drawerScrimColor = MaterialTheme.colors.surface.copy(0.63f),
-            drawerElevation = 0.dp,
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
-            NewGamesScreenBody(
-                viewModel = viewModel,
-                navController = navController,
-                subtitle = subtitle,
+    CollapsingTabBarScaffold(
+        topAppBar = {
+            GameResTopAppBar(
+                title = { Text("New Games", fontSize = 18.sp) },
+                drawerState = drawerState,
             )
-        }
+        },
+        drawerState = drawerState,
+        drawerContent = {
+            NavDrawer(
+                navController = navController,
+                modifier = Modifier.background(MaterialTheme.colors.surface),
+                state = drawerState,
+            )
+        },
+    ) {
+        NewGamesScreenBody(
+            viewModel = viewModel,
+            navController = navController,
+            subtitle = subtitle,
+        )
     }
 }
 
@@ -96,7 +80,7 @@ fun NewGamesScreenBody(
                 }
 
                 if (newGames.isEmpty()) {
-                    items(items = List(10){it}.chunked(numberOfItemsByRow)) { rowItems ->
+                    items(items = List(10) { it }.chunked(numberOfItemsByRow)) { rowItems ->
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(14.dp),
                         ) {

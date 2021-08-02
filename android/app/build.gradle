@@ -13,14 +13,14 @@ android {
     Properties properties = new Properties()
     properties.load(project.rootProject.file("local.properties").newDataInputStream())
 
-//    signingConfigs {
-//        release {
-//            storeFile file('/Users/berete/DevTools/keystore/GameRes')
-//            storePassword properties.getProperty("KEYSTORE_PASSWORD")
-//            keyAlias properties.getProperty("KEYALIAS")
-//            keyPassword properties.getProperty("KEYPASSWORD")
-//        }
-//    }
+    signingConfigs {
+        release {
+            storeFile file('/Users/berete/DevTools/keystore/GameRes')
+            storePassword properties.getProperty("KEYSTORE_PASSWORD")
+            keyAlias properties.getProperty("KEYALIAS")
+            keyPassword properties.getProperty("KEYPASSWORD")
+        }
+    }
     compileSdk 30
     buildToolsVersion "30.0.3"
 
@@ -46,7 +46,7 @@ android {
 //            shrinkResources true
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-//            signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
             debuggable false
         }
     }
