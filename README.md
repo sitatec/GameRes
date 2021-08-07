@@ -1,3 +1,6 @@
+<a href="https://play.google.com/store/apps/details?id=dev.berete.gameres"> <img src="https://raw.githubusercontent.com/mhemmings/play-store-button/fe50d360c5aa8b91279f451747268e8f92299e41/play-store-button.svg" width="200" /> </a>
+
+
 <div align="center">
   <img src="https://github.com/sitatec/GameRes/blob/master/assets/logo.png?raw=true" widht="100%" alt="GameRes"/>
  <img src="https://github.com/sitatec/GameRes/blob/master/assets/store_listing_screenshots.png?raw=true" widht="100%" alt="GameRes - Screenshots"/>
