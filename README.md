@@ -1,3 +1,6 @@
+> ⚠️ My app engine server have been shut down, thus in order to be able to run the app, you have to deploy the server on a new Google App Engine instance or change the server config and deploy it wherever you want.
+<br>
+
 <a href="https://play.google.com/store/apps/details?id=dev.berete.gameres"> <img src="https://raw.githubusercontent.com/mhemmings/play-store-button/fe50d360c5aa8b91279f451747268e8f92299e41/play-store-button.svg" width="200" /> </a>
 
 
