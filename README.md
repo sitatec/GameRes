@@ -20,4 +20,4 @@ An app built with jetpack compose that provides various information about video 
  # Demo
  >By clicking on the image below, you will be redirected to the video page in Google Drive
  
- <a href="https://drive.google.com/file/d/1VwXxBVYO0NDE3KlbtyqqB4ST09oMNSjM/view?usp=sharing"> <img src="https://github.com/sitatec/GameRes/blob/master/assets/demo_video_thumbnail.png?raw=true" alt="GameRes Demo"/> </a>
+ <a href="https://drive.google.com/file/d/1SClDs-j3FQDHH6zIDZAscZriu7MkOrYB/view?usp=sharing"> <img src="https://github.com/sitatec/GameRes/blob/master/assets/demo_video_thumbnail.png?raw=true" alt="GameRes Demo"/> </a>
